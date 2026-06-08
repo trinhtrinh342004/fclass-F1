@@ -39,13 +39,15 @@ VITE_SUPABASE_ANON_KEY=
 ```
 
 Do not add server-only Supabase keys to the frontend bundle.
+Existing `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are supported as a temporary fallback for local `.env` files.
 
 ## Supabase Setup
 
 1. Create a separate Supabase project for Tuwi.
 2. Add the env values above from Project Settings.
-3. Apply `supabase/migrations/20260608090000_student_login_admin_approval.sql`.
-4. Register the first admin user, then update that row in `profiles` to `role = 'admin'` and `status = 'approved'` from the Supabase dashboard or SQL editor.
+3. Apply migrations with `npm run setup:supabase` when the Supabase CLI is linked, or run SQL files in `supabase/migrations/`.
+4. Seed lessons with `npm run seed:lessons`.
+5. Register the first admin user, then update that row in `profiles` to `role = 'admin'` and `status = 'approved'` from the Supabase dashboard or SQL editor.
 
 ## Routes
 

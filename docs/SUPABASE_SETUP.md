@@ -11,6 +11,8 @@ VITE_SUPABASE_ANON_KEY=
 
 Do not expose private Supabase credentials in Vite source, docs examples, or frontend env files.
 
+The app also accepts existing `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` as a temporary compatibility fallback.
+
 ## Migration
 
 Apply:
@@ -19,7 +21,16 @@ Apply:
 supabase db push
 ```
 
-or paste `supabase/migrations/20260608090000_student_login_admin_approval.sql` into the Supabase SQL editor.
+or paste these migrations into the Supabase SQL editor:
+
+- `supabase/migrations/20260608090000_student_login_admin_approval.sql`
+- `supabase/migrations/20260608193000_realtime_learning_schema.sql`
+
+Then seed lesson rows:
+
+```bash
+npm run seed:lessons
+```
 
 ## Profiles Table
 
@@ -29,6 +40,8 @@ The migration creates `public.profiles` with:
 - `status`: `pending`, `approved`, `rejected`, or `blocked`
 
 RLS policies let students read/update their own basic profile and let approved admins view/update all profiles.
+
+The realtime schema also creates `lessons`, `student_lesson_progress`, `student_activity_logs`, and `admin_student_notes`.
 
 ## First Admin
 
