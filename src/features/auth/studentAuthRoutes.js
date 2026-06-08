@@ -34,7 +34,6 @@ const STUDENT_STATUS_FILTERS = [
   ["pending", "Chờ duyệt"],
   ["approved", "Đã duyệt"],
   ["rejected", "Từ chối"],
-  ["blocked", "Bị khóa"],
   ["all", "Tất cả"],
 ];
 const ADMIN_TABS = [
@@ -725,6 +724,22 @@ function attachStudentRealtime(view, userId){
 
 function renderStudentRow(student){
   const createdAt = student.created_at ? new Date(student.created_at).toLocaleDateString("vi-VN") : "";
+  let actionButtons = "";
+  if(student.status === "pending"){
+    actionButtons = `
+      <button data-student-id="${student.id}" data-action-status="approved">Duyệt</button>
+      <button data-student-id="${student.id}" data-action-status="rejected">Từ chối</button>
+    `;
+  }else if(student.status === "approved"){
+    actionButtons = `
+      <button data-student-id="${student.id}" data-action-status="rejected">Từ chối</button>
+    `;
+  }else if(student.status === "rejected"){
+    actionButtons = `
+      <button data-student-id="${student.id}" data-action-status="approved">Mở lại</button>
+    `;
+  }
+
   return `
     <div class="admin-table-row" role="row">
       <span data-label="Họ tên">${escapeHtml(student.full_name || "")}</span>
@@ -734,10 +749,7 @@ function renderStudentRow(student){
       <span data-label="Trạng thái"><b class="status-badge status-${escapeHtml(student.status)}">${profileStatusLabel(student.status)}</b></span>
       <span data-label="Role">${escapeHtml(student.role || "")}</span>
       <span class="admin-actions" data-label="Hành động">
-        <button data-student-id="${student.id}" data-action-status="approved">Duyệt</button>
-        <button data-student-id="${student.id}" data-action-status="rejected">Từ chối</button>
-        <button data-student-id="${student.id}" data-action-status="blocked">Khóa</button>
-        <button data-student-id="${student.id}" data-action-status="approved">Mở lại</button>
+        ${actionButtons}
       </span>
     </div>
   `;
