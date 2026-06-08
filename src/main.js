@@ -2818,7 +2818,8 @@ function getTranslationSpeechText(item){
 }
 
 function shouldUseDay31TranslationTts(){
-  return Number(STATE.lessonId) === 31;
+  const lesson = LESSONS.find((l) => l.id === Number(STATE.lessonId));
+  return Boolean(lesson?.metadata?.sourceLessonIds?.includes(31));
 }
 
 function _showTrQ(idx){
