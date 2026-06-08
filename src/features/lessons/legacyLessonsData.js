@@ -4,8 +4,8 @@ import {
   lessonArchitectureV1,
   normalizeLessonToBuoi9Architecture,
   validateLessonArchitecture
-} from "./lesson-architecture.js";
-import { LESSON_31_IMPORTED_TEMPLATE } from "./lesson-31-data.js";
+} from "./lessonArchitecture.js";
+import { LESSON_31_IMPORTED_TEMPLATE } from "./legacyLesson31Data.js";
 
 // ===============================================
 // DỮ LIỆU 31 BUỔI HỌC - GATEWAY TO THE WORLD A1

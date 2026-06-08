@@ -1,0 +1,52 @@
+import { getSupabaseConfigError, hasSupabaseConfig, supabase } from "./client.js";
+
+export async function getCurrentUser(){
+  if(!hasSupabaseConfig) return { user: null, error: new Error(getSupabaseConfigError()) };
+  const { data, error } = await supabase.auth.getUser();
+  return { user: data?.user || null, error };
+}
+
+export async function getCurrentSession(){
+  if(!hasSupabaseConfig) return { session: null, error: new Error(getSupabaseConfigError()) };
+  const { data, error } = await supabase.auth.getSession();
+  return { session: data?.session || null, error };
+}
+
+export async function signInStudent(email, password){
+  if(!hasSupabaseConfig) return { data: null, error: new Error(getSupabaseConfigError()) };
+  return supabase.auth.signInWithPassword({ email, password });
+}
+
+export async function signUpStudent({ fullName, phone, email, password }){
+  if(!hasSupabaseConfig) return { data: null, error: new Error(getSupabaseConfigError()) };
+  return supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: fullName,
+        phone,
+        role: "student",
+      },
+    },
+  });
+}
+
+export async function signOut(){
+  if(!hasSupabaseConfig) return { error: null };
+  return supabase.auth.signOut();
+}
+
+export async function getCurrentProfile(userId){
+  if(!hasSupabaseConfig) return { profile: null, error: new Error(getSupabaseConfigError()) };
+  const id = userId || (await getCurrentUser()).user?.id;
+  if(!id) return { profile: null, error: null };
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, full_name, phone, email, role, status, note, created_at, updated_at")
+    .eq("id", id)
+    .maybeSingle();
+
+  return { profile: data || null, error };
+}

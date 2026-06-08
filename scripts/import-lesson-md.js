@@ -6,7 +6,7 @@ import {
   canonicalSectionIdFromHeading,
   normalizeLessonToBuoi9Architecture,
   validateLessonArchitecture
-} from "../lesson-architecture.js";
+} from "../src/features/lessons/lessonArchitecture.js";
 
 const PLACEHOLDER = "Cần bổ sung nội dung theo template Buổi 9";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -482,11 +482,11 @@ function printImportReport(raw, normalized, warnings){
 }
 
 function writeImportedTemplate(raw, id){
-  const lessonsPath = path.join(repoRoot, "lessons-data.js");
+  const lessonsPath = path.join(repoRoot, "src", "features", "lessons", "legacyLessonsData.js");
   const source = fs.readFileSync(lessonsPath, "utf8");
   const endMarker = "// </lesson-import-overrides>";
   if(!source.includes(endMarker)){
-    console.error("Cannot write: import override marker not found in lessons-data.js");
+    console.error("Cannot write: import override marker not found in legacyLessonsData.js");
     process.exit(1);
   }
   const block = [
@@ -500,7 +500,7 @@ function writeImportedTemplate(raw, id){
     ? source.replace(re, `\n${block}`)
     : source.replace(endMarker, `${block}\n${endMarker}`);
   fs.writeFileSync(lessonsPath, next, "utf8");
-  console.log(`\nUpdated lessons-data.js with imported Buổi ${id}.`);
+  console.log(`\nUpdated legacyLessonsData.js with imported Buổi ${id}.`);
 }
 
 function toTemplatePayload(raw){
