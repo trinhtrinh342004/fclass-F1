@@ -14,7 +14,7 @@ export const TUWI_27_CURRICULUM_MAP = [
     topicVietnamese: "Danh từ số ít - Danh từ số nhiều",
     slug: "singular-plural-nouns",
     sourceLessons: [],
-    status: "draft",
+    status: "partial",
     notes: "Cần biên soạn nội dung riêng cho danh từ số ít/số nhiều.",
   },
   {

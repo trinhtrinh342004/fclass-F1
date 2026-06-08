@@ -7,7 +7,7 @@ Báo cáo chi tiết về tình trạng sẵn sàng của nội dung từng bu�
 | Buổi | Topic | Trạng thái | Nội dung hiện có | Thiếu gì | Ưu tiên |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | 1 | Alphabet and Nouns | **PARTIAL** | Đã nhập nội dung hoàn chỉnh | Thiếu video YouTube chính thức (đang để TODO) | **P2** (Có nội dung nhưng thiếu video) |
-| 2 | TOPIC2: Singular & Plural Nouns | **EMPTY** | Khung template trống (`DRAFT`) | Nội dung chi tiết, mục tiêu, từ vựng, ngữ pháp, bài tập, video | **P1** (Thiếu nội dung chính) |
+| 2 | TOPIC2: Singular & Plural Nouns | **PARTIAL** | Đã nhập nội dung hoàn chỉnh | Thiếu video YouTube chính thức (đang để TODO) | **P2** (Có nội dung nhưng thiếu video) |
 | 3 | (Un)Countable Nouns | **COMPLETE** | Tái sử dụng Buổi 13 cũ (đủ mục) | Không thiếu | **P3** (Chỉnh câu chữ/trang trí nếu cần) |
 | 4 | Personal pronoun | **EMPTY** | Khung template trống (`DRAFT`) | Nội dung chi tiết, mục tiêu, từ vựng, ngữ pháp, bài tập, video | **P1** (Thiếu nội dung chính) |
 | 5 | To be Verb | **COMPLETE** | Gộp từ Buổi 2 & 3 cũ (đủ mục) | Không thiếu | **P3** (Chỉnh câu chữ/trang trí nếu cần) |
