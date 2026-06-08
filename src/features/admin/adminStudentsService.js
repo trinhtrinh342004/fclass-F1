@@ -2,7 +2,7 @@ import {
   getStudentProgress,
   listStudents,
   updateStudentStatus,
-} from "./adminStudentRepository.js";
+} from "./adminRepository.js";
 
 const STATUS_ACTIONS = {
   approve: "approved",
