@@ -1,0 +1,18 @@
+{
+  "name": "tuwi-bank-account-training-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "validate:lessons": "node scripts/validate-lessons.js"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.0"
+  }
+}

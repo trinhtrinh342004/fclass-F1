@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gateway A1 — 31 Buổi Học Tiếng Anh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+</head>
+<body>
+
+<header class="topbar" id="topbar">
+  <div class="topbar-inner">
+    <a href="#" class="brand" onclick="goHome();return false;">
+      <span class="brand-mark">G</span>
+      <span class="brand-text">
+        <span class="brand-title">Gateway A1</span>
+        <span class="brand-sub">31 buổi · CEFR A1</span>
+      </span>
+    </a>
+    <nav class="topnav">
+      <button class="nav-btn" onclick="goHome()">🏠 Trang chủ</button>
+      <button class="nav-btn" id="progressBtn" onclick="showProgress()">📊 Tiến độ</button>
+      <button class="nav-btn" onclick="window.location.href='/student-login'">Đăng nhập</button>
+      <button class="nav-btn" onclick="window.location.href='/admin/students'">Admin</button>
+      <button class="nav-btn" id="resetBtn" onclick="resetProgress()">↺ Reset</button>
+    </nav>
+  </div>
+  <div class="progress-strip"><div class="progress-fill" id="progressFill"></div></div>
+</header>
+
+<main id="homeView" class="view active">
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-left">
+        <span class="eyebrow">LỘ TRÌNH A1 · CEFR</span>
+        <h1 class="hero-title">
+          Học tiếng Anh từ con số 0<br>
+          trong <span class="num-30">31</span> buổi.
+        </h1>
+        <p class="hero-lead">
+          Mỗi buổi <b>~45 phút</b>: Ôn bài → Lý thuyết → 4 minigame Nghe-Nói-Đọc-Viết → Minitest → Mindmap → Bài tập về nhà.
+        </p>
+        <div class="hero-stats">
+          <div class="stat"><b id="statLessons">31</b><span>buổi học</span></div>
+          <div class="stat"><b id="statWords">337+</b><span>từ vựng</span></div>
+          <div class="stat"><b id="statGames">10+</b><span>minigame</span></div>
+          <div class="stat"><b id="statDone">0</b><span>đã hoàn thành</span></div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="openLesson(getNextLessonId())">
+            <span>▶</span> <span id="continueLabel">Bắt đầu Buổi 1</span>
+          </button>
+          <button class="btn-ghost" onclick="document.getElementById('lessonGrid').scrollIntoView({behavior:'smooth'})">
+            Xem 31 buổi ↓
+          </button>
+        </div>
+      </div>
+      <aside class="hero-right">
+        <div class="card-deco card-deco-1">
+          <div class="deco-tag">VOCAB</div>
+          <div class="deco-word">hello</div>
+          <div class="deco-trans">xin chào</div>
+          <div class="deco-emoji">👋</div>
+        </div>
+        <div class="card-deco card-deco-2">
+          <div class="deco-tag">GRAMMAR</div>
+          <div class="deco-word">I <u>am</u> a student.</div>
+          <div class="deco-trans">Tôi là sinh viên.</div>
+        </div>
+        <div class="card-deco card-deco-3">
+          <div class="deco-tag">LISTEN</div>
+          <div class="deco-soundbars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="deco-trans">🔊 Nghe & nhắc lại</div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="skills-band">
+    <div class="skill-pill">🎴 Flashcard</div>
+    <div class="skill-pill">🧩 Ghép từ</div>
+    <div class="skill-pill">⚡ Sprint nghe</div>
+    <div class="skill-pill">✍️ Dictation</div>
+    <div class="skill-pill">🎤 Phát âm AI</div>
+    <div class="skill-pill">🧠 Memory</div>
+    <div class="skill-pill">🎧 Nghe ngữ cảnh</div>
+    <div class="skill-pill">📝 Quiz</div>
+  </section>
+
+  <section class="grid-section" id="lessonGrid">
+    <div class="grid-header">
+      <h2>Lộ trình 31 buổi</h2>
+      <p>Mỗi đơn vị (Unit) gồm 3 buổi · click để bắt đầu</p>
+    </div>
+    <div class="lesson-grid" id="lessonCards"></div>
+  </section>
+
+  <footer class="footer">
+    <p>Gateway to the World · A1 (CEFR) · Tài liệu học miễn phí</p>
+    <p class="footer-tip">💡 Mẹo: Học mỗi ngày 1 buổi · Ôn lại buổi cũ vào sáng hôm sau</p>
+  </footer>
+</main>
+
+<main id="lessonView" class="view">
+  <div class="lesson-shell">
+    <aside class="lesson-side">
+      <div class="side-header">
+        <span class="side-unit" id="sideUnit">Unit 1</span>
+        <span class="side-num" id="sideNum">Buổi 1</span>
+      </div>
+      <h3 class="side-title" id="sideTitle">—</h3>
+      <ol class="side-steps" id="sideSteps"></ol>
+      <div class="side-foot">
+        <button class="side-prev" id="sidePrev" onclick="prevLesson()">← Buổi trước</button>
+        <button class="side-next" id="sideNext" onclick="nextLesson()">Buổi sau →</button>
+      </div>
+    </aside>
+
+    <section class="lesson-main">
+      <div class="lesson-stage" id="lessonStage"></div>
+      <nav class="lesson-controls">
+        <button class="ctl-btn" id="ctlPrev" onclick="prevSection()">← Trước</button>
+        <div class="ctl-dots" id="ctlDots"></div>
+        <button class="ctl-btn ctl-next" id="ctlNext" onclick="nextSection()">Tiếp →</button>
+      </nav>
+    </section>
+  </div>
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script type="module" src="/app.js"></script>
+</body>
+</html>

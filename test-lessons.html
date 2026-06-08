@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Lessons 6 & 7</title>
+  <style>
+    body { font-family: monospace; padding: 20px; }
+    .pass { color: green; }
+    .fail { color: red; }
+    .section { margin: 10px 0; padding: 10px; background: #f5f5f5; }
+  </style>
+</head>
+<body>
+  <h1>Testing Lessons 6 & 7 Data Structure</h1>
+  <div id="results"></div>
+
+  <script type="module">
+    import { LESSONS } from './lessons-data.js';
+
+    const results = document.getElementById('results');
+    const l6 = LESSONS.find(l => l.id === 6);
+    const l7 = LESSONS.find(l => l.id === 7);
+
+    function test(name, condition, details = '') {
+      const status = condition ? '✅ PASS' : '❌ FAIL';
+      const className = condition ? 'pass' : 'fail';
+      results.innerHTML += `<div class="section ${className}">${status} - ${name} ${details}</div>`;
+      return condition;
+    }
+
+    // Test Lesson 6
+    results.innerHTML += '<h2>LESSON 6 Tests</h2>';
+    test('Lesson 6 exists', !!l6);
+    test('Vocabulary (42 words)', l6?.vocabulary?.length === 42, `(found: ${l6?.vocabulary?.length})`);
+    test('VocabGroups (3 groups)', Object.keys(l6?.vocabGroups || {}).length === 3);
+    test('Grammar exists', !!l6?.grammar);
+    test('Grammar structures', l6?.grammar?.structures?.length === 4, `(found: ${l6?.grammar?.structures?.length})`);
+    test('pointShout exists', !!l6?.pointShout);
+    test('pointShout.round1.words', Array.isArray(l6?.pointShout?.round1?.words), `(length: ${l6?.pointShout?.round1?.words?.length})`);
+    test('pointShout.round2.questions', Array.isArray(l6?.pointShout?.round2?.questions), `(length: ${l6?.pointShout?.round2?.questions?.length})`);
+    test('thisOrThat exists', !!l6?.thisOrThat);
+    test('thisOrThat.questions', Array.isArray(l6?.thisOrThat?.questions), `(length: ${l6?.thisOrThat?.questions?.length})`);
+    test('thisOrThat.bonus', !!l6?.thisOrThat?.bonus);
+    test('mysteryBag exists', !!l6?.mysteryBag);
+    test('mysteryBag.items', Array.isArray(l6?.mysteryBag?.items), `(length: ${l6?.mysteryBag?.items?.length})`);
+    test('mysteryBag.adjectives', Array.isArray(l6?.mysteryBag?.adjectives), `(length: ${l6?.mysteryBag?.adjectives?.length})`);
+    test('mysteryBag.dialogue', Array.isArray(l6?.mysteryBag?.dialogue), `(length: ${l6?.mysteryBag?.dialogue?.length})`);
+    test('quizBomb exists', !!l6?.quizBomb);
+    test('quizBomb.questions (8)', l6?.quizBomb?.questions?.length === 8, `(found: ${l6?.quizBomb?.questions?.length})`);
+    test('translation exists', !!l6?.translation);
+    test('translation.sentences (10)', l6?.translation?.sentences?.length === 10, `(found: ${l6?.translation?.sentences?.length})`);
+    test('minitest (10 questions)', l6?.minitest?.length === 10, `(found: ${l6?.minitest?.length})`);
+    test('homework exists', l6?.homework?.length > 0, `(items: ${l6?.homework?.length})`);
+
+    // Test Lesson 7
+    results.innerHTML += '<h2>LESSON 7 Tests</h2>';
+    test('Lesson 7 exists', !!l7);
+    test('Vocabulary (28 words)', l7?.vocabulary?.length === 28, `(found: ${l7?.vocabulary?.length})`);
+    test('VocabGroups (2 groups)', Object.keys(l7?.vocabGroups || {}).length === 2);
+    test('Grammar exists', !!l7?.grammar);
+    test('Grammar structures', l7?.grammar?.structures?.length === 4, `(found: ${l7?.grammar?.structures?.length})`);
+    test('touchFace exists', !!l7?.touchFace);
+    test('touchFace.round1.words', Array.isArray(l7?.touchFace?.round1?.words), `(length: ${l7?.touchFace?.round1?.words?.length})`);
+    test('touchFace.round2.words', Array.isArray(l7?.touchFace?.round2?.words), `(length: ${l7?.touchFace?.round2?.words?.length})`);
+    test('haveOrHas exists', !!l7?.haveOrHas);
+    test('haveOrHas.sentences', Array.isArray(l7?.haveOrHas?.sentences), `(length: ${l7?.haveOrHas?.sentences?.length})`);
+    test('haveOrHas.bonus', !!l7?.haveOrHas?.bonus);
+    test('celebrityGuess exists', !!l7?.celebrityGuess);
+    test('celebrityGuess.sampleDescription', Array.isArray(l7?.celebrityGuess?.sampleDescription), `(length: ${l7?.celebrityGuess?.sampleDescription?.length})`);
+    test('celebrityGuess.sampleQuestions', Array.isArray(l7?.celebrityGuess?.sampleQuestions), `(length: ${l7?.celebrityGuess?.sampleQuestions?.length})`);
+    test('quizBombLesson7 exists', !!l7?.quizBombLesson7);
+    test('quizBombLesson7.questions (8)', l7?.quizBombLesson7?.questions?.length === 8, `(found: ${l7?.quizBombLesson7?.questions?.length})`);
+    test('megaReview exists', !!l7?.megaReview);
+    test('megaReview.lessons (7)', l7?.megaReview?.lessons?.length === 7, `(found: ${l7?.megaReview?.lessons?.length})`);
+    test('translation exists', !!l7?.translation);
+    test('translation.sentences (10)', l7?.translation?.sentences?.length === 10, `(found: ${l7?.translation?.sentences?.length})`);
+    test('speaking exists', !!l7?.speaking);
+    test('speaking.questions', Array.isArray(l7?.speaking?.questions), `(length: ${l7?.speaking?.questions?.length})`);
+    test('minitest (10 questions)', l7?.minitest?.length === 10, `(found: ${l7?.minitest?.length})`);
+    test('homework exists', l7?.homework?.length > 0, `(items: ${l7?.homework?.length})`);
+
+    results.innerHTML += '<h2>Summary</h2>';
+    results.innerHTML += '<p>Check console for any errors. If all tests pass, lessons are ready!</p>';
+  </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+import { getSupabaseConfigError, hasSupabaseConfig, supabase } from "./supabase-client.js";
+
+export const STATUS_MESSAGES = {
+  pending: "Tài khoản của bạn đang chờ admin duyệt.",
+  rejected: "Tài khoản chưa được chấp nhận. Vui lòng liên hệ giáo viên.",
+  blocked: "Tài khoản đã bị khóa. Vui lòng liên hệ giáo viên.",
+  approved: "Tài khoản đã được duyệt.",
+  missing: "Chưa tìm thấy hồ sơ học viên. Vui lòng liên hệ giáo viên.",
+};
+
+export function profileStatusLabel(status){
+  const labels = {
+    pending: "Chờ duyệt",
+    approved: "Đã duyệt",
+    rejected: "Từ chối",
+    blocked: "Bị khóa",
+  };
+  return labels[status] || status || "Không rõ";
+}
+
+export async function getCurrentUser(){
+  if(!hasSupabaseConfig) return { user: null, error: new Error(getSupabaseConfigError()) };
+  const { data, error } = await supabase.auth.getUser();
+  return { user: data?.user || null, error };
+}
+
+export async function getCurrentProfile(userId){
+  if(!hasSupabaseConfig) return { profile: null, error: new Error(getSupabaseConfigError()) };
+  const id = userId || (await getCurrentUser()).user?.id;
+  if(!id) return { profile: null, error: null };
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, full_name, phone, email, role, status, note, created_at, updated_at")
+    .eq("id", id)
+    .maybeSingle();
+
+  return { profile: data || null, error };
+}
+
+export async function requireApprovedStudent(){
+  if(!hasSupabaseConfig){
+    return { ok: false, reason: "config", message: getSupabaseConfigError() };
+  }
+
+  const { user, error: userError } = await getCurrentUser();
+  if(userError || !user){
+    return { ok: false, reason: "unauthenticated", message: "Vui lòng đăng nhập để tiếp tục." };
+  }
+
+  const { profile, error: profileError } = await getCurrentProfile(user.id);
+  if(profileError){
+    return { ok: false, reason: "profile-error", user, message: "Không tải được hồ sơ học viên." };
+  }
+  if(!profile){
+    return { ok: false, reason: "missing-profile", user, message: STATUS_MESSAGES.missing };
+  }
+  if(profile.status !== "approved"){
+    return {
+      ok: false,
+      reason: profile.status,
+      user,
+      profile,
+      message: STATUS_MESSAGES[profile.status] || "Tài khoản chưa sẵn sàng.",
+    };
+  }
+
+  return { ok: true, user, profile };
+}
+
+export async function requireAdmin(){
+  if(!hasSupabaseConfig){
+    return { ok: false, reason: "config", message: getSupabaseConfigError() };
+  }
+
+  const { user, error: userError } = await getCurrentUser();
+  if(userError || !user){
+    return { ok: false, reason: "unauthenticated", message: "Vui lòng đăng nhập để tiếp tục." };
+  }
+
+  const { profile, error: profileError } = await getCurrentProfile(user.id);
+  if(profileError){
+    return { ok: false, reason: "profile-error", user, message: "Không tải được hồ sơ quản trị." };
+  }
+  if(!profile || profile.role !== "admin" || profile.status !== "approved"){
+    return { ok: false, reason: "forbidden", user, profile, message: "Không có quyền truy cập." };
+  }
+
+  return { ok: true, user, profile };
+}
