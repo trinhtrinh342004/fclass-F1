@@ -4,7 +4,7 @@ Bảng theo dõi tiến độ biên soạn và tích hợp nội dung chi tiết
 
 | Buổi | Topic | Trạng thái hiện tại | Đã có template | Cần MD nội dung | Cần video | Cần bài tập | Ghi chú |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Buổi 1** | Alphabet and Nouns | `DRAFT` (Skeleton) | ✅ Có sẵn khung | 🟥 Cần soạn mới | 🟥 Cần video bảng chữ cái | ✅ Có bài tập mẫu | Chưa có dữ liệu cũ hỗ trợ. |
+| **Buổi 1** | Alphabet and Nouns | `PARTIAL` | ✅ Có sẵn khung | ✅ Đã nhập | 🟥 Cần video bảng chữ cái | ✅ Có bài tập mẫu | Đã nhập nội dung MD, còn thiếu video chính thức. |
 | **Buổi 2** | Singular & Plural Nouns | `DRAFT` (Skeleton) | ✅ Có sẵn khung | 🟥 Cần soạn mới | 🟥 Cần video danh từ số ít/nhiều | ✅ Có bài tập mẫu | Cần biên soạn nội dung ngữ pháp riêng. |
 | **Buổi 4** | Personal pronoun | `DRAFT` (Skeleton) | ✅ Có sẵn khung | 🟥 Cần soạn mới | 🟥 Cần video đại từ nhân xưng | ✅ Có bài tập mẫu | Tách riêng mảng đại từ nhân xưng. |
 | **Buổi 8** | Capital letter rules | `DRAFT` (Skeleton) | ✅ Có sẵn khung | 🟥 Cần soạn mới | 🟥 Cần video viết hoa | ✅ Có bài tập mẫu | Chưa có nội dung cũ phù hợp. |

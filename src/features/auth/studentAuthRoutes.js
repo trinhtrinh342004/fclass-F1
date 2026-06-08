@@ -365,7 +365,7 @@ function renderClassRequestList(classes, memberships){
       <div class="student-lesson-grid">
         ${classes.map((klass) => {
           const membership = membershipByClass.get(klass.id);
-          const disabled = membership && membership.status !== "rejected" && membership.status !== "removed";
+          const disabled = Boolean(membership);
           return `
             <article class="student-lesson class-card">
               <span>${escapeHtml(klass.level || "A1")}</span>
