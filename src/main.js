@@ -11,6 +11,8 @@ import {
 } from "./features/progress/progressRepository.js";
 import { getCurrentUser } from "./lib/supabase/auth.js";
 import { subscribeToMyProgress, unsubscribe as unsubscribeProgressRealtime } from "./features/progress/progressRealtime.js";
+import { requireApprovedStudent } from "./features/auth/authGuard.js";
+import { requireApprovedClassMembership } from "./features/student/studentRepository.js";
 
 /* ============================================================
   GATEWAY A1 — APP LOGIC & MINIGAMES (revamped)
@@ -253,8 +255,19 @@ function updateProgressBar(){
 }
 
 // ============== LESSON OPEN ==============
-function openLesson(id, updateUrl = true){
+async function openLesson(id, updateUrl = true){
   hideAuthView();
+  const canOpen = await requireLessonAccess();
+  if(!canOpen.ok){
+    toast(canOpen.message, "warning");
+    if(canOpen.reason === "unauthenticated"){
+      window.history.pushState({}, "", "/student-login");
+    }else{
+      window.history.pushState({}, "", "/student");
+    }
+    await renderAuthRoute();
+    return;
+  }
   const lesson = LESSONS.find(l => l.id===id);
   if(!lesson){
     toast("Buổi học này chưa có trong lộ trình Tuwi 27 buổi.", "warning");
@@ -275,6 +288,26 @@ function openLesson(id, updateUrl = true){
   renderSection();
   markLessonOpened(lesson.id).catch(() => {});
   window.scrollTo({top:0});
+}
+
+async function requireLessonAccess(){
+  const student = await requireApprovedStudent();
+  if(!student.ok){
+    return {
+      ok: false,
+      reason: student.reason,
+      message: student.message || "Vui lòng đăng nhập tài khoản học viên đã được duyệt.",
+    };
+  }
+  const membership = await requireApprovedClassMembership();
+  if(!membership.ok){
+    return {
+      ok: false,
+      reason: "class-membership",
+      message: membership.error?.message || "Bạn cần được admin duyệt vào lớp trước khi mở bài học.",
+    };
+  }
+  return { ok: true };
 }
 
 const SECTION_LABELS = {

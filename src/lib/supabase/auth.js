@@ -17,6 +17,10 @@ export async function signInStudent(email, password){
   return supabase.auth.signInWithPassword({ email, password });
 }
 
+export async function signIn(email, password){
+  return signInStudent(email, password);
+}
+
 export async function signUpStudent({ fullName, phone, email, password }){
   if(!hasSupabaseConfig) return { data: null, error: new Error(getSupabaseConfigError()) };
   return supabase.auth.signUp({
