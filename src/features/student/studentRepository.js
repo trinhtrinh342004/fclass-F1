@@ -16,11 +16,11 @@ export async function requestJoinClass(classId){
 
   return supabase
     .from("class_memberships")
-    .upsert({
+    .insert({
       class_id: classId,
       student_id: user.id,
       status: "pending",
-    }, { onConflict: "class_id,student_id", ignoreDuplicates: false })
+    })
     .select("id, class_id, student_id, status, created_at")
     .single();
 }

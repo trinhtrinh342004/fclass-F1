@@ -25,7 +25,7 @@ const DRAFT_LESSONS = {
 const EMPTY_SECTION_FLOW = ["intro", "homework"];
 
 export const TUWI_27_LESSONS = TUWI_27_CURRICULUM_MAP.map((entry) => {
-  if (entry.status === "draft" && DRAFT_LESSONS[entry.lessonId]) {
+  if (["draft", "partial", "ready"].includes(entry.status) && DRAFT_LESSONS[entry.lessonId]) {
     const rawDraft = DRAFT_LESSONS[entry.lessonId];
     const lessonObj = normalizeLessonToBuoi9Architecture({
       ...rawDraft,
