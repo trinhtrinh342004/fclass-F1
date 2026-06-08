@@ -2,6 +2,7 @@ export {
   getCurrentProfile,
   getCurrentSession,
   getCurrentUser,
+  signIn,
   signInStudent,
   signOut,
   signUpStudent,

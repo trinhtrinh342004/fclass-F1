@@ -359,6 +359,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .status-pending{background:var(--orange-soft);color:var(--orange)}
 .status-rejected{background:var(--red-soft);color:var(--red)}
 .status-blocked{background:#e5e7eb;color:#374151}
+.status-removed,
+.status-archived{background:#e5e7eb;color:#374151}
+.status-active{background:var(--green-soft);color:var(--green)}
 .student-lessons h2{
   margin:0 0 16px;
   font-family:var(--font-display);
@@ -403,6 +406,34 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   display:block;
   color:var(--ink-soft);
 }
+.class-approved-card{
+  margin-bottom:28px;
+}
+.class-list{
+  display:grid;
+  gap:10px;
+}
+.class-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 0;
+  border-bottom:1px solid var(--line);
+}
+.class-row:last-child{border-bottom:0}
+.class-card{
+  display:grid;
+  gap:8px;
+}
+.class-request-btn{
+  margin-top:8px;
+  justify-content:center;
+}
+.class-request-btn:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+}
 .admin-panel{
   overflow:hidden;
 }
@@ -438,6 +469,36 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .admin-list{
   margin-top:16px;
 }
+.admin-stat-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:14px;
+}
+.admin-stat-card{
+  border:1.5px solid var(--line);
+  border-radius:var(--radius);
+  padding:18px;
+  background:var(--bg-soft);
+}
+.admin-stat-card strong{
+  display:block;
+  color:var(--navy);
+  font-family:var(--font-display);
+  font-size:34px;
+  line-height:1;
+}
+.admin-stat-card span{
+  display:block;
+  margin-top:8px;
+  color:var(--ink-soft);
+  font-weight:700;
+}
+.admin-class-form{
+  max-width:none;
+  grid-template-columns:1.2fr 1.4fr .5fr 160px;
+  align-items:end;
+  margin-bottom:18px;
+}
 .admin-table{
   min-width:980px;
 }
@@ -447,6 +508,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   grid-template-columns:1.1fr .85fr 1.2fr .75fr .75fr .9fr 1.35fr;
   gap:12px;
   align-items:center;
+}
+.admin-table-classes .admin-table-head,
+.admin-table-classes .admin-table-row,
+.admin-table-requests .admin-table-head,
+.admin-table-requests .admin-table-row,
+.admin-table-progress .admin-table-head,
+.admin-table-progress .admin-table-row{
+  grid-template-columns:1.2fr .55fr .7fr 1.2fr .75fr 1.2fr;
 }
 .admin-table-head{
   padding:12px 14px;
@@ -517,6 +586,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   }
   .admin-actions{
     display:flex !important;
+  }
+  .admin-class-form{
+    grid-template-columns:1fr;
   }
   .auth-row{
     flex-direction:column;

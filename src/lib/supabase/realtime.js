@@ -23,3 +23,29 @@ export function unsubscribe(channel){
 export function unsubscribeAll(channels = []){
   channels.forEach(unsubscribe);
 }
+
+export function subscribeToProfiles(callback){
+  return subscribeToTable({ table: "profiles", callback });
+}
+
+export function subscribeToClassMemberships(callback){
+  return subscribeToTable({ table: "class_memberships", callback });
+}
+
+export function subscribeToMyMemberships(studentId, callback){
+  if(!studentId) return null;
+  return subscribeToTable({
+    table: "class_memberships",
+    filter: `student_id=eq.${studentId}`,
+    callback,
+  });
+}
+
+export function subscribeToStudentProgress(studentId, callback){
+  if(!studentId) return null;
+  return subscribeToTable({
+    table: "student_lesson_progress",
+    filter: `student_id=eq.${studentId}`,
+    callback,
+  });
+}

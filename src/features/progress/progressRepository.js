@@ -1,6 +1,7 @@
 import { getCurrentUser } from "../../lib/supabase/auth.js";
 import { hasSupabaseConfig, supabase } from "../../lib/supabase/client.js";
 import { getLessonRowIdByNumber } from "../lessons/lessonRepository.js";
+import { getPrimaryApprovedClassId } from "../student/studentRepository.js";
 
 const STORAGE_KEY = "gateway_a1_progress_v2";
 const MIGRATED_KEY = "gateway_a1_progress_v2_migrated";
@@ -28,13 +29,17 @@ export async function getProgressByLesson(lessonNumber){
     .maybeSingle();
 }
 
-export async function upsertMyLessonProgress({ lessonId, status = "in_progress", progressPercent = 0, data = {} }){
+export async function upsertMyLessonProgress({ lessonId, classId, status = "in_progress", progressPercent = 0, data = {} }){
   const { user } = await getCurrentUser();
   const dbLessonId = await getLessonRowIdByNumber(lessonId);
   if(!user || !dbLessonId || !hasSupabaseConfig || !supabase) return { data: null, error: null };
+  const approvedClass = classId ? { classId, error: null } : await getPrimaryApprovedClassId();
+  if(approvedClass.error) return { data: null, error: approvedClass.error };
+  if(!approvedClass.classId) return { data: null, error: new Error("Học viên cần được admin duyệt vào lớp trước khi lưu tiến độ.") };
 
   const payload = {
     student_id: user.id,
+    class_id: approvedClass.classId,
     lesson_id: dbLessonId,
     status,
     progress_percent: progressPercent,
@@ -83,6 +88,9 @@ export async function markLessonCompleted(lessonId){
 
 export async function migrateLocalProgressToSupabase(){
   if(localStorage.getItem(MIGRATED_KEY) === "true") return { migrated: false, reason: "already-migrated" };
+  const approvedClass = await getPrimaryApprovedClassId();
+  if(approvedClass.error) return { migrated: false, reason: "class-check-error", error: approvedClass.error };
+  if(!approvedClass.classId) return { migrated: false, reason: "no-approved-class" };
 
   let localProgress;
   try{
@@ -103,6 +111,7 @@ export async function migrateLocalProgressToSupabase(){
     const completed = done.includes(lessonId);
     await upsertMyLessonProgress({
       lessonId,
+      classId: approvedClass.classId,
       status: completed ? "completed" : "in_progress",
       progressPercent: completed ? 100 : 50,
       data: {

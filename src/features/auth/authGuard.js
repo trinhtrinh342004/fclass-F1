@@ -8,7 +8,7 @@ export const STATUS_MESSAGES = {
   rejected: "Tài khoản chưa được chấp nhận. Vui lòng liên hệ giáo viên.",
   blocked: "Tài khoản đã bị khóa. Vui lòng liên hệ giáo viên.",
   approved: "Tài khoản đã được duyệt.",
-  missing: "Chưa tìm thấy hồ sơ học viên. Vui lòng liên hệ giáo viên.",
+  missing: "Không tìm thấy hồ sơ tài khoản. Vui lòng liên hệ admin.",
 };
 
 export function profileStatusLabel(status){
@@ -38,13 +38,13 @@ export async function requireApprovedStudent(){
   if(!profile){
     return { ok: false, reason: "missing-profile", user, message: STATUS_MESSAGES.missing };
   }
-  if(profile.status !== "approved"){
+  if(profile.role !== "student" || profile.status !== "approved"){
     return {
       ok: false,
-      reason: profile.status,
+      reason: profile.role !== "student" ? "forbidden" : profile.status,
       user,
       profile,
-      message: STATUS_MESSAGES[profile.status] || "Tài khoản chưa sẵn sàng.",
+      message: profile.role !== "student" ? "Không có quyền truy cập khu vực học viên." : STATUS_MESSAGES[profile.status] || "Tài khoản chưa sẵn sàng.",
     };
   }
 
