@@ -10,7 +10,7 @@
     "validate:env": "node scripts/validate-env.mjs",
     "seed:lessons": "node scripts/seed-27-lessons.mjs",
     "setup:supabase": "node scripts/setup-supabase-realtime.mjs",
-    "validate:lessons": "node scripts/validate-lessons.js"
+    "validate:lessons": "node scripts/validate-27-lessons.js"
   },
   "devDependencies": {
     "vite": "^5.0.0"
