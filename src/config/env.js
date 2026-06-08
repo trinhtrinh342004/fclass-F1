@@ -1,8 +1,8 @@
 const rawEnv = import.meta.env || {};
 
 export const env = {
-  supabaseUrl: rawEnv.VITE_SUPABASE_URL || "",
-  supabaseAnonKey: rawEnv.VITE_SUPABASE_ANON_KEY || "",
+  supabaseUrl: rawEnv.VITE_SUPABASE_URL || rawEnv.NEXT_PUBLIC_SUPABASE_URL || "",
+  supabaseAnonKey: rawEnv.VITE_SUPABASE_ANON_KEY || rawEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
 };
 
 export function hasRequiredEnv(){
@@ -11,10 +11,7 @@ export function hasRequiredEnv(){
 
 export function getEnvError(){
   if(hasRequiredEnv()) return "";
-  const missing = [];
-  if(!env.supabaseUrl) missing.push("VITE_SUPABASE_URL");
-  if(!env.supabaseAnonKey) missing.push("VITE_SUPABASE_ANON_KEY");
-  return `Thiếu cấu hình ${missing.join(" và ")}. Tạo .env.local từ .env.example rồi chạy lại app.`;
+  return "Thiếu cấu hình VITE_SUPABASE_URL và VITE_SUPABASE_ANON_KEY. Tạo .env từ .env.example rồi chạy lại app.";
 }
 
 export function validateEnv(){

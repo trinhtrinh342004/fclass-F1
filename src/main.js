@@ -1,6 +1,16 @@
-import { LESSONS, LESSON_ARCHITECTURE_WARNINGS, canonicalLessonSections } from "./features/lessons/lessonRegistry.js";
+import { LESSONS as LOCAL_LESSONS, LESSON_ARCHITECTURE_WARNINGS, canonicalLessonSections } from "./features/lessons/lessonRegistry.js";
 import { hideAuthView, isAuthRoute, renderAuthRoute } from "./features/auth/studentAuthRoutes.js";
 import { resolveLessonRoute } from "./features/lessons/lessonRoutes.js";
+import { getLessons, LESSON_SOURCE } from "./features/lessons/lessonRepository.js";
+import { subscribeToLessons, unsubscribe as unsubscribeLessonRealtime } from "./features/lessons/lessonRealtime.js";
+import {
+  getMyProgress,
+  markLessonCompleted,
+  markLessonOpened,
+  remoteProgressToLocalShape,
+} from "./features/progress/progressRepository.js";
+import { getCurrentUser } from "./lib/supabase/auth.js";
+import { subscribeToMyProgress, unsubscribe as unsubscribeProgressRealtime } from "./features/progress/progressRealtime.js";
 
 /* ============================================================
   GATEWAY A1 — APP LOGIC & MINIGAMES (revamped)
@@ -21,9 +31,14 @@ function loadProgress(){
 }
 function saveProgress(p){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }catch{} }
 let progress = loadProgress();
-const SORTED_LESSONS = [...LESSONS].sort((a,b)=>a.id-b.id);
-const TOTAL_LESSONS = SORTED_LESSONS.length;
-const FIRST_LESSON_ID = SORTED_LESSONS[0]?.id || 1;
+let LESSONS = [...LOCAL_LESSONS];
+let lessonDataSource = LESSON_SOURCE.fallback;
+let lessonDataWarning = "";
+let lessonRealtimeChannel = null;
+let progressRealtimeChannel = null;
+let SORTED_LESSONS = sortLessons(LESSONS);
+let TOTAL_LESSONS = SORTED_LESSONS.length;
+let FIRST_LESSON_ID = SORTED_LESSONS[0]?.id || 1;
 
 // ============== TEXT REGISTRY (safe HTML attribute embedding) ==============
 const TXT_REG = {};
@@ -36,6 +51,8 @@ function escAttr(s){
 
 // ============== INIT ==============
 window.addEventListener("DOMContentLoaded", async () => {
+  showHomeLoading("Đang kết nối Supabase...");
+  await initializeDataLayer();
   if(await renderAuthRoute()){
     updateProgressBar();
     return;
@@ -77,6 +94,69 @@ function logLessonArchitectureWarnings(){
   console.warn("[FClass] Lesson Architecture V1 warnings", LESSON_ARCHITECTURE_WARNINGS);
 }
 
+async function initializeDataLayer(){
+  const result = await getLessons();
+  setActiveLessons(result.lessons, result.source, result.warning);
+  await hydrateRemoteProgress();
+  subscribeLessonsRealtime();
+  await subscribeProgressRealtime();
+}
+
+function setActiveLessons(lessons, source = LESSON_SOURCE.fallback, warning = ""){
+  LESSONS = sortLessons(lessons?.length ? lessons : LOCAL_LESSONS);
+  lessonDataSource = source;
+  lessonDataWarning = warning || "";
+  SORTED_LESSONS = sortLessons(LESSONS);
+  TOTAL_LESSONS = SORTED_LESSONS.length;
+  FIRST_LESSON_ID = SORTED_LESSONS[0]?.id || 1;
+  window.LESSONS = LESSONS;
+}
+
+function sortLessons(lessons){
+  return [...lessons].sort((a,b)=>a.id-b.id);
+}
+
+async function hydrateRemoteProgress(){
+  const { data, error } = await getMyProgress();
+  if(error || !data?.length) return;
+  progress = {
+    ...progress,
+    ...remoteProgressToLocalShape(data),
+  };
+}
+
+function subscribeLessonsRealtime(){
+  if(lessonRealtimeChannel) unsubscribeLessonRealtime(lessonRealtimeChannel);
+  lessonRealtimeChannel = subscribeToLessons(async () => {
+    const result = await getLessons();
+    setActiveLessons(result.lessons, result.source, result.warning);
+    if(STATE.view === "home") renderHome();
+    if(STATE.view === "lesson" && STATE.lessonId){
+      const lesson = LESSONS.find((item) => item.id === STATE.lessonId);
+      if(lesson){
+        STATE.sections = [...(lesson.sectionFlow || canonicalLessonSections)];
+        renderSidebar(lesson);
+      }
+    }
+  });
+}
+
+async function subscribeProgressRealtime(){
+  const { user } = await getCurrentUser();
+  if(!user) return;
+  if(progressRealtimeChannel) unsubscribeProgressRealtime(progressRealtimeChannel);
+  progressRealtimeChannel = subscribeToMyProgress(user.id, async () => {
+    await hydrateRemoteProgress();
+    updateProgressBar();
+    if(STATE.view === "home") renderHome();
+  });
+}
+
+function showHomeLoading(message){
+  const grid = document.getElementById("lessonCards");
+  if(grid) grid.innerHTML = `<div class="empty-state">${escAttr(message)}</div>`;
+}
+
 // ============== HOME ==============
 function renderHome(){
   const grid = document.getElementById("lessonCards");
@@ -89,7 +169,11 @@ function renderHome(){
   document.getElementById("continueLabel").textContent =
     next === 1 ? "Bắt đầu Buổi 1" : `Tiếp tục Buổi ${next}`;
 
-  grid.innerHTML = LESSONS.map((l) => {
+  const fallbackWarning = lessonDataSource === LESSON_SOURCE.fallback && lessonDataWarning
+    ? `<div class="empty-state">${escAttr(lessonDataWarning)}</div>`
+    : "";
+
+  grid.innerHTML = fallbackWarning + LESSONS.map((l) => {
     const done = progress.done.includes(l.id);
     return `
       <button class="lcard ${done?'done':''}" onclick="openLesson(${l.id})">
@@ -189,6 +273,7 @@ function openLesson(id, updateUrl = true){
 
   renderSidebar(lesson);
   renderSection();
+  markLessonOpened(lesson.id).catch(() => {});
   window.scrollTo({top:0});
 }
 
@@ -274,6 +359,7 @@ function nextSection(){
       progress.done.push(lesson.id);
       saveProgress(progress);
     }
+    markLessonCompleted(lesson.id).catch(() => {});
     updateProgressBar();
     toast(`🎉 Hoàn thành Buổi ${lesson.id}!`, "success");
     setTimeout(() => {
@@ -4003,7 +4089,12 @@ function toggleHw(lid, i, el){
   const idx = arr.indexOf(i);
   if(idx>=0) arr.splice(idx,1); else arr.push(i);
   saveProgress(progress);
+  upsertHomeworkProgress(lid);
   el.classList.toggle("done");
+}
+
+function upsertHomeworkProgress(lid){
+  markLessonOpened(lid).catch(() => {});
 }
 
 // ============== TTS / Speech ==============

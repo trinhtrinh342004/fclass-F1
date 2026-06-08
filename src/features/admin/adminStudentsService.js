@@ -1,4 +1,8 @@
-import { supabase } from "../../lib/supabase/client.js";
+import {
+  getStudentProgress,
+  listStudents,
+  updateStudentStatus,
+} from "./adminStudentRepository.js";
 
 const STATUS_ACTIONS = {
   approve: "approved",
@@ -7,19 +11,7 @@ const STATUS_ACTIONS = {
   unblock: "approved",
 };
 
-export async function listStudents(filter = "pending"){
-  let query = supabase
-    .from("profiles")
-    .select("id, full_name, phone, email, role, status, note, created_at")
-    .order("created_at", { ascending: false });
-
-  if(filter !== "all") query = query.eq("status", filter);
-  return query;
-}
-
-export async function updateStudentStatus(id, status){
-  return supabase.from("profiles").update({ status }).eq("id", id);
-}
+export { getStudentProgress, listStudents, updateStudentStatus };
 
 export function approveStudent(id){
   return updateStudentStatus(id, STATUS_ACTIONS.approve);

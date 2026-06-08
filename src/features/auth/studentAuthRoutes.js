@@ -1,8 +1,11 @@
-import { LESSONS } from "../lessons/lessonRegistry.js";
 import { getCurrentProfile, profileStatusLabel, requireAdmin, requireApprovedStudent, STATUS_MESSAGES } from "./authGuard.js";
 import { getSupabaseConfigError, hasSupabaseConfig } from "../../lib/supabase/client.js";
 import { signInStudent, signOut, signUpStudent } from "./authService.js";
 import { listStudents, updateStudentStatus } from "../admin/adminStudentsService.js";
+import { getLessons } from "../lessons/lessonRepository.js";
+import { migrateLocalProgressToSupabase, getMyProgress, remoteProgressToLocalShape } from "../progress/progressRepository.js";
+import { subscribeToStudents, unsubscribe as unsubscribeAdminRealtime } from "../admin/adminRealtime.js";
+import { subscribeToTable, unsubscribe as unsubscribeRealtime } from "../../lib/supabase/realtime.js";
 
 const AUTH_ROUTES = new Set(["/student-register", "/student-login", "/student", "/admin/students"]);
 const STUDENT_STATUS_FILTERS = [
@@ -14,6 +17,8 @@ const STUDENT_STATUS_FILTERS = [
 ];
 
 let currentAdminFilter = "pending";
+let adminStudentsChannel = null;
+let profileStatusChannel = null;
 
 export function isAuthRoute(pathname = window.location.pathname){
   return AUTH_ROUTES.has(normalizePath(pathname));
@@ -196,13 +201,21 @@ async function renderStudentDashboard(view){
   if(!guard.ok){
     view.innerHTML = renderShell("Trạng thái tài khoản", renderStatusCard(guard.message));
     attachLogoutHandler();
+    attachProfileStatusRealtime(view, guard.user?.id);
     return;
   }
 
-  const lessonCards = [...LESSONS]
+  await migrateLocalProgressToSupabase();
+  const [{ lessons, warning }, progressResult] = await Promise.all([
+    getLessons(),
+    getMyProgress(),
+  ]);
+  const remoteProgress = remoteProgressToLocalShape(progressResult.data || []);
+
+  const lessonCards = [...lessons]
     .sort((a, b) => a.id - b.id)
     .map((lesson) => `
-      <button class="student-lesson" data-lesson-id="${lesson.id}">
+      <button class="student-lesson ${remoteProgress.done.includes(lesson.id) ? "done" : ""}" data-lesson-id="${lesson.id}">
         <span>Buổi ${lesson.id}</span>
         <strong>${escapeHtml(lesson.title)}</strong>
         <small>${escapeHtml(lesson.subtitle || lesson.unit || "")}</small>
@@ -223,6 +236,7 @@ async function renderStudentDashboard(view){
         <button class="btn-ghost" id="studentLogoutBtn">Đăng xuất</button>
       </div>
     </section>
+    ${warning ? `<div class="empty-state">${escapeHtml(warning)}</div>` : ""}
     <section class="student-lessons">
       <h2>Danh sách buổi học hiện tại</h2>
       <div class="student-lesson-grid">${lessonCards}</div>
@@ -272,6 +286,7 @@ async function renderAdminStudents(view){
     });
   });
   await loadAdminStudents();
+  subscribeAdminStudentsRealtime();
 }
 
 async function loadAdminStudents(){
@@ -315,6 +330,37 @@ async function loadAdminStudents(){
       setMessage(message, "Cập nhật trạng thái thành công.", "success");
       await loadAdminStudents();
     });
+  });
+}
+
+function subscribeAdminStudentsRealtime(){
+  if(adminStudentsChannel) unsubscribeAdminRealtime(adminStudentsChannel);
+  adminStudentsChannel = subscribeToStudents(async () => {
+    await loadAdminStudents();
+  });
+}
+
+function attachProfileStatusRealtime(view, userId){
+  if(profileStatusChannel) unsubscribeRealtime(profileStatusChannel);
+  if(!userId) return;
+
+  profileStatusChannel = subscribeToTable({
+    table: "profiles",
+    filter: `id=eq.${userId}`,
+    callback: (payload) => {
+      const status = payload.new?.status;
+      if(status !== "approved") return;
+      view.innerHTML = renderShell("Trạng thái tài khoản", `
+        <section class="auth-card status-card">
+          <p>Tài khoản đã được duyệt. Bạn có thể vào học ngay.</p>
+          <div class="student-actions">
+            <a class="btn-primary" href="/student">Vào học</a>
+            <button class="btn-ghost" id="studentLogoutBtn">Đăng xuất</button>
+          </div>
+        </section>
+      `);
+      attachLogoutHandler();
+    },
   });
 }
 
