@@ -1,5 +1,6 @@
-import { LESSONS, LESSON_ARCHITECTURE_WARNINGS, canonicalLessonSections } from "./lessons-data.js";
-import { hideAuthView, isAuthRoute, renderAuthRoute } from "./student-auth.js";
+import { LESSONS, LESSON_ARCHITECTURE_WARNINGS, canonicalLessonSections } from "./features/lessons/lessonRegistry.js";
+import { hideAuthView, isAuthRoute, renderAuthRoute } from "./features/auth/studentAuthRoutes.js";
+import { resolveLessonRoute } from "./features/lessons/lessonRoutes.js";
 
 /* ============================================================
   GATEWAY A1 — APP LOGIC & MINIGAMES (revamped)
@@ -39,6 +40,17 @@ window.addEventListener("DOMContentLoaded", async () => {
     updateProgressBar();
     return;
   }
+  const lessonRoute = resolveLessonRoute();
+  if(lessonRoute.matched){
+    logLessonArchitectureWarnings();
+    if(lessonRoute.lesson) openLesson(lessonRoute.lesson.id, false);
+    else {
+      window.history.replaceState({}, "", "/");
+      goHome(false);
+    }
+    updateProgressBar();
+    return;
+  }
   logLessonArchitectureWarnings();
   renderHome();
   updateProgressBar();
@@ -46,6 +58,16 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 window.addEventListener("popstate", async () => {
   if(await renderAuthRoute()) return;
+  const lessonRoute = resolveLessonRoute();
+  if(lessonRoute.matched){
+    hideAuthView();
+    if(lessonRoute.lesson) openLesson(lessonRoute.lesson.id, false);
+    else {
+      window.history.replaceState({}, "", "/");
+      goHome(false);
+    }
+    return;
+  }
   hideAuthView();
   goHome(false);
 });
@@ -118,7 +140,7 @@ function getAdjacentLessonId(id, offset){
 function goHome(updateUrl = true){
   closeVideoModal();
   hideAuthView();
-  if(updateUrl && isAuthRoute()) window.history.pushState({}, "", "/");
+  if(updateUrl && window.location.pathname !== "/") window.history.pushState({}, "", "/");
   STATE.view="home";
   document.getElementById("homeView").classList.add("active");
   document.getElementById("lessonView").classList.remove("active");
@@ -147,15 +169,18 @@ function updateProgressBar(){
 }
 
 // ============== LESSON OPEN ==============
-function openLesson(id){
+function openLesson(id, updateUrl = true){
   hideAuthView();
-  if(isAuthRoute()) window.history.pushState({}, "", "/");
+  const lesson = LESSONS.find(l => l.id===id);
+  if(!lesson){
+    toast("Buổi học này chưa có trong lộ trình Tuwi 27 buổi.", "warning");
+    goHome();
+    return;
+  }
+  if(updateUrl && window.location.pathname !== `/lesson/${id}`) window.history.pushState({}, "", `/lesson/${id}`);
   STATE.lessonId = id;
   STATE.view = "lesson";
   STATE.sectionIdx = 0;
-
-  const lesson = LESSONS.find(l => l.id===id);
-  if(!lesson) return;
 
   STATE.sections = [...(lesson.sectionFlow || canonicalLessonSections)];
 

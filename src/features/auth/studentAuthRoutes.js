@@ -1,6 +1,8 @@
-import { LESSONS } from "./lessons-data.js";
-import { getCurrentProfile, profileStatusLabel, requireAdmin, requireApprovedStudent, STATUS_MESSAGES } from "./auth-guards.js";
-import { getSupabaseConfigError, hasSupabaseConfig, supabase } from "./supabase-client.js";
+import { LESSONS } from "../lessons/lessonRegistry.js";
+import { getCurrentProfile, profileStatusLabel, requireAdmin, requireApprovedStudent, STATUS_MESSAGES } from "./authGuard.js";
+import { getSupabaseConfigError, hasSupabaseConfig } from "../../lib/supabase/client.js";
+import { signInStudent, signOut, signUpStudent } from "./authService.js";
+import { listStudents, updateStudentStatus } from "../admin/adminStudentsService.js";
 
 const AUTH_ROUTES = new Set(["/student-register", "/student-login", "/student", "/admin/students"]);
 const STUDENT_STATUS_FILTERS = [
@@ -113,17 +115,7 @@ function renderStudentRegister(view){
     const submit = event.currentTarget.querySelector("button[type='submit']");
     submit.disabled = true;
     setMessage(message, "Đang tạo tài khoản...", "");
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          phone,
-          role: "student",
-        },
-      },
-    });
+    const { error } = await signUpStudent({ fullName, phone, email, password });
     submit.disabled = false;
 
     if(error){
@@ -131,7 +123,7 @@ function renderStudentRegister(view){
       return;
     }
 
-    await supabase.auth.signOut();
+    await signOut();
     event.currentTarget.reset();
     setMessage(message, "Đăng ký thành công. Vui lòng chờ admin duyệt tài khoản.", "success");
   });
@@ -171,7 +163,7 @@ function renderStudentLogin(view){
     const submit = event.currentTarget.querySelector("button[type='submit']");
     submit.disabled = true;
     setMessage(message, "Đang đăng nhập...", "");
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await signInStudent(email, password);
     submit.disabled = false;
 
     if(error || !data?.user){
@@ -287,13 +279,7 @@ async function loadAdminStudents(){
   const message = document.getElementById("adminStudentsMessage");
   if(!list || !message) return;
 
-  let query = supabase
-    .from("profiles")
-    .select("id, full_name, phone, email, role, status, note, created_at")
-    .order("created_at", { ascending: false });
-  if(currentAdminFilter !== "all") query = query.eq("status", currentAdminFilter);
-
-  const { data, error } = await query;
+  const { data, error } = await listStudents(currentAdminFilter);
   if(error){
     list.innerHTML = `<div class="empty-state">Không tải được danh sách học viên. ${escapeHtml(error.message)}</div>`;
     return;
@@ -318,10 +304,7 @@ async function loadAdminStudents(){
       const status = button.dataset.actionStatus;
       button.disabled = true;
       setMessage(message, "Đang cập nhật...", "");
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ status })
-        .eq("id", id);
+      const { error: updateError } = await updateStudentStatus(id, status);
 
       if(updateError){
         button.disabled = false;
@@ -369,7 +352,7 @@ function renderStatusCard(message){
 
 function attachLogoutHandler(){
   document.getElementById("studentLogoutBtn")?.addEventListener("click", async () => {
-    if(hasSupabaseConfig) await supabase.auth.signOut();
+    if(hasSupabaseConfig) await signOut();
     window.history.pushState({}, "", "/student-login");
     await renderAuthRoute();
   });

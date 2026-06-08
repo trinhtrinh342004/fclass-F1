@@ -1,4 +1,7 @@
-import { getSupabaseConfigError, hasSupabaseConfig, supabase } from "./supabase-client.js";
+import { getCurrentProfile, getCurrentUser } from "../../lib/supabase/auth.js";
+import { getSupabaseConfigError, hasSupabaseConfig } from "../../lib/supabase/client.js";
+
+export { getCurrentProfile, getCurrentUser };
 
 export const STATUS_MESSAGES = {
   pending: "Tài khoản của bạn đang chờ admin duyệt.",
@@ -16,26 +19,6 @@ export function profileStatusLabel(status){
     blocked: "Bị khóa",
   };
   return labels[status] || status || "Không rõ";
-}
-
-export async function getCurrentUser(){
-  if(!hasSupabaseConfig) return { user: null, error: new Error(getSupabaseConfigError()) };
-  const { data, error } = await supabase.auth.getUser();
-  return { user: data?.user || null, error };
-}
-
-export async function getCurrentProfile(userId){
-  if(!hasSupabaseConfig) return { profile: null, error: new Error(getSupabaseConfigError()) };
-  const id = userId || (await getCurrentUser()).user?.id;
-  if(!id) return { profile: null, error: null };
-
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id, full_name, phone, email, role, status, note, created_at, updated_at")
-    .eq("id", id)
-    .maybeSingle();
-
-  return { profile: data || null, error };
 }
 
 export async function requireApprovedStudent(){

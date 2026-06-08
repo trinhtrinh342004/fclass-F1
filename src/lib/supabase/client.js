@@ -1,12 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
+import { env, getEnvError, hasRequiredEnv } from "../../config/env.js";
 
-const supabaseUrl = import.meta.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-
-export const hasSupabaseConfig = Boolean(supabaseUrl && supabaseAnonKey);
+export const hasSupabaseConfig = hasRequiredEnv();
 
 export const supabase = hasSupabaseConfig
-  ? createClient(supabaseUrl, supabaseAnonKey, {
+  ? createClient(env.supabaseUrl, env.supabaseAnonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
@@ -16,8 +14,7 @@ export const supabase = hasSupabaseConfig
   : null;
 
 export function getSupabaseConfigError(){
-  if(hasSupabaseConfig) return "";
-  return "Chưa cấu hình NEXT_PUBLIC_SUPABASE_URL và NEXT_PUBLIC_SUPABASE_ANON_KEY.";
+  return hasSupabaseConfig ? "" : getEnvError();
 }
 
 export function getSupabaseBrowserClient(){
