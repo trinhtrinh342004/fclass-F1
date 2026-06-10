@@ -7,6 +7,20 @@ export const lesson01 = {
   status: "partial",
   unit: "Tuwi 1",
   mainTopic: "Alphabet and Nouns",
+  sectionFlow: [
+    "intro",
+    "review",
+    "video",
+    "vocab",
+    "listen_pick",
+    "grammar",
+    "dialogue_video",
+    "dialogue_video_quiz",
+    "speaking",
+    "minitest",
+    "mindmap",
+    "homework"
+  ],
   metadata: {
     sourceLessonIds: [],
     hasTodoVideo: true,
