@@ -708,7 +708,7 @@ function renderSidebar(lesson){
   const sectionsDone = progress.sectionsDone[lesson.id] || [];
   ul.innerHTML = STATE.sections.map((s,i)=>`
     <li class="${i===STATE.sectionIdx?'active':''} ${sectionsDone.includes(s)?'complete':''}"
-        onclick="jumpTo(${i})">${SECTION_LABELS[s]||s}</li>
+        onclick="jumpTo(${i})">${lesson.sectionLabels?.[s] || SECTION_LABELS[s] || s}</li>
   `).join("");
 
   document.getElementById("sidePrev").disabled = !getAdjacentLessonId(lesson.id, -1);
@@ -859,7 +859,7 @@ function renderIpaSection(lesson, section){
           </div>
           <div class="ipa-symbol-stack">${sounds.map(sound=>`<span>${escAttr(sound.symbol)}</span>`).join("")}</div>
         </div>
-        ${renderIpaProcessBlock()}
+        ${renderIpaProcessBlock(ipa)}
       `;
     case "ipa_why":
       return `${header}
@@ -868,7 +868,7 @@ function renderIpaSection(lesson, section){
           <div class="ipa-info-card"><h3>Học bằng mắt, tai và miệng</h3><p>Người mất gốc cần thấy môi, lưỡi, răng và luồng hơi để bắt chước đúng trước khi nói nhanh.</p></div>
         </div>`;
     case "ipa_word_process":
-      return `${header}${renderIpaProcessBlock()}`;
+      return `${header}${renderIpaProcessBlock(ipa)}`;
     case "ipa_sound_table":
     case "ipa_audio_samples":
     case "ipa_read_symbols":
@@ -884,16 +884,11 @@ function renderIpaSection(lesson, section){
       }
       return `${header}
         <div class="ipa-compare-grid">
-          ${[
+          ${(ipa.comparisons || [
             ["/ɪ/", "/iː/", "sit", "seat", "ngắn, thả lỏng", "dài, kéo môi rõ hơn"],
             ["/e/", "/æ/", "pen", "pan/cat", "mở vừa", "mở rộng hơn"],
             ["/ʊ/", "/uː/", "book", "blue", "ngắn, môi tròn nhẹ", "dài, môi tròn rõ"],
-          ].map(([a,b,aw,bw,an,bn])=>`
-            <div class="ipa-compare-card">
-              <div><b>${a}</b><span>${escAttr(aw)} - ${escAttr(an)}</span></div>
-              <div><b>${b}</b><span>${escAttr(bw)} - ${escAttr(bn)}</span></div>
-            </div>
-          `).join("")}
+          ]).map((comparison)=>renderIpaComparison(comparison)).join("")}
         </div>`;
     case "ipa_spell_words":
     case "ipa_blend_words":
@@ -1173,12 +1168,28 @@ function renderIpaHeader(lesson, section){
       <span class="stage-tag">${escAttr(lesson.unit)}</span>
       <span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span>
     </div>
-    <h2 class="stage-title">${escAttr(SECTION_LABELS[section] || lesson.title)}</h2>
+    <h2 class="stage-title">${escAttr(lesson.sectionLabels?.[section] || SECTION_LABELS[section] || lesson.title)}</h2>
     <p class="stage-sub">${escAttr(lesson.title)} · ${escAttr(lesson.subtitle || "")}</p>
   `;
 }
 
-function renderIpaProcessBlock(){
+function renderIpaProcessBlock(ipa = {}){
+  if(ipa.isGlideLesson){
+    return `
+      <div class="ipa-process">
+        <div class="ipa-glide-demo">
+          ${ipa.sounds.map((sound)=>`
+            <div class="ipa-glide-row">
+              <b>${escAttr(sound.symbol)}</b>
+              <span class="ipa-glide-track">${escAttr(sound.glide)}</span>
+              <strong>${escAttr(sound.word)} ${escAttr(sound.ipa)}</strong>
+            </div>
+          `).join("")}
+        </div>
+        <p class="ipa-glide-note">Bắt đầu ở âm thứ nhất, trượt nhẹ sang âm thứ hai, rồi đọc liền thành một âm tự nhiên.</p>
+      </div>
+    `;
+  }
   const steps = ["Word", "IPA", "Audio", "Mouth Shape", "Split Sounds", "Blend", "Speak", "Feedback"];
   return `
     <div class="ipa-process">
@@ -1188,6 +1199,27 @@ function renderIpaProcessBlock(){
       <div class="ipa-example-line">
         <span>cat</span><span>/kæt/</span><span>/k/ + /æ/ + /t/</span><strong>cat</strong>
       </div>
+    </div>
+  `;
+}
+
+function renderIpaComparison(comparison){
+  if(Array.isArray(comparison)){
+    const [a,b,aw,bw,an,bn] = comparison;
+    return `
+      <div class="ipa-compare-card">
+        <div><b>${a}</b><span>${escAttr(aw)} - ${escAttr(an)}</span></div>
+        <div><b>${b}</b><span>${escAttr(bw)} - ${escAttr(bn)}</span></div>
+      </div>
+    `;
+  }
+  return `
+    <div class="ipa-compare-card">
+      <h3>${escAttr(comparison.title)}</h3>
+      <p>${escAttr(comparison.desc || "")}</p>
+      ${comparison.items.map((item)=>`
+        <div><b>${escAttr(item.symbol)}</b><span>${escAttr(item.keyword)} ${escAttr(item.ipa)} · ${escAttr(item.glide)}</span></div>
+      `).join("")}
     </div>
   `;
 }
