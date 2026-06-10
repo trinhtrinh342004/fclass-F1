@@ -32,8 +32,8 @@ export const TUWI_27_CURRICULUM_MAP = [
     topicVietnamese: "Đại từ nhân xưng",
     slug: "personal-pronoun",
     sourceLessons: [],
-    status: "draft",
-    notes: "Chưa có buổi cũ tách riêng đại từ nhân xưng.",
+    status: "ready",
+    notes: "Đã tích hợp đầy đủ nội dung Personal Pronouns theo kiến trúc Buổi 9.",
   },
   {
     lessonId: 5,
