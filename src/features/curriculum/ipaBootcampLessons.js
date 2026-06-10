@@ -1,3 +1,5 @@
+import { lesson04LongVowels } from "../lessons/lesson-04-long-vowels.js";
+
 export const IPA_BOOTCAMP_SECTION_FLOW = [
   "ipa_intro",
   "ipa_why",
@@ -177,12 +179,12 @@ export const IPA_BOOTCAMP_CURRICULUM_MAP = [
   },
   {
     lessonId: 4,
-    topicEnglish: "Stop Sounds & Nasals – Âm bật và âm mũi",
-    topicVietnamese: "Bật âm rõ, không nuốt âm cuối",
-    slug: "stop-sounds-and-nasals",
+    topicEnglish: "Long Vowels – Nguyên âm dài",
+    topicVietnamese: "Hiểu dấu /ː/ và biết kéo dài âm đúng cách",
+    slug: "long-vowels",
     sourceLessons: [],
     status: "ready",
-    notes: "IPA Bootcamp lesson.",
+    notes: "Buổi 4 có structure riêng theo Long Vowels.",
   },
   {
     lessonId: 5,
@@ -260,14 +262,14 @@ export const IPA_BOOTCAMP_LESSONS = [
     learningItems: "/eɪ/ /aɪ/ /ɔɪ/ /aʊ/ /əʊ/ /ɪə/ /eə/ /ʊə/",
     outcome: "Học sinh biết đọc các âm trượt như say, time, boy, house, go.",
   }),
-  createIpaLesson({
+  {
+    ...lesson04LongVowels,
     id: 4,
-    title: "Stop Sounds & Nasals – Âm bật và âm mũi",
-    subtitle: "Bật âm rõ, không nuốt âm cuối",
-    topic: "Phụ âm bật + âm mũi",
-    learningItems: "/p/ /b/ /t/ /d/ /k/ /g/ /m/ /n/ /ŋ/",
-    outcome: "Học sinh biết bật âm cuối, đọc rõ các âm p/b/t/d/k/g và âm mũi m/n/ng.",
-  }),
+    lessonNumber: 4,
+    dayNumber: 4,
+    slug: "long-vowels",
+    module: "ipa-bootcamp",
+  },
   createIpaLesson({
     id: 5,
     title: "Fricatives – Âm gió / âm ma sát",
