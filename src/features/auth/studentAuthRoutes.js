@@ -186,7 +186,8 @@ function renderStudentRegister(view){
   document.getElementById("studentRegisterForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     const message = document.getElementById("studentRegisterMessage");
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const fullName = String(form.get("fullName") || "").trim();
     const email = String(form.get("email") || "").trim();
     const password = String(form.get("password") || "");
@@ -205,24 +206,55 @@ function renderStudentRegister(view){
       return;
     }
 
-    const submit = event.currentTarget.querySelector("button[type='submit']");
-    submit.disabled = true;
-    submit.textContent = "Đang tạo tài khoản...";
-    setMessage(message, "Đang tạo tài khoản...", "");
-    const { data, error } = await signUpStudent({ fullName, phone: "", email, password });
-    submit.disabled = false;
-    submit.textContent = "Đăng ký";
-
-    if(error){
-      setMessage(message, friendlyAuthError(error.message), "error");
-      return;
+    const submit = formElement.querySelector("button[type='submit']");
+    if(submit){
+      submit.disabled = true;
+      submit.textContent = "Đang tạo tài khoản...";
     }
+    setMessage(message, "Đang tạo tài khoản...", "");
 
-    event.currentTarget.reset();
-    setMessage(message, "Đăng ký thành công. Vui lòng chờ admin duyệt tài khoản.", "success");
-    if(data?.session || data?.user){
-      window.history.pushState({}, "", "/pending-approval");
-      await renderAuthRoute();
+    try{
+      const { data, error } = await signUpStudent({ fullName, phone: "", email, password });
+
+      if(error){
+        setMessage(message, friendlyAuthError(error.message), "error");
+        return;
+      }
+
+      if(formElement){
+        formElement.reset();
+      }
+
+      if(data && !data.session && data.user){
+        // Email confirmation is required, render a friendly notification card
+        if(formElement){
+          formElement.outerHTML = `
+            <div class="auth-card status-card" style="display: grid; gap: 16px; justify-items: center; text-align: center; max-width: 520px; margin: 0 auto;">
+              <div style="font-size: 48px; margin-bottom: 8px;">✉️</div>
+              <p style="font-size: 18px; color: var(--navy); font-weight: 700; margin: 0;">Đăng ký thành công!</p>
+              <span class="status-badge status-pending">Đang chờ xác thực email</span>
+              <p style="color: var(--ink-mute); font-size: 14px; margin: 0; max-width: 420px; line-height: 1.6;">
+                Tài khoản đã được tạo. Vui lòng kiểm tra email để xác nhận, sau đó chờ admin duyệt vào lớp.
+              </p>
+              <div class="student-actions" style="margin-top: 8px; justify-content: center; width: 100%;">
+                <a class="btn-primary" href="/login" style="text-decoration: none; display: inline-flex; justify-content: center; width: 100%;">Đi tới Đăng nhập</a>
+              </div>
+            </div>
+          `;
+        }
+      }else if(data?.session || data?.user){
+        setMessage(message, "Đăng ký thành công. Vui lòng chờ admin duyệt tài khoản.", "success");
+        window.history.pushState({}, "", "/pending-approval");
+        await renderAuthRoute();
+      }
+    }catch(err){
+      console.error("[FClass auth] Registration error", err);
+      setMessage(message, friendlyAuthError(err?.message || err), "error");
+    }finally{
+      if(submit){
+        submit.disabled = false;
+        submit.textContent = "Đăng ký";
+      }
     }
   });
 }
@@ -338,7 +370,7 @@ async function renderAuthCallback(view){
   if(code){
     const { error } = await exchangeCodeForSession(code);
     if(error){
-      view.innerHTML = renderShell("Không thể xác thực", renderStatusCard(friendlyAuthError(error.message)));
+      view.innerHTML = renderShell("Không thể xác thực", renderStatusCard(friendlyAuthError(error.message), { showLogin: true }));
       attachLogoutHandler();
       return;
     }
@@ -1386,9 +1418,13 @@ function setMessage(element, text, kind){
 }
 
 function friendlyAuthError(message){
-  if(/already registered|already exists/i.test(message)) return "Email này đã được đăng ký.";
-  if(/password/i.test(message)) return "Mật khẩu chưa hợp lệ.";
-  return message || "Không thể xử lý yêu cầu.";
+  const msg = String(message || "");
+  if(/already registered|already exists|email_exists/i.test(msg)) return "Email này đã được đăng ký sử dụng.";
+  if(/password/i.test(msg)) return "Mật khẩu quá yếu (yêu cầu tối thiểu 6 ký tự).";
+  if(/email confirmation|confirm email|token|invalid or has expired/i.test(msg)) return "Đường liên kết xác nhận đã hết hạn hoặc không hợp lệ. Vui lòng đăng ký/đăng nhập lại để nhận link mới.";
+  if(/network|fetch|connect/i.test(msg)) return "Không kết nối được với Supabase. Vui lòng kiểm tra kết nối mạng.";
+  if(/violates row level security/i.test(msg)) return "Không có quyền lưu thông tin tài khoản. Vui lòng liên hệ admin.";
+  return msg || "Không thể xử lý yêu cầu.";
 }
 
 function membershipStatusLabel(status){
