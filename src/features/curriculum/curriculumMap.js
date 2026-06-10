@@ -68,8 +68,8 @@ export const TUWI_27_CURRICULUM_MAP = [
     topicVietnamese: "Nguyên tắc viết hoa",
     slug: "capital-letter-rules",
     sourceLessons: [],
-    status: "draft",
-    notes: "Chưa có nội dung cũ phù hợp.",
+    status: "ready",
+    notes: "Đã biên soạn đầy đủ theo nội dung Buổi 8 và kiến trúc canonical của Buổi 9.",
   },
   {
     lessonId: 9,
