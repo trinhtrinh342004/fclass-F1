@@ -47,10 +47,10 @@ const expectedTitles = new Map([
   [1, "IPA Foundation – Cách đọc một từ tiếng Anh"],
   [2, "Short vs Long Vowels – Nguyên âm ngắn và dài"],
   [3, "Diphthongs – Nguyên âm đôi"],
-  [4, "Long Vowels – Nguyên âm dài"],
+  [4, "BUỔI 4: Long Vowels - Nguyên âm dài"],
   [5, "Fricatives – Âm gió / âm ma sát"],
   [6, "Difficult Consonants – Âm dễ sai với người Việt"],
-  [7, "Word Stress & Schwa – Trọng âm và âm /ə/"],
+  [7, "BUỔI 7: Consonants 2 – Phụ âm gió & Âm khó"],
   [8, "IPA Review + Word Stress – Tổng ôn IPA và trọng âm"],
 ]);
 
@@ -92,6 +92,12 @@ check(lesson08?.finalRecording?.sentences?.length === 5, "Lesson 8 final recordi
 check(lesson08?.minitest?.length >= 13, "Lesson 8 final mini test must include all supplied quiz questions.");
 check(lesson08?.mindmap?.branches?.length >= 8, "Lesson 8 must include the complete module mindmap.");
 check(lesson08?.homeworkRich?.tasks?.length >= 4, "Lesson 8 must include post-module homework and self-assessment.");
+
+const lesson07 = lessonById(7);
+check(lesson07?.slug === "consonants-2-am-gio-va-am-kho-voi-nguoi-viet", "Lesson 7 must route to Consonants 2.");
+check(lesson07?.sectionFlow?.length === 18, "Lesson 7 must preserve the 18 requested Consonants 2 sections.");
+check(lesson07?.ipa?.sounds?.length === 15, "Lesson 7 must expose all 15 difficult consonant sounds.");
+check(lesson07?.ipa?.comparisons?.length === 7, "Lesson 7 must expose all 7 requested consonant comparisons.");
 
 check(!LESSONS.some((lesson) => lesson.slug === "alphabet-and-nouns"), "Old lesson 1 Alphabet and Nouns must not remain in the main route.");
 check(lessonById(9)?.slug === "singular-plural-nouns", "Lesson 9 must be old Lesson 2 Singular & Plural Nouns.");

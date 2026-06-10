@@ -642,7 +642,46 @@ Object.assign(SECTION_LABELS, {
   review8_mini_test: "Final mini test",
   review8_mindmap: "Mindmap tổng",
   review8_homework: "Bài tập sau module",
+  consonants2_intro_fricative: "Âm gió là gì?",
+  consonants2_voicing: "Hữu thanh và vô thanh",
+  consonants2_pair_f_v: "Cặp /f/ và /v/",
+  consonants2_pair_s_z: "Cặp /s/ và /z/",
+  consonants2_pair_th: "Cặp /θ/ và /ð/",
+  consonants2_pair_sh_zh: "Cặp /ʃ/ và /ʒ/",
+  consonants2_pair_ch_j: "Cặp /tʃ/ và /dʒ/",
+  consonants2_pair_l_r: "Âm /l/ và /r/",
+  consonants2_pair_w_j: "Âm /w/ và /j/",
+  consonants2_mouth_shapes: "Khẩu hình trực quan",
+  consonants2_mouth_videos: "Video khẩu hình",
+  consonants2_listen_choose: "Nghe chọn âm",
+  consonants2_minimal_pairs: "Minimal pairs",
+  consonants2_sentence_reading: "Luyện đọc câu",
+  consonants2_ai_speaking: "Luyện nói AI",
+  consonants2_mini_test: "Mini test",
+  consonants2_mindmap: "Mindmap",
+  consonants2_homework: "Bài tập về nhà",
 });
+
+const IPA_SECTION_ALIASES = {
+  consonants2_intro_fricative: "ipa_intro",
+  consonants2_voicing: "ipa_compare_sounds",
+  consonants2_pair_f_v: "ipa_compare_sounds",
+  consonants2_pair_s_z: "ipa_compare_sounds",
+  consonants2_pair_th: "ipa_compare_sounds",
+  consonants2_pair_sh_zh: "ipa_compare_sounds",
+  consonants2_pair_ch_j: "ipa_compare_sounds",
+  consonants2_pair_l_r: "ipa_compare_sounds",
+  consonants2_pair_w_j: "ipa_compare_sounds",
+  consonants2_mouth_shapes: "ipa_mouth_visual",
+  consonants2_mouth_videos: "ipa_video_mouth",
+  consonants2_listen_choose: "ipa_listen_choose_sound",
+  consonants2_minimal_pairs: "ipa_compare_sounds",
+  consonants2_sentence_reading: "ipa_sentence_practice",
+  consonants2_ai_speaking: "ipa_ai_speaking",
+  consonants2_mini_test: "ipa_mini_test",
+  consonants2_mindmap: "ipa_mindmap",
+  consonants2_homework: "ipa_homework",
+};
 
 function renderSidebar(lesson){
   document.getElementById("sideUnit").textContent = lesson.unit==="Starter"?"STARTER":lesson.unit;
@@ -718,7 +757,7 @@ function renderSection(){
   let html="";
   if(lesson?.module === "ipa-bootcamp" && section.startsWith("review8_")){
     html = renderReview8Section(lesson, section);
-  }else if(lesson?.module === "ipa-bootcamp" && section.startsWith("ipa_")){
+  }else if(lesson?.module === "ipa-bootcamp" && (section.startsWith("ipa_") || IPA_SECTION_ALIASES[section])){
     html = renderIpaSection(lesson, section);
   }else switch(section){
     case "intro":       html = renderIntro(lesson); break;
@@ -790,7 +829,8 @@ function renderIpaSection(lesson, section){
   const ipa = lesson.ipa || {};
   const sounds = ipa.sounds || [];
   const header = renderIpaHeader(lesson, section);
-  switch(section){
+  const normalizedSection = IPA_SECTION_ALIASES[section] || section;
+  switch(normalizedSection){
     case "ipa_intro":
       return `${header}
         <div class="ipa-hero-panel">
@@ -821,6 +861,9 @@ function renderIpaSection(lesson, section){
     case "ipa_video_mouth":
       return `${header}${renderIpaVideoSlots(ipa.videoSlots || [])}`;
     case "ipa_compare_sounds":
+      if(ipa.comparisons?.length){
+        return `${header}${renderIpaComparisons(selectIpaComparisons(ipa.comparisons, section))}`;
+      }
       return `${header}
         <div class="ipa-compare-grid">
           ${[
@@ -1063,6 +1106,48 @@ window._spellReviewName = function(input){
     .split("")
     .join("-") || "L-A-N";
 };
+
+function selectIpaComparisons(comparisons, section){
+  const sectionSymbols = {
+    consonants2_pair_f_v: ["/f/", "/v/"],
+    consonants2_pair_s_z: ["/s/", "/z/"],
+    consonants2_pair_th: ["/θ/", "/ð/"],
+    consonants2_pair_sh_zh: ["/ʃ/", "/ʒ/"],
+    consonants2_pair_ch_j: ["/tʃ/", "/dʒ/"],
+    consonants2_pair_l_r: ["/l/", "/r/"],
+    consonants2_pair_w_j: ["/w/", "/j/"],
+  }[section];
+  if(!sectionSymbols) return comparisons;
+  return comparisons.filter((comparison) =>
+    sectionSymbols.every((symbol) => comparison.items.some((item) => item.symbol === symbol))
+  );
+}
+
+function renderIpaComparisons(comparisons){
+  return `
+    <div class="ipa-compare-grid">
+      ${comparisons.map((comparison)=>`
+        <article class="ipa-info-card">
+          <h3>${escAttr(comparison.title)}</h3>
+          <p>${escAttr(comparison.desc)}</p>
+          <div class="ipa-compare-card">
+            ${comparison.items.map((item)=>`
+              <div>
+                <b>${escAttr(item.symbol)}</b>
+                <span>${escAttr(item.keyword)} · ${escAttr(item.detail)}</span>
+              </div>
+            `).join("")}
+          </div>
+          <div class="ipa-chip-row">
+            ${comparison.pairs.map((pair)=>`
+              <span>${escAttr(pair.wordA)} ${escAttr(pair.ipaA)} · ${escAttr(pair.wordB)} ${escAttr(pair.ipaB)}</span>
+            `).join("")}
+          </div>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
 
 function renderIpaHeader(lesson, section){
   return `
