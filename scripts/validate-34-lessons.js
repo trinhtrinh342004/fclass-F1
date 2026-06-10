@@ -47,8 +47,8 @@ const expectedTitles = new Map([
   [1, "IPA Foundation – Cách đọc một từ tiếng Anh"],
   [2, "Short vs Long Vowels – Nguyên âm ngắn và dài"],
   [3, "Diphthongs – Nguyên âm đôi"],
-  [4, "Stop Sounds & Nasals – Âm bật và âm mũi"],
-  [5, "Fricatives – Âm gió / âm ma sát"],
+  [4, "Long Vowels – Nguyên âm dài"],
+  [5, "Diphthongs – Nguyên âm đôi"],
   [6, "Difficult Consonants – Âm dễ sai với người Việt"],
   [7, "Word Stress & Schwa – Trọng âm và âm /ə/"],
   [8, "IPA Review – Tổng ôn IPA và đọc từ/câu"],
@@ -68,6 +68,15 @@ check(lesson01?.ipa?.videoSlots?.length === 7, "Lesson 1 must have 7 video slots
 check(lesson01?.ipa?.imageSlots?.length === 6, "Lesson 1 must have 6 vocabulary image slots.");
 check(lesson01?.ipa?.blendGame?.length >= 4, "Lesson 1 must have blend game data.");
 check(lesson01?.ipa?.listenChooseGame?.length >= 4, "Lesson 1 must have listen-and-choose game data.");
+
+const lesson05 = lessonById(5);
+check(lesson05?.sectionFlow?.length === 16, "Lesson 5 Diphthongs sidebar must have exactly 16 sections.");
+check(lesson05?.ipa?.sounds?.length === 8, "Lesson 5 Diphthongs must have 8 sound cards.");
+check(lesson05?.ipa?.videoSlots?.length === 4, "Lesson 5 Diphthongs must have 4 safe video placeholders.");
+check(lesson05?.ipa?.imageSlots?.length === 8, "Lesson 5 Diphthongs must have 8 safe image placeholders.");
+check(lesson05?.ipa?.blendGame?.length === 8, "Lesson 5 Diphthongs must have 8 blend-game words.");
+check(lesson05?.ipa?.listenChooseGame?.length === 8, "Lesson 5 Diphthongs must have 8 listen-and-choose rounds.");
+check(lesson05?.ipa?.isGlideLesson === true, "Lesson 5 Diphthongs must enable the glide animation.");
 
 check(!LESSONS.some((lesson) => lesson.slug === "alphabet-and-nouns"), "Old lesson 1 Alphabet and Nouns must not remain in the main route.");
 check(lessonById(9)?.slug === "singular-plural-nouns", "Lesson 9 must be old Lesson 2 Singular & Plural Nouns.");
