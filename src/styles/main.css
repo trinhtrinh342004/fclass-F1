@@ -2507,9 +2507,12 @@ body.admin-active > .topbar{
 .grammar-rich-list li{font-size:14px;line-height:1.55;margin:3px 0;color:var(--ink)}
 .grammar-rich-mistakes{display:grid;gap:8px;margin-top:10px}
 .grammar-rich-mistake{
-  background:var(--red-soft);border:1.5px solid #fecaca;color:var(--red);
-  border-radius:8px;padding:9px 12px;font-size:13px;line-height:1.5;
+  background:#fff;border:1.5px solid var(--line);color:var(--ink);
+  border-radius:8px;padding:8px;display:grid;gap:6px;font-size:13px;line-height:1.5;
 }
+.grammar-rich-mistake > div{padding:7px 9px;border-radius:6px}
+.grammar-rich-mistake > div:first-child{background:var(--red-soft);color:var(--red)}
+.grammar-rich-mistake > div:last-child{background:var(--green-soft);color:var(--green)}
 
 /* ============================================================
    VOCAB GROUPS + IPA
