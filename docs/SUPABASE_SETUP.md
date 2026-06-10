@@ -24,7 +24,9 @@ In Supabase Dashboard, open **Authentication > URL Configuration**:
   - `http://localhost:5173/auth/callback`
   - `http://localhost:5173/reset-password`
 
-If production uses a custom domain, add the same `/auth/callback` and `/reset-password` paths for that custom domain too. Forgot-password emails redirect to `/reset-password`; signup/email-confirmation links redirect to `/auth/callback`.
+If production uses a custom domain, add the same `/auth/callback` and `/reset-password` paths for that custom domain too. Forgot-password emails and signup/email-confirmation links redirect through `/auth/callback`; recovery requests include `?type=recovery` so the callback opens `/reset-password` instead of a dashboard.
+
+This Vite project runs locally on port `5173`. Do not add `localhost:3000` redirects unless the app is actually served on port `3000`, and never use `http://localhost:3000` as the production Site URL.
 
 ## Migration
 
