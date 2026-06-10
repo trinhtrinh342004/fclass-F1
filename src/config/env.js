@@ -1,8 +1,8 @@
 const rawEnv = import.meta.env || {};
 
 export const env = {
-  supabaseUrl: rawEnv.VITE_SUPABASE_URL || rawEnv.NEXT_PUBLIC_SUPABASE_URL || "",
-  supabaseAnonKey: rawEnv.VITE_SUPABASE_ANON_KEY || rawEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
+  supabaseUrl: rawEnv.VITE_SUPABASE_URL || "",
+  supabaseAnonKey: rawEnv.VITE_SUPABASE_ANON_KEY || "",
 };
 
 export function hasRequiredEnv(){

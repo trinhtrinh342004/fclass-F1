@@ -39,7 +39,7 @@ VITE_SUPABASE_ANON_KEY=
 ```
 
 Do not add server-only Supabase keys to the frontend bundle.
-Existing `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are supported as a temporary fallback for local `.env` files.
+The frontend reads only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
 
 ## Supabase Setup
 
@@ -48,6 +48,7 @@ Existing `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are supp
 3. Apply migrations with `npm run setup:supabase` when the Supabase CLI is linked, or run SQL files in `supabase/migrations/`.
 4. Seed lessons with `npm run seed:lessons`.
 5. Register the first admin user, then update that row in `profiles` to `role = 'admin'` and `status = 'approved'` from the Supabase dashboard or SQL editor.
+6. In Supabase Auth URL Configuration, set Site URL to `https://fclass-f1.vercel.app` or the exact production domain, then add redirect URLs for `/auth/callback` and `/reset-password` on production and local dev.
 
 ## Routes
 
@@ -56,6 +57,11 @@ Existing `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are supp
 - `/student-register`
 - `/student-login`
 - `/student`
+- `/forgot-password`
+- `/reset-password`
+- `/auth/callback`
+- `/admin`
+- `/admin/approvals`
 - `/admin/students`
 
 ## Deploy To Vercel

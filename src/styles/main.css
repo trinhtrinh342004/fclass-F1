@@ -108,7 +108,16 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   font-size:11px;letter-spacing:.1em;text-transform:uppercase;
   color:var(--ink-soft);font-weight:600;
 }
-.topnav{display:flex;gap:8px}
+.topnav{display:flex;gap:8px;align-items:center}
+.nav-user{
+  max-width:180px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+  font-weight:700;
+  color:var(--ink-mute);
+}
 .nav-btn{
   padding:9px 14px;border:1.5px solid var(--line);border-radius:10px;
   font-size:13px;font-weight:600;background:#fff;color:var(--navy);
