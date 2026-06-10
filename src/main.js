@@ -54,7 +54,7 @@ function escAttr(s){
 
 // ============== INIT ==============
 window.addEventListener("DOMContentLoaded", async () => {
-  showHomeLoading("Đang kết nối Supabase...");
+  showHomeLoading("Đang kiểm tra tài khoản...");
   await refreshAuthNavbar();
   if(await renderAuthRoute()){
     updateProgressBar();
@@ -228,8 +228,8 @@ async function refreshAuthNavbar(){
 
   if(!user || !profile){
     nav.innerHTML = `
-      <button class="nav-btn" data-nav-home>Trang chủ</button>
-      <button class="nav-btn" data-nav-login>Đăng nhập / Đăng ký</button>
+      <button class="nav-btn" data-nav-login>Đăng nhập</button>
+      <button class="nav-btn" data-nav-register>Đăng ký</button>
     `;
   }else if(profile.role === "admin" && profile.status === "approved"){
     nav.innerHTML = `
@@ -363,6 +363,7 @@ async function goHome(updateUrl = true){
   }
   await initializeDataLayer();
   closeVideoModal();
+  document.getElementById("authCheckView")?.classList.remove("active");
   hideAuthView();
   if(updateUrl && window.location.pathname !== "/") window.history.pushState({}, "", "/");
   STATE.view="home";
@@ -394,6 +395,7 @@ function updateProgressBar(){
 
 // ============== LESSON OPEN ==============
 async function openLesson(id, updateUrl = true){
+  document.getElementById("authCheckView")?.classList.remove("active");
   hideAuthView();
   const canOpen = await requireLessonAccess();
   if(!canOpen.ok){
