@@ -21,6 +21,101 @@ export async function updateStudentStatus(studentId, status){
     .single();
 }
 
+export async function approveStudentForClass(studentId, classId, adminId){
+  const now = new Date().toISOString();
+
+  const current = await supabase
+    .from("profiles")
+    .select("id, status")
+    .eq("id", studentId)
+    .eq("role", "student")
+    .maybeSingle();
+  if(current.error) return { data: null, error: current.error };
+
+  const profileResult = await supabase
+    .from("profiles")
+    .update({ status: "approved" })
+    .eq("id", studentId)
+    .eq("role", "student")
+    .select("id, status")
+    .single();
+  if(profileResult.error) return profileResult;
+
+  const membershipResult = await supabase
+    .from("class_memberships")
+    .upsert({
+      class_id: classId,
+      student_id: studentId,
+      status: "approved",
+      approved_by: adminId,
+      approved_at: now,
+      rejected_at: null,
+    }, { onConflict: "class_id,student_id" })
+    .select("id, class_id, student_id, status")
+    .single();
+  if(membershipResult.error) return { data: null, error: membershipResult.error };
+
+  await logApprovalAction({
+    studentId,
+    adminId,
+    classId,
+    action: "approved",
+    oldStatus: current.data?.status || null,
+    newStatus: "approved",
+  });
+
+  return {
+    data: {
+      profile: profileResult.data,
+      membership: membershipResult.data,
+    },
+    error: null,
+  };
+}
+
+export async function rejectStudent(studentId, adminId, classId = null){
+  const current = await supabase
+    .from("profiles")
+    .select("id, status")
+    .eq("id", studentId)
+    .eq("role", "student")
+    .maybeSingle();
+  if(current.error) return { data: null, error: current.error };
+
+  const profileResult = await supabase
+    .from("profiles")
+    .update({ status: "rejected" })
+    .eq("id", studentId)
+    .eq("role", "student")
+    .select("id, status")
+    .single();
+  if(profileResult.error) return profileResult;
+
+  await logApprovalAction({
+    studentId,
+    adminId,
+    classId,
+    action: "rejected",
+    oldStatus: current.data?.status || null,
+    newStatus: "rejected",
+  });
+
+  return { data: profileResult.data, error: null };
+}
+
+export async function logApprovalAction({ studentId, adminId, classId, action, oldStatus, newStatus }){
+  return supabase
+    .from("approval_logs")
+    .insert({
+      user_id: studentId,
+      admin_id: adminId,
+      class_id: classId,
+      action,
+      old_status: oldStatus,
+      new_status: newStatus,
+    });
+}
+
 export async function listClasses(){
   return supabase
     .from("classes")

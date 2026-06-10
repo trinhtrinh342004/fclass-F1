@@ -41,6 +41,17 @@ export async function signOut(){
   return supabase.auth.signOut();
 }
 
+export async function resetPasswordForEmail(email){
+  if(!hasSupabaseConfig) return { data: null, error: new Error(getSupabaseConfigError()) };
+  const redirectTo = `${window.location.origin}/reset-password`;
+  return supabase.auth.resetPasswordForEmail(email, { redirectTo });
+}
+
+export async function updatePassword(password){
+  if(!hasSupabaseConfig) return { data: null, error: new Error(getSupabaseConfigError()) };
+  return supabase.auth.updateUser({ password });
+}
+
 export async function getCurrentProfile(userId){
   if(!hasSupabaseConfig) return { profile: null, error: new Error(getSupabaseConfigError()) };
   const id = userId || (await getCurrentUser()).user?.id;

@@ -9,7 +9,7 @@ import {
   markLessonOpened,
   remoteProgressToLocalShape,
 } from "./features/progress/progressRepository.js";
-import { getCurrentUser } from "./lib/supabase/auth.js";
+import { getCurrentProfile, getCurrentUser, signOut } from "./lib/supabase/auth.js";
 import { subscribeToMyProgress, unsubscribe as unsubscribeProgressRealtime } from "./features/progress/progressRealtime.js";
 import { requireApprovedStudent } from "./features/auth/authGuard.js";
 import { requireApprovedClassMembership } from "./features/student/studentRepository.js";
@@ -41,6 +41,7 @@ let progressRealtimeChannel = null;
 let SORTED_LESSONS = sortLessons(LESSONS);
 let TOTAL_LESSONS = SORTED_LESSONS.length;
 let FIRST_LESSON_ID = SORTED_LESSONS[0]?.id || 1;
+let dataLayerReady = false;
 
 // ============== TEXT REGISTRY (safe HTML attribute embedding) ==============
 const TXT_REG = {};
@@ -54,12 +55,21 @@ function escAttr(s){
 // ============== INIT ==============
 window.addEventListener("DOMContentLoaded", async () => {
   showHomeLoading("Đang kết nối Supabase...");
-  await initializeDataLayer();
+  await refreshAuthNavbar();
   if(await renderAuthRoute()){
     updateProgressBar();
+    await refreshAuthNavbar();
     return;
   }
   const lessonRoute = resolveLessonRoute();
+  const access = await requireLearningAccess();
+  if(!access.ok){
+    await redirectForLearningAccess(access);
+    updateProgressBar();
+    await refreshAuthNavbar();
+    return;
+  }
+  await initializeDataLayer();
   if(lessonRoute.matched){
     logLessonArchitectureWarnings();
     if(lessonRoute.lesson) openLesson(lessonRoute.lesson.id, false);
@@ -73,11 +83,22 @@ window.addEventListener("DOMContentLoaded", async () => {
   logLessonArchitectureWarnings();
   renderHome();
   updateProgressBar();
+  await refreshAuthNavbar();
 });
 
 window.addEventListener("popstate", async () => {
-  if(await renderAuthRoute()) return;
+  if(await renderAuthRoute()){
+    await refreshAuthNavbar();
+    return;
+  }
   const lessonRoute = resolveLessonRoute();
+  const access = await requireLearningAccess();
+  if(!access.ok){
+    await redirectForLearningAccess(access, false);
+    await refreshAuthNavbar();
+    return;
+  }
+  await initializeDataLayer();
   if(lessonRoute.matched){
     hideAuthView();
     if(lessonRoute.lesson) openLesson(lessonRoute.lesson.id, false);
@@ -89,6 +110,7 @@ window.addEventListener("popstate", async () => {
   }
   hideAuthView();
   goHome(false);
+  await refreshAuthNavbar();
 });
 
 function logLessonArchitectureWarnings(){
@@ -97,11 +119,13 @@ function logLessonArchitectureWarnings(){
 }
 
 async function initializeDataLayer(){
+  if(dataLayerReady) return;
   const result = await getLessons();
   setActiveLessons(result.lessons, result.source, result.warning);
   await hydrateRemoteProgress();
   subscribeLessonsRealtime();
   await subscribeProgressRealtime();
+  dataLayerReady = true;
 }
 
 function setActiveLessons(lessons, source = LESSON_SOURCE.fallback, warning = ""){
@@ -157,6 +181,107 @@ async function subscribeProgressRealtime(){
 function showHomeLoading(message){
   const grid = document.getElementById("lessonCards");
   if(grid) grid.innerHTML = `<div class="empty-state">${escAttr(message)}</div>`;
+}
+
+async function requireLearningAccess(){
+  const student = await requireApprovedStudent();
+  if(!student.ok) return student;
+
+  const membership = await requireApprovedClassMembership();
+  if(!membership.ok){
+    return {
+      ok: false,
+      reason: "class-membership",
+      user: student.user,
+      profile: student.profile,
+      message: membership.error?.message || "Bạn cần được admin thêm vào lớp trước khi xem nội dung học.",
+    };
+  }
+
+  return { ok: true, user: student.user, profile: student.profile, membership: membership.membership };
+}
+
+async function redirectForLearningAccess(access, replace = true){
+  let target = "/student-login";
+  if(access.reason === "pending") target = "/pending-approval";
+  if(access.reason === "rejected" || access.reason === "blocked") target = "/rejected";
+  if(access.reason === "class-membership" || access.reason === "missing-profile" || access.reason === "profile-error") target = "/student";
+  if(access.profile?.role === "admin" && access.profile?.status === "approved") target = "/admin";
+
+  if(window.location.pathname !== target){
+    const method = replace ? "replaceState" : "pushState";
+    window.history[method]({}, "", target);
+  }
+  await renderAuthRoute();
+}
+
+async function refreshAuthNavbar(){
+  const nav = document.querySelector(".topnav");
+  if(!nav) return;
+
+  const { user } = await getCurrentUser();
+  let profile = null;
+  if(user){
+    const profileResult = await getCurrentProfile(user.id);
+    profile = profileResult.profile;
+  }
+
+  if(!user || !profile){
+    nav.innerHTML = `
+      <button class="nav-btn" data-nav-home>Trang chủ</button>
+      <button class="nav-btn" data-nav-login>Đăng nhập</button>
+      <button class="nav-btn" data-nav-register>Đăng ký</button>
+    `;
+  }else if(profile.role === "admin" && profile.status === "approved"){
+    nav.innerHTML = `
+      <button class="nav-btn" data-nav-admin>Admin</button>
+      <button class="nav-btn" data-nav-logout>Đăng xuất</button>
+    `;
+  }else if(profile.role === "student" && profile.status === "approved"){
+    nav.innerHTML = `
+      <button class="nav-btn" data-nav-home>Trang chủ</button>
+      <button class="nav-btn" data-nav-progress>Tiến độ</button>
+      <button class="nav-btn" data-nav-reset>Reset</button>
+      <button class="nav-btn" data-nav-logout>Đăng xuất</button>
+    `;
+  }else{
+    nav.innerHTML = `
+      <button class="nav-btn" data-nav-status>Trạng thái</button>
+      <button class="nav-btn" data-nav-logout>Đăng xuất</button>
+    `;
+  }
+
+  nav.querySelector("[data-nav-home]")?.addEventListener("click", () => goHome());
+  nav.querySelector("[data-nav-login]")?.addEventListener("click", async () => {
+    window.history.pushState({}, "", "/student-login");
+    await renderAuthRoute();
+    await refreshAuthNavbar();
+  });
+  nav.querySelector("[data-nav-register]")?.addEventListener("click", async () => {
+    window.history.pushState({}, "", "/student-register");
+    await renderAuthRoute();
+    await refreshAuthNavbar();
+  });
+  nav.querySelector("[data-nav-admin]")?.addEventListener("click", async () => {
+    window.history.pushState({}, "", "/admin");
+    await renderAuthRoute();
+    await refreshAuthNavbar();
+  });
+  nav.querySelector("[data-nav-status]")?.addEventListener("click", async () => {
+    const target = profile?.status === "rejected" || profile?.status === "blocked" ? "/rejected" : "/pending-approval";
+    window.history.pushState({}, "", target);
+    await renderAuthRoute();
+    await refreshAuthNavbar();
+  });
+  nav.querySelector("[data-nav-progress]")?.addEventListener("click", showProgress);
+  nav.querySelector("[data-nav-reset]")?.addEventListener("click", resetProgress);
+  nav.querySelector("[data-nav-logout]")?.addEventListener("click", async () => {
+    await signOut();
+    dataLayerReady = false;
+    window.history.pushState({}, "", "/student-login");
+    await renderAuthRoute();
+    await refreshAuthNavbar();
+  });
 }
 
 // ============== HOME ==============
@@ -223,7 +348,13 @@ function getAdjacentLessonId(id, offset){
   return idx >= 0 ? SORTED_LESSONS[idx + offset]?.id : null;
 }
 
-function goHome(updateUrl = true){
+async function goHome(updateUrl = true){
+  const access = await requireLearningAccess();
+  if(!access.ok){
+    await redirectForLearningAccess(access);
+    return;
+  }
+  await initializeDataLayer();
   closeVideoModal();
   hideAuthView();
   if(updateUrl && window.location.pathname !== "/") window.history.pushState({}, "", "/");
@@ -262,6 +393,12 @@ async function openLesson(id, updateUrl = true){
     toast(canOpen.message, "warning");
     if(canOpen.reason === "unauthenticated"){
       window.history.pushState({}, "", "/student-login");
+    }else if(canOpen.reason === "pending"){
+      window.history.pushState({}, "", "/pending-approval");
+    }else if(canOpen.reason === "rejected" || canOpen.reason === "blocked"){
+      window.history.pushState({}, "", "/rejected");
+    }else if(canOpen.profile?.role === "admin"){
+      window.history.pushState({}, "", "/admin");
     }else{
       window.history.pushState({}, "", "/student");
     }
@@ -296,6 +433,8 @@ async function requireLessonAccess(){
     return {
       ok: false,
       reason: student.reason,
+      user: student.user,
+      profile: student.profile,
       message: student.message || "Vui lòng đăng nhập tài khoản học viên đã được duyệt.",
     };
   }
@@ -4657,6 +4796,7 @@ function toast(msg, kind){
 // Expose to window for onclick handlers (ES module scope fix)
 Object.assign(window, {
   goHome, showProgress, resetProgress,
+  refreshAuthNavbar,
   openLesson, getNextLessonId,
   prevSection, nextSection, prevLesson, nextLesson, jumpTo,
   finishReview, pickMatch,
