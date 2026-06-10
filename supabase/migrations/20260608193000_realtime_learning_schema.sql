@@ -189,10 +189,12 @@ using (public.is_admin(auth.uid()))
 with check (public.is_admin(auth.uid()));
 
 drop policy if exists "Public can read lesson rows" on public.lessons;
-create policy "Public can read lesson rows"
+drop policy if exists "Approved students can read lesson rows" on public.lessons;
+drop policy if exists "Admins can read lesson rows" on public.lessons;
+create policy "Admins can read lesson rows"
 on public.lessons for select
-to anon, authenticated
-using (true);
+to authenticated
+using (public.is_admin(auth.uid()));
 
 drop policy if exists "Admins can write lessons" on public.lessons;
 create policy "Admins can write lessons"

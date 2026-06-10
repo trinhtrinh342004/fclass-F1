@@ -10,11 +10,11 @@
 
 ## RLS
 
-Migration: `supabase/migrations/20260608234500_real_admin_student_class_flow.sql`.
+Migration hoàn thiện mới nhất: `supabase/migrations/20260610160000_auth_admin_approval_completion.sql`.
 
 - `profiles`: users read their own profile; admins read/update all profiles; users cannot self-change `role` or `status`.
-- `classes`: admins CRUD classes; approved students read active classes.
-- `class_memberships`: students read their own memberships and create pending requests; admins read/update memberships.
+- `classes`: admins CRUD classes; approved students read only active classes they are assigned to.
+- `class_memberships`: approved students read only their approved memberships; admins read/insert/update/delete memberships.
 - `lessons`: admins read/write lessons; approved students with an approved class membership read lessons.
 - `student_lesson_progress`: students read/insert/update only their own approved-class progress; admins read all progress.
 
@@ -39,21 +39,20 @@ Login:
 2. The app queries `public.profiles` by `auth.user.id`.
 3. Missing profile is blocked.
 4. `admin + approved` goes to `/admin`.
-5. `student + approved` goes to `/student`.
+5. `student + approved` goes to `/`.
 6. `pending`, `rejected`, and `blocked` show explicit status messages.
 
 Admin approval:
 
-1. `/admin` checks Supabase Auth and `profiles.role = admin`, `profiles.status = approved`.
-2. Admin manages tabs for overview, students, classes, class requests, and progress.
-3. Student account actions update `profiles.status`.
+1. `/admin` and `/admin/approvals` check Supabase Auth and `profiles.role = admin`, `profiles.status = approved`.
+2. Admin approvals choose a class, update `profiles.status = approved`, upsert `class_memberships`, and insert `approval_logs`.
+3. Reject actions update `profiles.status = rejected` and insert `approval_logs`.
 
 Class join:
 
-1. Approved students see active classes in `/student`.
-2. “Xin vào lớp” inserts `class_memberships.status = pending`.
-3. Admin approves/rejects/removes in `/admin`.
-4. Only `class_memberships.status = approved` unlocks lessons.
+1. Admin assigns students to classes during approval.
+2. Only `class_memberships.status = approved` unlocks lessons.
+3. The unique `(class_id, student_id)` constraint prevents duplicate memberships.
 
 Progress:
 

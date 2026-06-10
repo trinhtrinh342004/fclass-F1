@@ -9,7 +9,7 @@ VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 ```
 
-Code hiện hỗ trợ fallback tạm thời từ `NEXT_PUBLIC_SUPABASE_URL` và `NEXT_PUBLIC_SUPABASE_ANON_KEY` để không vỡ `.env` hiện tại. `SUPABASE_SERVICE_ROLE_KEY` chỉ được đọc bởi script local, không import vào frontend.
+Frontend chỉ đọc `VITE_SUPABASE_URL` và `VITE_SUPABASE_ANON_KEY`. `SUPABASE_SERVICE_ROLE_KEY` chỉ được đọc bởi script local/server-side, không import vào frontend.
 
 ## Bảng Đã Tạo
 

@@ -33,8 +33,8 @@ if(!supabaseUrl || !supabaseAnonKey){
   process.exit(1);
 }
 
-if(process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY){
-  fail("Service role key đang bị expose bằng biến frontend. Không dùng VITE_/NEXT_PUBLIC_ cho SUPABASE_SERVICE_ROLE_KEY.");
+if(process.env.VITE_SUPABASE_SERVICE_ROLE_KEY){
+  fail("Service role key đang bị expose bằng biến frontend. Không dùng VITE_ cho SUPABASE_SERVICE_ROLE_KEY.");
 }
 
 const checkKey = serviceRoleKey || supabaseAnonKey;

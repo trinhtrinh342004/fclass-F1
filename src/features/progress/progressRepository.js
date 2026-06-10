@@ -1,5 +1,5 @@
 import { getCurrentUser } from "../../lib/supabase/auth.js";
-import { hasSupabaseConfig, supabase } from "../../lib/supabase/client.js";
+import { debugSupabaseAuth, hasSupabaseConfig, supabase, withSupabaseTimeout } from "../../lib/supabase/client.js";
 import { getLessonRowIdByNumber } from "../lessons/lessonRepository.js";
 import { getPrimaryApprovedClassId } from "../student/studentRepository.js";
 
@@ -10,10 +10,24 @@ export async function getMyProgress(){
   const { user } = await getCurrentUser();
   if(!user || !hasSupabaseConfig || !supabase) return { data: [], error: null };
 
-  return supabase
-    .from("student_lesson_progress")
-    .select("id, lesson_id, status, progress_percent, completed_at, last_opened_at, data, lessons(lesson_number)")
-    .eq("student_id", user.id);
+  try{
+    const result = await withSupabaseTimeout(
+      supabase
+        .from("student_lesson_progress")
+        .select("id, lesson_id, status, progress_percent, completed_at, last_opened_at, data, lessons(lesson_number)")
+        .eq("student_id", user.id),
+      "student_lesson_progress.select.mine",
+    );
+    debugSupabaseAuth("progress query end", {
+      userId: user.id,
+      count: result.data?.length || 0,
+      error: result.error?.message || null,
+    });
+    return result;
+  }catch(error){
+    debugSupabaseAuth("progress query failed", { userId: user.id, error: error.message });
+    return { data: [], error };
+  }
 }
 
 export async function getProgressByLesson(lessonNumber){
@@ -21,12 +35,19 @@ export async function getProgressByLesson(lessonNumber){
   const lessonId = await getLessonRowIdByNumber(lessonNumber);
   if(!user || !lessonId || !hasSupabaseConfig || !supabase) return { data: null, error: null };
 
-  return supabase
-    .from("student_lesson_progress")
-    .select("*")
-    .eq("student_id", user.id)
-    .eq("lesson_id", lessonId)
-    .maybeSingle();
+  try{
+    return await withSupabaseTimeout(
+      supabase
+        .from("student_lesson_progress")
+        .select("*")
+        .eq("student_id", user.id)
+        .eq("lesson_id", lessonId)
+        .maybeSingle(),
+      "student_lesson_progress.select.byLesson",
+    );
+  }catch(error){
+    return { data: null, error };
+  }
 }
 
 export async function upsertMyLessonProgress({ lessonId, classId, status = "in_progress", progressPercent = 0, data = {} }){
@@ -48,21 +69,35 @@ export async function upsertMyLessonProgress({ lessonId, classId, status = "in_p
   };
   if(status === "completed") payload.completed_at = new Date().toISOString();
 
-  return supabase
-    .from("student_lesson_progress")
-    .upsert(payload, { onConflict: "student_id,lesson_id" })
-    .select()
-    .single();
+  try{
+    return await withSupabaseTimeout(
+      supabase
+        .from("student_lesson_progress")
+        .upsert(payload, { onConflict: "student_id,lesson_id" })
+        .select()
+        .single(),
+      "student_lesson_progress.upsert.mine",
+    );
+  }catch(error){
+    return { data: null, error };
+  }
 }
 
 export async function markLessonOpened(lessonId){
   const existing = await getProgressByLesson(lessonId);
   if(existing.data?.status === "completed"){
     await logStudentActivity({ lessonNumber: lessonId, action: "lesson_opened_again", metadata: { completed: true } });
-    return supabase
-      .from("student_lesson_progress")
-      .update({ last_opened_at: new Date().toISOString() })
-      .eq("id", existing.data.id);
+    try{
+      return await withSupabaseTimeout(
+        supabase
+          .from("student_lesson_progress")
+          .update({ last_opened_at: new Date().toISOString() })
+          .eq("id", existing.data.id),
+        "student_lesson_progress.update.lastOpened",
+      );
+    }catch(error){
+      return { data: null, error };
+    }
   }
 
   const result = await upsertMyLessonProgress({
@@ -147,10 +182,17 @@ async function logStudentActivity({ lessonNumber, action, metadata = {} }){
   const lessonId = await getLessonRowIdByNumber(lessonNumber);
   if(!user || !lessonId || !hasSupabaseConfig || !supabase) return { data: null, error: null };
 
-  return supabase.from("student_activity_logs").insert({
-    student_id: user.id,
-    lesson_id: lessonId,
-    action,
-    metadata,
-  });
+  try{
+    return await withSupabaseTimeout(
+      supabase.from("student_activity_logs").insert({
+        student_id: user.id,
+        lesson_id: lessonId,
+        action,
+        metadata,
+      }),
+      "student_activity_logs.insert",
+    );
+  }catch(error){
+    return { data: null, error };
+  }
 }

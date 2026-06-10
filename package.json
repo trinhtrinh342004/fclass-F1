@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "validate:env": "node scripts/validate-env.mjs",
     "seed:lessons": "node scripts/seed-27-lessons.mjs",
+    "seed:test-accounts": "node scripts/seed-test-accounts.ts",
     "setup:supabase": "node scripts/setup-supabase-realtime.mjs",
     "check:supabase": "node scripts/check-real-supabase-flow.mjs",
     "validate:lessons": "node scripts/validate-27-lessons.js"
@@ -17,6 +18,7 @@
     "vite": "^5.0.0"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.108.0"
+    "@supabase/ssr": "^0.12.0",
+    "@supabase/supabase-js": "^2.108.1"
   }
 }

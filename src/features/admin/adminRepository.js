@@ -21,6 +21,34 @@ export async function updateStudentStatus(studentId, status){
     .single();
 }
 
+export async function approveStudentForClass(studentId, classId, adminId){
+  return supabase.rpc("approve_student", {
+    p_student_id: studentId,
+    p_class_id: classId,
+  });
+}
+
+export async function rejectStudent(studentId, adminId, classId = null){
+  return supabase.rpc("reject_student", {
+    p_student_id: studentId,
+    p_reason: null,
+  });
+}
+
+export async function logApprovalAction({ studentId, adminId, classId, action, oldStatus, newStatus }){
+  return supabase
+    .from("approval_logs")
+    .insert({
+      student_id: studentId,
+      user_id: studentId,
+      admin_id: adminId,
+      class_id: classId,
+      action,
+      old_status: oldStatus,
+      new_status: newStatus,
+    });
+}
+
 export async function listClasses(){
   return supabase
     .from("classes")

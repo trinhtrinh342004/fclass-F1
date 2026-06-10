@@ -1,13 +1,27 @@
 import { getCurrentUser } from "../../lib/supabase/auth.js";
-import { supabase } from "../../lib/supabase/client.js";
+import { debugSupabaseAuth, supabase, withSupabaseTimeout } from "../../lib/supabase/client.js";
 import { getLessonRowIdByNumber } from "../lessons/lessonRepository.js";
 
 export async function listActiveClasses(){
-  return supabase
-    .from("classes")
-    .select("id, name, description, level, status, created_at")
-    .eq("status", "active")
-    .order("created_at", { ascending: false });
+  debugSupabaseAuth("classes query start");
+  try{
+    const result = await withSupabaseTimeout(
+      supabase
+        .from("classes")
+        .select("id, name, description, level, status, created_at")
+        .eq("status", "active")
+        .order("created_at", { ascending: false }),
+      "classes.select.active",
+    );
+    debugSupabaseAuth("classes query end", {
+      count: result.data?.length || 0,
+      error: result.error?.message || null,
+    });
+    return result;
+  }catch(error){
+    debugSupabaseAuth("classes query failed", { error: error.message });
+    return { data: [], error };
+  }
 }
 
 export async function requestJoinClass(classId){
@@ -29,11 +43,27 @@ export async function getMyClassMemberships(){
   const { user, error } = await getCurrentUser();
   if(error || !user) return { data: [], error: error || null };
 
-  return supabase
-    .from("class_memberships")
-    .select("id, class_id, student_id, status, approved_at, rejected_at, created_at, classes(id, name, description, level, status)")
-    .eq("student_id", user.id)
-    .order("created_at", { ascending: false });
+  debugSupabaseAuth("class_memberships query start", { userId: user.id });
+  try{
+    const result = await withSupabaseTimeout(
+      supabase
+        .from("class_memberships")
+        .select("id, class_id, student_id, status, approved_at, rejected_at, created_at, classes(id, name, description, level, status)")
+        .eq("student_id", user.id)
+        .order("created_at", { ascending: false }),
+      "class_memberships.select.mine",
+    );
+    debugSupabaseAuth("class_memberships query end", {
+      userId: user.id,
+      count: result.data?.length || 0,
+      statuses: (result.data || []).map((item) => item.status),
+      error: result.error?.message || null,
+    });
+    return result;
+  }catch(error){
+    debugSupabaseAuth("class_memberships query failed", { userId: user.id, error: error.message });
+    return { data: [], error };
+  }
 }
 
 export async function getMyApprovedClasses(){
@@ -49,10 +79,24 @@ export async function getMyProgress(){
   const { user, error } = await getCurrentUser();
   if(error || !user) return { data: [], error: error || null };
 
-  return supabase
-    .from("student_lesson_progress")
-    .select("id, lesson_id, class_id, status, progress_percent, completed_at, last_opened_at, data, lessons(lesson_number), classes(id, name)")
-    .eq("student_id", user.id);
+  try{
+    const result = await withSupabaseTimeout(
+      supabase
+        .from("student_lesson_progress")
+        .select("id, lesson_id, class_id, status, progress_percent, completed_at, last_opened_at, data, lessons(lesson_number), classes(id, name)")
+        .eq("student_id", user.id),
+      "student_lesson_progress.select.dashboard",
+    );
+    debugSupabaseAuth("student dashboard progress query end", {
+      userId: user.id,
+      count: result.data?.length || 0,
+      error: result.error?.message || null,
+    });
+    return result;
+  }catch(queryError){
+    debugSupabaseAuth("student dashboard progress query failed", { userId: user.id, error: queryError.message });
+    return { data: [], error: queryError };
+  }
 }
 
 export async function upsertLessonProgress({ lessonId, classId, status = "in_progress", progressPercent = 0, data = {} }){
@@ -73,11 +117,18 @@ export async function upsertLessonProgress({ lessonId, classId, status = "in_pro
   };
   if(status === "completed") payload.completed_at = new Date().toISOString();
 
-  return supabase
-    .from("student_lesson_progress")
-    .upsert(payload, { onConflict: "student_id,lesson_id" })
-    .select()
-    .single();
+  try{
+    return await withSupabaseTimeout(
+      supabase
+        .from("student_lesson_progress")
+        .upsert(payload, { onConflict: "student_id,lesson_id" })
+        .select()
+        .single(),
+      "student_lesson_progress.upsert.dashboard",
+    );
+  }catch(queryError){
+    return { data: null, error: queryError };
+  }
 }
 
 export async function getPrimaryApprovedClassId(){

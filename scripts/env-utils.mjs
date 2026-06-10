@@ -19,8 +19,8 @@ export function loadLocalEnv(cwd = process.cwd()){
 }
 
 export function getSupabaseScriptEnv(){
-  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
+  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || "";
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
   return { supabaseUrl, supabaseAnonKey, serviceRoleKey };
 }
@@ -28,7 +28,7 @@ export function getSupabaseScriptEnv(){
 export function assertSupabaseClientEnv(){
   const env = getSupabaseScriptEnv();
   if(!env.supabaseUrl || !env.supabaseAnonKey){
-    throw new Error("Thiếu cấu hình VITE_SUPABASE_URL và VITE_SUPABASE_ANON_KEY. Tạo .env từ .env.example rồi chạy lại app.");
+    throw new Error("Thiếu cấu hình VITE_SUPABASE_URL/SUPABASE_URL và VITE_SUPABASE_ANON_KEY. Tạo .env từ .env.example rồi chạy lại app.");
   }
   return env;
 }
