@@ -3,12 +3,13 @@ import { LESSONS, LESSON_ARCHITECTURE_WARNINGS, canonicalLessonSections } from "
 
 let failed = false;
 
-if(LESSONS.length !== 27){
-  console.error(`Expected 27 lessons, found ${LESSONS.length}.`);
+if(LESSONS.length !== 34){
+  console.error(`Expected 34 lessons, found ${LESSONS.length}.`);
   failed = true;
 }
 
 for(const lesson of LESSONS){
+  if(lesson.module === "ipa-bootcamp") continue;
   if(lesson.curriculumStatus === "empty") continue;
   const flow = lesson.sectionFlow || [];
   const sameFlow = flow.length === canonicalLessonSections.length &&
@@ -19,7 +20,7 @@ for(const lesson of LESSONS){
   }
 }
 
-for(const id of [9, 11, 12, 27]){
+for(const id of [9, 11, 17, 19, 34]){
   const lesson = LESSONS.find(item => item.id === id);
   if(!lesson){
     console.error(`Buổi ${id}: missing.`);
@@ -52,7 +53,7 @@ const expectedHouseVocabulary = {
   lamp: { vi: "đèn", ipaIncludes: "læmp" }
 };
 
-for(const lessonId of [11, 12]){
+for(const lessonId of [17, 19]){
   const lesson = LESSONS.find(item => item.id === lessonId);
   if(!lesson) continue;
   validateVocabularySet(`Buổi ${lessonId} vocabulary`, lesson.vocabulary || []);

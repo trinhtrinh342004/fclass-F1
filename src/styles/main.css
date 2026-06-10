@@ -3473,3 +3473,65 @@ body.admin-active > .topbar{
   opacity: 0.75;
 }
 
+/* IPA Bootcamp */
+.ipa-hero-panel,.ipa-process,.ipa-info-card,.ipa-game,.ipa-ai-panel{border:1.5px solid var(--line);border-radius:var(--radius);background:#fff;padding:22px;box-shadow:var(--shadow-sm)}
+.ipa-hero-panel{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;background:linear-gradient(135deg,#fff 0%,#f8fbff 100%);border-color:#cbd5e1;margin-bottom:18px}
+.ipa-kicker{display:inline-flex;width:max-content;max-width:100%;padding:5px 10px;border-radius:999px;background:var(--yellow);color:var(--navy);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.ipa-hero-panel h3,.ipa-info-card h3,.ipa-game h3,.ipa-ai-panel h3{margin:10px 0 8px;color:var(--navy);font-family:var(--font-display)}
+.ipa-hero-panel p,.ipa-info-card p,.ipa-ai-panel p{margin:0;color:var(--ink-mute);font-weight:600}
+.ipa-symbol-stack{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;max-width:340px}
+.ipa-symbol-stack span,.ipa-chip-row span{display:inline-grid;min-width:48px;min-height:42px;place-items:center;padding:6px 10px;border-radius:8px;background:var(--navy);color:#fff;font-family:var(--font-display);font-size:24px;font-weight:900}
+.ipa-process-flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ipa-process-step{min-height:86px;display:grid;gap:8px;align-content:center;border:1.5px solid var(--line);border-radius:8px;background:var(--bg-soft);padding:12px}
+.ipa-process-step span{width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:var(--yellow);color:var(--navy);font-weight:900}
+.ipa-process-step b{color:var(--navy);font-size:14px;line-height:1.25}
+.ipa-example-line{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:var(--font-display);font-weight:900;color:var(--navy)}
+.ipa-example-line span,.ipa-example-line strong{border:1.5px solid var(--line);border-radius:8px;padding:8px 12px;background:#fff}
+.ipa-example-line strong{background:var(--yellow)}
+.ipa-two-col,.ipa-sound-grid,.ipa-video-grid,.ipa-image-grid,.ipa-compare-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.ipa-sound-card{min-height:294px;display:flex;flex-direction:column;gap:8px;border:1.5px solid var(--line);border-radius:var(--radius);background:#fff;padding:18px;box-shadow:var(--shadow-sm)}
+.ipa-symbol{width:max-content;max-width:100%;min-width:74px;min-height:68px;display:grid;place-items:center;padding:6px 14px;border-radius:10px;background:var(--yellow);color:var(--navy);font-family:var(--font-display);font-size:42px;font-weight:900}
+.ipa-sound-name{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:900}
+.ipa-sound-card h3{margin:0;color:var(--navy);font-size:24px}
+.ipa-sound-card p{margin:0;color:var(--ink-mute);font-weight:650}
+.ipa-card-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+.ipa-card-actions button,.ipa-option-row button,.ipa-listen-button,.ipa-reading-card button{border:1.5px solid var(--line-strong);border-radius:8px;background:#fff;color:var(--navy);padding:9px 12px;font-weight:800}
+.ipa-card-actions button:hover,.ipa-option-row button:hover,.ipa-listen-button:hover,.ipa-reading-card button:hover{border-color:var(--navy);background:var(--bg-soft)}
+.ipa-audio-slot{border:1.5px dashed var(--line-strong);border-radius:8px;color:var(--ink-soft);padding:8px 10px;font-size:12px;font-weight:800}
+.ipa-mouth-layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:18px;align-items:start}
+.ipa-mouth-figure{position:sticky;top:94px;border:1.5px solid var(--line);border-radius:var(--radius);background:#fff;padding:22px;text-align:center;color:var(--navy);font-weight:900}
+.mouth-head{position:relative;width:210px;height:190px;margin:0 auto 12px;border:4px solid var(--navy);border-radius:50% 50% 46% 46%;background:#f8fbff;overflow:hidden}
+.mouth-lips{position:absolute;right:26px;top:72px;width:70px;height:42px;border:5px solid var(--red);border-radius:50%;background:#fff}
+.mouth-teeth{position:absolute;right:44px;top:78px;width:34px;height:11px;background:#fff;border:1.5px solid var(--line-strong)}
+.mouth-tongue{position:absolute;right:48px;top:103px;width:90px;height:34px;background:#fca5a5;border-radius:50% 0 50% 50%}
+.mouth-air{position:absolute;right:0;top:88px;width:38px;height:5px;background:var(--yellow);box-shadow:14px -12px 0 var(--yellow),14px 12px 0 var(--yellow)}
+.ipa-mouth-list{display:grid;gap:12px}
+.ipa-mouth-card{border:1.5px solid var(--line);border-radius:var(--radius);background:#fff;padding:16px}
+.ipa-mouth-card h3{margin:0 0 10px;color:var(--navy);font-family:var(--font-display);font-size:26px}
+.ipa-mouth-card h3 span{font-size:15px;color:var(--ink-soft)}
+.ipa-mouth-card dl{display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px 12px;margin:0}
+.ipa-mouth-card dt{color:var(--navy);font-weight:900}
+.ipa-mouth-card dd{margin:0;color:var(--ink-mute);font-weight:650}
+.ipa-video-slot,.ipa-image-card,.ipa-compare-card,.ipa-reading-card{border:1.5px solid var(--line);border-radius:var(--radius);background:#fff;padding:14px}
+.ipa-video-frame{min-height:160px;display:grid;place-items:center;border-radius:8px;border:1.5px dashed var(--line-strong);background:var(--bg-soft);color:var(--ink-soft);font-weight:900;text-align:center;padding:16px;margin-bottom:10px}
+.ipa-video-slot code{font-size:11px;color:var(--navy);white-space:normal;word-break:break-word}
+.ipa-illustration{height:120px;display:grid;place-items:center;border-radius:8px;background:var(--yellow-soft);color:var(--navy);font-family:var(--font-display);font-size:56px;font-weight:900;margin-bottom:10px}
+.ipa-image-card h3{margin:0;color:var(--navy)}
+.ipa-image-card h3 span{font-size:14px;color:var(--ink-soft)}
+.ipa-image-card p{margin:6px 0;color:var(--ink);font-weight:700}
+.ipa-image-card small{color:var(--ink-soft);font-weight:700}
+.ipa-game{display:grid;gap:14px}
+.ipa-game-row{display:grid;grid-template-columns:minmax(210px,.7fr) minmax(260px,1fr);gap:14px;align-items:center;border-top:1.5px solid var(--line);padding-top:14px}
+.ipa-chip-row,.ipa-option-row{display:flex;flex-wrap:wrap;gap:8px}
+.ipa-option-row button.ipa-choice-ok{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.ipa-option-row button.ipa-choice-bad{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.ipa-listen-button{background:var(--navy);color:#fff;border-color:var(--navy)}
+.ipa-reading-list{display:grid;gap:10px}
+.ipa-reading-card{display:grid;grid-template-columns:70px minmax(0,1fr) auto;gap:12px;align-items:center}
+.ipa-reading-card b{font-size:28px;color:var(--navy);font-family:var(--font-display)}
+.ipa-reading-card span{font-weight:700;color:var(--ink-mute)}
+.ipa-mindmap{min-height:300px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:center}
+.ipa-mind-center,.ipa-mindmap span{display:grid;min-height:84px;place-items:center;border:1.5px solid var(--line);border-radius:var(--radius);background:#fff;color:var(--navy);font-weight:900;text-align:center;padding:12px}
+.ipa-mind-center{grid-column:1/-1;background:var(--navy);color:#fff;font-family:var(--font-display);font-size:24px}
+@media (max-width:760px){.ipa-hero-panel,.ipa-mouth-layout,.ipa-game-row,.ipa-reading-card{grid-template-columns:1fr}.ipa-symbol-stack{justify-content:flex-start}.ipa-process-flow{grid-template-columns:repeat(2,minmax(0,1fr))}.ipa-mouth-figure{position:relative;top:auto}.ipa-mindmap{grid-template-columns:1fr 1fr}}
+

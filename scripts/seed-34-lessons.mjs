@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { createClient } from "@supabase/supabase-js";
-import { TUWI_27_LESSONS } from "../src/features/curriculum/tuwi27Lessons.js";
+import { TUWI_34_LESSONS } from "../src/features/curriculum/tuwi27Lessons.js";
 import { assertSupabaseClientEnv, getSupabaseScriptEnv, loadLocalEnv } from "./env-utils.mjs";
 
 loadLocalEnv();
@@ -12,7 +12,7 @@ const supabase = createClient(supabaseUrl, seedKey, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-const rows = TUWI_27_LESSONS.map(toLessonRow);
+const rows = TUWI_34_LESSONS.map(toLessonRow);
 const { data, error } = await supabase
   .from("lessons")
   .upsert(rows, { onConflict: "lesson_number" })

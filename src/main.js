@@ -26,9 +26,11 @@ const STATE = {
 };
 
 const STORAGE_KEY = "gateway_a1_progress_v2";
+const IPA34_PROGRESS_MIGRATED_KEY = "gateway_a1_progress_v2_ipa34_migrated";
+const IPA34_LEGACY_LESSON1_ARCHIVE_KEY = "gateway_a1_progress_v2_legacy_lesson1_archive";
 
 function loadProgress(){
-  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {done:[], hw:{}, sectionsDone:{}}; }
+  try{ return migrateLegacyProgressNumbering(JSON.parse(localStorage.getItem(STORAGE_KEY)) || {done:[], hw:{}, sectionsDone:{}}); }
   catch{ return {done:[], hw:{}, sectionsDone:{}}; }
 }
 function saveProgress(p){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }catch{} }
@@ -149,6 +151,53 @@ function setActiveLessons(lessons, source = LESSON_SOURCE.fallback, warning = ""
 
 function sortLessons(lessons){
   return [...lessons].sort((a,b)=>a.id-b.id);
+}
+
+function migrateLegacyProgressNumbering(currentProgress){
+  const base = {
+    done: Array.isArray(currentProgress.done) ? currentProgress.done : [],
+    hw: currentProgress.hw || {},
+    sectionsDone: currentProgress.sectionsDone || {},
+  };
+  if(localStorage.getItem(IPA34_PROGRESS_MIGRATED_KEY) === "true") return base;
+
+  const allIds = [
+    ...base.done,
+    ...Object.keys(base.hw).map(Number),
+    ...Object.keys(base.sectionsDone).map(Number),
+  ].filter(Number.isFinite);
+  if(allIds.some((id) => id >= 28)){
+    localStorage.setItem(IPA34_PROGRESS_MIGRATED_KEY, "true");
+    return base;
+  }
+
+  const archivedLesson1 = {
+    done: base.done.includes(1),
+    hw: base.hw[1] || [],
+    sectionsDone: base.sectionsDone[1] || [],
+  };
+  if(archivedLesson1.done || archivedLesson1.hw.length || archivedLesson1.sectionsDone.length){
+    localStorage.setItem(IPA34_LEGACY_LESSON1_ARCHIVE_KEY, JSON.stringify(archivedLesson1));
+  }
+
+  const remapId = (id) => {
+    const numeric = Number(id);
+    if(!Number.isFinite(numeric) || numeric === 1) return null;
+    return numeric >= 2 && numeric <= 27 ? numeric + 7 : numeric;
+  };
+  const mapObjectKeys = (obj) => Object.entries(obj || {}).reduce((acc, [key, value]) => {
+    const mapped = remapId(key);
+    if(mapped) acc[mapped] = value;
+    return acc;
+  }, {});
+  const migrated = {
+    done: [...new Set(base.done.map(remapId).filter(Boolean))],
+    hw: mapObjectKeys(base.hw),
+    sectionsDone: mapObjectKeys(base.sectionsDone),
+  };
+  saveProgress(migrated);
+  localStorage.setItem(IPA34_PROGRESS_MIGRATED_KEY, "true");
+  return migrated;
 }
 
 async function hydrateRemoteProgress(){
@@ -365,7 +414,7 @@ function renderHome(){
           ${renderLessonStatusBadges(l)}
         </div>
         <div class="lcard-foot">
-          <span>${l.vocabulary?.length||0} từ · ${l.minitest?.length||0} câu test</span>
+          <span>${renderLessonCardCount(l)}</span>
           <span class="lcard-arrow">→</span>
         </div>
       </button>
@@ -374,6 +423,14 @@ function renderHome(){
 }
 
 function renderLessonStatusBadges(l){
+  if(l.module === "ipa-bootcamp"){
+    return `
+      <span class="lcard-badge lcard-badge-content">IPA</span>
+      <span class="lcard-badge">NEW</span>
+      <span class="lcard-badge">VISUAL</span>
+      <span class="lcard-badge">PRACTICE</span>
+    `;
+  }
   const status = l.metadata?.status || l.status || {};
   const content = status.content || "partial";
   const code = status.code || "legacy";
@@ -383,6 +440,15 @@ function renderLessonStatusBadges(l){
     <span class="lcard-badge">${escAttr(code)}</span>
     <span class="lcard-badge">${escAttr(importStatus)}</span>
   `;
+}
+
+function renderLessonCardCount(l){
+  if(l.module === "ipa-bootcamp"){
+    const soundCount = l.ipa?.sounds?.length || 0;
+    const testCount = l.minitest?.length || 0;
+    return `${soundCount} âm IPA · ${testCount} câu test`;
+  }
+  return `${l.vocabulary?.length || 0} từ · ${l.minitest?.length || 0} câu test`;
 }
 
 function getNextLessonId(){
@@ -460,7 +526,7 @@ async function openLesson(id, updateUrl = true){
   }
   const lesson = LESSONS.find(l => l.id===id);
   if(!lesson){
-    toast("Buổi học này chưa có trong lộ trình Tuwi 27 buổi.", "warning");
+    toast(`Buổi học này chưa có trong lộ trình ${TOTAL_LESSONS} buổi.`, "warning");
     goHome();
     return;
   }
@@ -535,6 +601,28 @@ const SECTION_LABELS = {
 SECTION_LABELS.dialogue_video = "Video hội thoại";
 SECTION_LABELS.dialogue_video_quiz = "Nghe chọn thoại";
 SECTION_LABELS.dialogue_video_order = "Điền hội thoại";
+Object.assign(SECTION_LABELS, {
+  ipa_intro: "Giới thiệu",
+  ipa_why: "Vì sao cần học IPA?",
+  ipa_word_process: "Quy trình đọc một từ",
+  ipa_sound_table: "Bảng âm hôm nay",
+  ipa_mouth_visual: "Khẩu hình trực quan",
+  ipa_video_mouth: "Video khẩu hình",
+  ipa_mouth_opening: "Cách mở miệng",
+  ipa_audio_samples: "Nghe âm mẫu",
+  ipa_read_symbols: "Nhìn IPA đọc âm",
+  ipa_compare_sounds: "So sánh âm dễ nhầm",
+  ipa_spell_words: "Đánh vần từ mẫu",
+  ipa_image_sentence: "Hình ảnh & câu minh họa",
+  ipa_blend_words: "Ghép âm thành từ",
+  ipa_listen_choose_sound: "Nghe chọn âm",
+  ipa_self_reading: "Tự đọc - giáo viên sửa",
+  ipa_sentence_practice: "Luyện đọc câu ngắn",
+  ipa_ai_speaking: "Luyện nói AI",
+  ipa_mini_test: "Mini test",
+  ipa_mindmap: "Mindmap",
+  ipa_homework: "Bài tập về nhà",
+});
 
 function renderSidebar(lesson){
   document.getElementById("sideUnit").textContent = lesson.unit==="Starter"?"STARTER":lesson.unit;
@@ -608,7 +696,9 @@ function renderSection(){
   const section = STATE.sections[STATE.sectionIdx];
 
   let html="";
-  switch(section){
+  if(lesson?.module === "ipa-bootcamp" && section.startsWith("ipa_")){
+    html = renderIpaSection(lesson, section);
+  }else switch(section){
     case "intro":       html = renderIntro(lesson); break;
     case "review":      html = renderReview(lesson); break;
     case "video":       html = renderVideo(lesson); break;
@@ -671,6 +761,275 @@ function renderMissingSection(section){
     <h2 class="stage-title">${escAttr(SECTION_LABELS[section] || section)}</h2>
     <div class="mg-block warm"><p>Cần bổ sung nội dung theo template Buổi 9</p></div>
   `;
+}
+
+function renderIpaSection(lesson, section){
+  const ipa = lesson.ipa || {};
+  const sounds = ipa.sounds || [];
+  const header = renderIpaHeader(lesson, section);
+  switch(section){
+    case "ipa_intro":
+      return `${header}
+        <div class="ipa-hero-panel">
+          <div>
+            <span class="ipa-kicker">IPA Bootcamp</span>
+            <h3>${escAttr(ipa.topic || lesson.mainTopic)}</h3>
+            <p>${escAttr(ipa.outcome || "")}</p>
+          </div>
+          <div class="ipa-symbol-stack">${sounds.map(sound=>`<span>${escAttr(sound.symbol)}</span>`).join("")}</div>
+        </div>
+        ${renderIpaProcessBlock()}
+      `;
+    case "ipa_why":
+      return `${header}
+        <div class="ipa-two-col">
+          <div class="ipa-info-card"><h3>Nhìn từ mới không còn đoán mò</h3><p>IPA là bản đồ phát âm: nhìn ký hiệu, nghe mẫu, đặt khẩu hình, tách âm rồi ghép lại thành từ.</p></div>
+          <div class="ipa-info-card"><h3>Học bằng mắt, tai và miệng</h3><p>Người mất gốc cần thấy môi, lưỡi, răng và luồng hơi để bắt chước đúng trước khi nói nhanh.</p></div>
+        </div>`;
+    case "ipa_word_process":
+      return `${header}${renderIpaProcessBlock()}`;
+    case "ipa_sound_table":
+    case "ipa_audio_samples":
+    case "ipa_read_symbols":
+      return `${header}${renderIpaSoundCards(sounds)}`;
+    case "ipa_mouth_visual":
+    case "ipa_mouth_opening":
+      return `${header}${renderIpaMouthVisual(sounds)}`;
+    case "ipa_video_mouth":
+      return `${header}${renderIpaVideoSlots(ipa.videoSlots || [])}`;
+    case "ipa_compare_sounds":
+      return `${header}
+        <div class="ipa-compare-grid">
+          ${[
+            ["/ɪ/", "/iː/", "sit", "seat", "ngắn, thả lỏng", "dài, kéo môi rõ hơn"],
+            ["/e/", "/æ/", "pen", "pan/cat", "mở vừa", "mở rộng hơn"],
+            ["/ʊ/", "/uː/", "book", "blue", "ngắn, môi tròn nhẹ", "dài, môi tròn rõ"],
+          ].map(([a,b,aw,bw,an,bn])=>`
+            <div class="ipa-compare-card">
+              <div><b>${a}</b><span>${escAttr(aw)} - ${escAttr(an)}</span></div>
+              <div><b>${b}</b><span>${escAttr(bw)} - ${escAttr(bn)}</span></div>
+            </div>
+          `).join("")}
+        </div>`;
+    case "ipa_spell_words":
+    case "ipa_blend_words":
+      return `${header}${renderIpaBlendGame(ipa.blendGame || [])}`;
+    case "ipa_image_sentence":
+      return `${header}${renderIpaImageSentence(ipa.imageSlots || [])}`;
+    case "ipa_listen_choose_sound":
+      return `${header}${renderIpaListenChooseGame(ipa.listenChooseGame || [])}`;
+    case "ipa_self_reading":
+      return `${header}${renderIpaSelfReading(sounds)}`;
+    case "ipa_sentence_practice":
+      return `${header}${renderIpaSentencePractice(sounds)}`;
+    case "ipa_ai_speaking":
+      return `${header}${renderIpaSpeakingPlaceholder(sounds)}`;
+    case "ipa_mini_test":
+      return renderMinitest(lesson);
+    case "ipa_mindmap":
+      return `${header}${renderIpaMindmap(lesson)}`;
+    case "ipa_homework":
+      return renderHomework(lesson);
+    default:
+      return renderIpaGenericPractice(lesson, section);
+  }
+}
+
+function renderIpaHeader(lesson, section){
+  return `
+    <div class="stage-h">
+      <span class="stage-tag">${escAttr(lesson.unit)}</span>
+      <span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span>
+    </div>
+    <h2 class="stage-title">${escAttr(SECTION_LABELS[section] || lesson.title)}</h2>
+    <p class="stage-sub">${escAttr(lesson.title)} · ${escAttr(lesson.subtitle || "")}</p>
+  `;
+}
+
+function renderIpaProcessBlock(){
+  const steps = ["Word", "IPA", "Audio", "Mouth Shape", "Split Sounds", "Blend", "Speak", "Feedback"];
+  return `
+    <div class="ipa-process">
+      <div class="ipa-process-flow">${steps.map((step, i)=>`
+        <div class="ipa-process-step"><span>${i + 1}</span><b>${escAttr(step)}</b></div>
+      `).join("")}</div>
+      <div class="ipa-example-line">
+        <span>cat</span><span>/kæt/</span><span>/k/ + /æ/ + /t/</span><strong>cat</strong>
+      </div>
+    </div>
+  `;
+}
+
+function renderIpaSoundCards(sounds){
+  return `
+    <div class="ipa-sound-grid">
+      ${sounds.map((sound)=>`
+        <article class="ipa-sound-card">
+          <div class="ipa-symbol">${escAttr(sound.symbol)}</div>
+          <div class="ipa-sound-name">${escAttr(sound.name || "âm IPA")}</div>
+          <h3>${escAttr(sound.word || sound.symbol)}</h3>
+          <p>${escAttr(sound.ipa || sound.symbol)} · ${escAttr(sound.sentence || "")}</p>
+          <div class="ipa-card-actions">
+            <button onclick="speakById('${regTxt(sound.word || sound.symbol)}')">Nghe mẫu</button>
+            <button onclick="jumpTo(${Math.min(4, STATE.sections.length - 1)})">Xem khẩu hình</button>
+          </div>
+          <div class="ipa-audio-slot">Audio placeholder · ${escAttr(sound.symbol)}</div>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderIpaMouthVisual(sounds){
+  return `
+    <div class="ipa-mouth-layout">
+      <div class="ipa-mouth-figure" aria-hidden="true">
+        <div class="mouth-head"><div class="mouth-lips"></div><div class="mouth-teeth"></div><div class="mouth-tongue"></div><div class="mouth-air"></div></div>
+        <span>Mặt cắt miệng</span>
+      </div>
+      <div class="ipa-mouth-list">
+        ${sounds.map(sound=>`
+          <div class="ipa-mouth-card">
+            <h3>${escAttr(sound.symbol)} <span>${escAttr(sound.word || "")}</span></h3>
+            <dl>
+              <dt>Môi</dt><dd>${escAttr(sound.mouth?.lips || "")}</dd>
+              <dt>Lưỡi</dt><dd>${escAttr(sound.mouth?.tongue || "")}</dd>
+              <dt>Răng</dt><dd>${escAttr(sound.mouth?.teeth || "")}</dd>
+              <dt>Hơi</dt><dd>${escAttr(sound.mouth?.air || "")}</dd>
+              <dt>Rung</dt><dd>${escAttr(sound.mouth?.voice || "")}</dd>
+              <dt>Lỗi hay sai</dt><dd>${escAttr(sound.mouth?.mistake || "")}</dd>
+            </dl>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderIpaVideoSlots(slots){
+  return `
+    <div class="ipa-video-grid">
+      ${slots.map(slot=>`
+        <div class="ipa-video-slot">
+          <div class="ipa-video-frame"><span>Video khẩu hình đang được cập nhật</span></div>
+          <code>${escAttr(slot)}</code>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderIpaImageSentence(items){
+  return `
+    <div class="ipa-image-grid">
+      ${items.map(item=>`
+        <div class="ipa-image-card">
+          <div class="ipa-illustration">${escAttr(item.word?.[0]?.toUpperCase() || "I")}</div>
+          <h3>${escAttr(item.word)} <span>${escAttr(item.ipa)}</span></h3>
+          <p>${escAttr(item.sentence)}</p>
+          <small>${escAttr(item.slot)} · illustration placeholder</small>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderIpaBlendGame(rounds){
+  const answers = rounds.map((round) => round.answer);
+  return `
+    <div class="ipa-game">
+      <h3>Ghép âm thành từ</h3>
+      ${rounds.map((round)=>`
+        <div class="ipa-game-row">
+          <div class="ipa-chip-row">${round.sounds.map(sound=>`<span>${escAttr(sound)}</span>`).join("")}</div>
+          <div class="ipa-option-row">
+            ${answers.map(answer=>`
+              <button data-answer="${escAttr(round.answer)}" data-choice="${escAttr(answer)}" onclick="_checkIpaChoice(this)">${escAttr(answer)}</button>
+            `).join("")}
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderIpaListenChooseGame(rounds){
+  return `
+    <div class="ipa-game">
+      <h3>Nghe chọn âm</h3>
+      ${rounds.map((round)=>`
+        <div class="ipa-game-row">
+          <button class="ipa-listen-button" onclick="speakById('${regTxt(round.audioText)}')">Nghe: ${escAttr(round.audioText)}</button>
+          <div class="ipa-option-row">
+            ${round.options.map(option=>`
+              <button data-answer="${escAttr(round.answer)}" data-choice="${escAttr(option)}" onclick="_checkIpaChoice(this)">${escAttr(option)}</button>
+            `).join("")}
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderIpaSelfReading(sounds){
+  return `
+    <div class="ipa-reading-list">
+      ${sounds.map((sound, i)=>`
+        <div class="ipa-reading-card">
+          <b>${escAttr(sound.symbol)}</b>
+          <span>${escAttr(sound.word || "")} · ${escAttr(sound.sentence || "")}</span>
+          <button id="mic-${i}" onclick="recordById(${i}, '${regTxt(sound.word || sound.symbol)}')">Tự đọc</button>
+          <div id="speakRes-${i}" class="dlg-result" style="display:none"></div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderIpaSentencePractice(sounds){
+  return `
+    <div class="grammar-examples">
+      ${sounds.map(sound=>`
+        <div class="grammar-ex">
+          <div>
+            <div class="gex-en">${escAttr(sound.sentence || `Repeat ${sound.symbol}.`)}</div>
+            <div class="gex-vi">${escAttr(sound.ipa || sound.symbol)} · focus ${escAttr(sound.symbol)}</div>
+          </div>
+          <button class="gex-speak" onclick="speakById('${regTxt(sound.sentence || sound.word || sound.symbol)}')">🔊</button>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderIpaSpeakingPlaceholder(sounds){
+  return `
+    <div class="ipa-ai-panel">
+      <h3>Luyện nói AI</h3>
+      <p>Component ghi âm dùng trình duyệt để nghe học sinh đọc. Khi tích hợp AI chấm phát âm, dữ liệu mục tiêu đã sẵn sàng theo từng âm.</p>
+      ${renderIpaSelfReading(sounds)}
+    </div>
+  `;
+}
+
+function renderIpaMindmap(lesson){
+  const ipa = lesson.ipa || {};
+  return `
+    <div class="ipa-mindmap">
+      <div class="ipa-mind-center">${escAttr(ipa.topic || lesson.title)}</div>
+      ${["Word", "IPA", "Audio", "Mouth", "Blend", "Feedback"].map(item=>`<span>${escAttr(item)}</span>`).join("")}
+    </div>
+  `;
+}
+
+function renderIpaGenericPractice(lesson, section){
+  return `${renderIpaHeader(lesson, section)}
+    <div class="ipa-info-card">
+      <h3>${escAttr(lesson.ipa?.topic || lesson.title)}</h3>
+      <p><b>Học gì:</b> ${escAttr(lesson.ipa?.learningItems || "")}</p>
+      <p><b>Kết quả cần đạt:</b> ${escAttr(lesson.ipa?.outcome || "")}</p>
+      ${renderIpaSoundCards(lesson.ipa?.sounds || [])}
+    </div>`;
 }
 
 function renderDots(){
@@ -4835,6 +5194,13 @@ function playWrong(){
   } catch(e){}
 }
 
+function _checkIpaChoice(button){
+  const ok = button.dataset.choice === button.dataset.answer;
+  button.classList.remove("ipa-choice-ok", "ipa-choice-bad");
+  button.classList.add(ok ? "ipa-choice-ok" : "ipa-choice-bad");
+  toast(ok ? "Đúng rồi!" : `Chưa đúng. Đáp án là ${button.dataset.answer}.`, ok ? "success" : "warning");
+}
+
 // ============== Speech Recognition ==============
 let recognition = null;
 let recordingFor = null;
@@ -4946,6 +5312,7 @@ Object.assign(window, {
   answerSprint, toggleHw,
   speak, speakById, recordById, playFullDialogue, playCorrect, playWrong,
   getBestEnglishVoice, speakEnglish, normalizeSpeechText, stopCurrentSpeech,
+  _checkIpaChoice,
   // Game interactive functions
   initQuizBomb, _pickQB,
   initThisOrThat, _pickTOT, _checkTOTBonus,

@@ -1,4 +1,6 @@
-export const TUWI_27_CURRICULUM_MAP = [
+import { IPA_BOOTCAMP_CURRICULUM_MAP } from "./ipaBootcampLessons.js";
+
+export const OLD_TUWI_CURRICULUM_MAP = [
   {
     lessonId: 1,
     topicEnglish: "Alphabet and Nouns",
@@ -243,3 +245,17 @@ export const TUWI_27_CURRICULUM_MAP = [
     notes: "Tái sử dụng buổi địa lý và hiện tại hoàn thành.",
   },
 ];
+
+export const TUWI_34_CURRICULUM_MAP = [
+  ...IPA_BOOTCAMP_CURRICULUM_MAP,
+  ...OLD_TUWI_CURRICULUM_MAP
+    .filter((entry) => entry.lessonId >= 2)
+    .map((entry) => ({
+      ...entry,
+      originalLessonId: entry.lessonId,
+      lessonId: entry.lessonId + 7,
+      notes: `Shifted from old lesson ${entry.lessonId}. ${entry.notes || ""}`.trim(),
+    })),
+];
+
+export const COURSE_TOTAL_LESSONS = TUWI_34_CURRICULUM_MAP.length;

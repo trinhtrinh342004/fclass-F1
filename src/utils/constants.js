@@ -1,1 +1,1 @@
-export const TUWI_TOTAL_LESSONS = 27;
+export const TUWI_TOTAL_LESSONS = 34;

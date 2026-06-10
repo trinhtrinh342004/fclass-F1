@@ -13,7 +13,7 @@ export const lesson01 = {
     contentImported: true,
     status: {
       content: "partial",
-      code: "tuwi27",
+      code: "tuwi34",
       import: "manual"
     }
   },

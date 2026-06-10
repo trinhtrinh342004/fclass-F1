@@ -5,6 +5,8 @@ import { getPrimaryApprovedClassId } from "../student/studentRepository.js";
 
 const STORAGE_KEY = "gateway_a1_progress_v2";
 const MIGRATED_KEY = "gateway_a1_progress_v2_migrated";
+const IPA34_MIGRATED_KEY = "gateway_a1_progress_v2_ipa34_migrated";
+const IPA34_LEGACY_LESSON1_ARCHIVE_KEY = "gateway_a1_progress_v2_legacy_lesson1_archive";
 
 export async function getMyProgress(){
   const { user } = await getCurrentUser();
@@ -142,8 +144,9 @@ export async function migrateLocalProgressToSupabase(){
     return { migrated: false, reason: "empty" };
   }
 
-  for(const lessonId of new Set([...done, ...Object.keys(sectionsDone).map(Number), ...Object.keys(homework).map(Number)])){
-    const completed = done.includes(lessonId);
+  const remapped = remapLegacyProgressNumbering({ done, sectionsDone, hw: homework });
+  for(const lessonId of new Set([...remapped.done, ...Object.keys(remapped.sectionsDone).map(Number), ...Object.keys(remapped.hw).map(Number)])){
+    const completed = remapped.done.includes(lessonId);
     await upsertMyLessonProgress({
       lessonId,
       classId: approvedClass.classId,
@@ -151,8 +154,8 @@ export async function migrateLocalProgressToSupabase(){
       progressPercent: completed ? 100 : 50,
       data: {
         migratedFromLocalStorage: true,
-        sectionsDone: sectionsDone[lessonId] || [],
-        homework: homework[lessonId] || [],
+        sectionsDone: remapped.sectionsDone[lessonId] || [],
+        homework: remapped.hw[lessonId] || [],
       },
     });
   }
@@ -175,6 +178,49 @@ export function remoteProgressToLocalShape(rows = []){
   }
 
   return { done, sectionsDone, hw };
+}
+
+function remapLegacyProgressNumbering(progress){
+  if(localStorage.getItem(IPA34_MIGRATED_KEY) === "true") return progress;
+  const allIds = [
+    ...progress.done,
+    ...Object.keys(progress.sectionsDone || {}).map(Number),
+    ...Object.keys(progress.hw || {}).map(Number),
+  ].filter(Number.isFinite);
+  if(allIds.some((id) => id >= 28)){
+    localStorage.setItem(IPA34_MIGRATED_KEY, "true");
+    return progress;
+  }
+
+  const legacyLesson1 = {
+    done: progress.done.includes(1),
+    sectionsDone: progress.sectionsDone?.[1] || [],
+    hw: progress.hw?.[1] || [],
+  };
+  if(legacyLesson1.done || legacyLesson1.sectionsDone.length || legacyLesson1.hw.length){
+    localStorage.setItem(IPA34_LEGACY_LESSON1_ARCHIVE_KEY, JSON.stringify(legacyLesson1));
+  }
+
+  const remapId = (id) => {
+    const numeric = Number(id);
+    if(!Number.isFinite(numeric) || numeric === 1) return null;
+    return numeric >= 2 && numeric <= 27 ? numeric + 7 : numeric;
+  };
+  const mapObjectKeys = (obj) => Object.entries(obj || {}).reduce((acc, [key, value]) => {
+    const mapped = remapId(key);
+    if(mapped) acc[mapped] = value;
+    return acc;
+  }, {});
+  const migrated = {
+    done: [...new Set(progress.done.map(remapId).filter(Boolean))],
+    sectionsDone: mapObjectKeys(progress.sectionsDone),
+    hw: mapObjectKeys(progress.hw),
+  };
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+    localStorage.setItem(IPA34_MIGRATED_KEY, "true");
+  }catch{}
+  return migrated;
 }
 
 async function logStudentActivity({ lessonNumber, action, metadata = {} }){
