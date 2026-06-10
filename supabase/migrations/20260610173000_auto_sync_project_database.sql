@@ -429,7 +429,7 @@ as $$
   select public.is_approved_student(auth.uid());
 $$;
 
-create or replace function public.is_class_member(p_user_id uuid, target_class_id uuid)
+create or replace function public.is_class_member(user_id uuid, target_class_id uuid)
 returns boolean
 language sql
 security definer
@@ -437,13 +437,13 @@ set search_path = public
 as $$
   select exists (
     select 1 from public.class_memberships
-    where student_id = p_user_id
-      and class_id = target_class_id
+    where student_id = $1
+      and class_id = $2
       and status = 'approved'
   ) or exists (
     select 1 from public.class_members cm
-    where cm.user_id = p_user_id
-      and cm.class_id = target_class_id
+    where cm.user_id = $1
+      and cm.class_id = $2
       and cm.status = 'approved'
   );
 $$;

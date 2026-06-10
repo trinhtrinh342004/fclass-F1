@@ -243,12 +243,15 @@ Created:
 
 Automatic migration status:
 
-- Not run automatically. The current CLI account does not have privileges for the project ref in `.env`, and no DB URL/password is available.
+- Initially blocked before `.env` was updated because the CLI account did not have access to the old project ref.
+- After `.env` was updated to project `iaowbkoulntepmtsuvye`, `supabase link` succeeded and `supabase db push --include-all --yes` applied all local migrations through `20260610173000_auto_sync_project_database.sql`.
+- The first push stopped on a Postgres function parameter-name conflict for `public.is_class_member`; the migration was corrected to keep the existing function signature and use positional arguments, then `supabase db push --include-all --yes` completed successfully.
+- `supabase db push --dry-run --include-all` now reports the remote database is up to date.
+- A schema dump backup was attempted before migration, but Supabase CLI required Docker/pg_dump locally and Docker was unavailable. No backup file was produced. The migration itself does not drop tables, truncate data, or delete rows.
+- `public.lessons` was seeded with 27 rows from local `TUWI_27_LESSONS` using a generated temporary SQL file executed by `supabase db query --linked`; the temp file was removed after seeding.
 
 Run order in Supabase SQL Editor:
 
-1. Run `supabase/migrations/20260610173000_auto_sync_project_database.sql`.
-2. Run `npm run seed:lessons` locally if the `lessons` table remains empty after schema sync and you want to seed the 27 lesson rows.
-3. Register/create the first admin user in Supabase Auth.
-4. Replace `YOUR_ADMIN_EMAIL_HERE` in `supabase/seed_first_admin.sql`, then run it.
-5. Run `npm run check:supabase` again.
+1. Register/create the first admin user in Supabase Auth.
+2. Replace `YOUR_ADMIN_EMAIL_HERE` in `supabase/seed_first_admin.sql`, then run it.
+3. Run `npm run check:supabase` again. With only anon keys, the script may warn that RLS returns 0 lesson rows even though the linked DB count is 27.
