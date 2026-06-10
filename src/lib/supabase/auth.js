@@ -40,6 +40,51 @@ export async function exchangeCodeForSession(code){
   return supabase.auth.exchangeCodeForSession(code);
 }
 
+export async function establishSessionFromAuthUrl(url = window.location.href){
+  if(!hasSupabaseConfig) return { session: null, type: null, error: new Error(getSupabaseConfigError()) };
+
+  const authUrl = new URL(url, window.location.origin);
+  const query = authUrl.searchParams;
+  const hash = new URLSearchParams(authUrl.hash.replace(/^#/, ""));
+  const getParam = (name) => query.get(name) || hash.get(name);
+  const type = getParam("type");
+  const errorCode = getParam("error_code") || getParam("error");
+  const errorDescription = getParam("error_description");
+
+  if(errorCode || errorDescription){
+    const error = new Error(errorDescription || "Liên kết xác thực không hợp lệ.");
+    error.code = errorCode || "auth_link_error";
+    return { session: null, type, error };
+  }
+
+  const code = getParam("code");
+  if(code){
+    const { data, error } = await exchangeCodeForSession(code);
+    if(error){
+      const current = await getCurrentSession();
+      if(current.session) return { session: current.session, type, error: null };
+    }
+    return { session: data?.session || null, type, error };
+  }
+
+  const accessToken = getParam("access_token");
+  const refreshToken = getParam("refresh_token");
+  if(accessToken && refreshToken){
+    const { data, error } = await supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+    if(error){
+      const current = await getCurrentSession();
+      if(current.session) return { session: current.session, type, error: null };
+    }
+    return { session: data?.session || null, type, error };
+  }
+
+  const { session, error } = await getCurrentSession();
+  return { session, type, error };
+}
+
 export async function signInStudent(email, password){
   if(!hasSupabaseConfig) return { data: null, error: new Error(getSupabaseConfigError()) };
   return supabase.auth.signInWithPassword({ email, password });
@@ -72,7 +117,7 @@ export async function signOut(){
 
 export async function resetPasswordForEmail(email){
   if(!hasSupabaseConfig) return { data: null, error: new Error(getSupabaseConfigError()) };
-  const redirectTo = `${window.location.origin}/reset-password`;
+  const redirectTo = new URL("/auth/callback?type=recovery", window.location.origin).toString();
   return supabase.auth.resetPasswordForEmail(email, { redirectTo });
 }
 

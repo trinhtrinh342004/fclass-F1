@@ -1,6 +1,6 @@
 import { getCurrentProfile, getCurrentSession, getCurrentUser, profileStatusLabel, requireAdmin, requireApprovedStudent } from "./authGuard.js";
 import { getSupabaseConfigError, hasSupabaseConfig } from "../../lib/supabase/client.js";
-import { exchangeCodeForSession, resetPasswordForEmail, signInStudent, signOut, signUpStudent, updatePassword } from "./authService.js";
+import { establishSessionFromAuthUrl, resetPasswordForEmail, signInStudent, signOut, signUpStudent, updatePassword } from "./authService.js";
 import { getLessons } from "../lessons/lessonRepository.js";
 import { migrateLocalProgressToSupabase, remoteProgressToLocalShape } from "../progress/progressRepository.js";
 import {
@@ -261,9 +261,12 @@ function renderStudentRegister(view){
 }
 
 function renderStudentLogin(view){
+  const resetSucceeded = new URLSearchParams(window.location.search).get("reset") === "success";
+  if(resetSucceeded) window.history.replaceState({}, "", "/login");
   view.innerHTML = renderShell("Đăng nhập học viên", `
     ${renderConfigWarning()}
     <form class="auth-card auth-form" id="studentLoginForm">
+      ${resetSucceeded ? `<div class="auth-alert success">Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.</div>` : ""}
       <label>Email<input name="email" type="email" autocomplete="email" required></label>
       <label>Mật khẩu<input name="password" type="password" autocomplete="current-password" required></label>
       <button class="btn-primary auth-submit" type="submit">Đăng nhập</button>
@@ -348,14 +351,19 @@ function renderForgotPassword(view){
     submit.disabled = true;
     submit.textContent = "Đang gửi...";
     setMessage(message, "Đang gửi email...", "");
-    const { error } = await resetPasswordForEmail(email);
-    submit.disabled = false;
-    submit.textContent = "Gửi link đặt lại mật khẩu";
-    if(error){
-      setMessage(message, friendlyAuthError(error.message), "error");
-      return;
+    try{
+      const { error } = await resetPasswordForEmail(email);
+      if(error){
+        setMessage(message, friendlyAuthError(error.message), "error");
+        return;
+      }
+      setMessage(message, "Nếu email tồn tại, hệ thống đã gửi link đặt lại mật khẩu. Vui lòng kiểm tra hộp thư.", "success");
+    }catch(error){
+      setMessage(message, friendlyAuthError(error?.message || error), "error");
+    }finally{
+      submit.disabled = false;
+      submit.textContent = "Gửi link đặt lại mật khẩu";
     }
-    setMessage(message, "Nếu email tồn tại, Supabase sẽ gửi link đặt lại mật khẩu.", "success");
   });
 }
 
@@ -366,42 +374,52 @@ async function renderAuthCallback(view){
     return;
   }
 
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get("code");
-  if(code){
-    const { error } = await exchangeCodeForSession(code);
-    if(error){
-      view.innerHTML = renderShell("Không thể xác thực", renderStatusCard(friendlyAuthError(error.message), { showLogin: true }));
-      attachLogoutHandler();
+  const recoveryRequested = isRecoveryAuthUrl();
+  const { session, type, error } = await establishSessionFromAuthUrl();
+  if(error){
+    if(recoveryRequested || isExpiredRecoveryError(error)){
+      renderRecoveryLinkError(view);
       return;
     }
+    view.innerHTML = renderShell("Không thể xác thực", renderStatusCard(friendlyAuthError(error.message), { showLogin: true }));
+    attachLogoutHandler();
+    return;
   }
 
+  if(recoveryRequested || type === "recovery"){
+    if(!session){
+      renderRecoveryLinkError(view);
+      return;
+    }
+    window.history.replaceState({}, "", "/reset-password");
+    await renderResetPassword(view, { sessionReady: true });
+    return;
+  }
   await redirectAfterAuthCallback(view);
 }
 
-async function renderResetPassword(view){
-  if(hasSupabaseConfig){
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-    if(code){
-      view.innerHTML = renderShell("Đang xác thực", `<div class="auth-loading">Đang xử lý link đặt lại mật khẩu...</div>`);
-      const { error } = await exchangeCodeForSession(code);
-      if(error){
-        view.innerHTML = renderShell("Không thể đặt lại mật khẩu", renderStatusCard(friendlyAuthError(error.message)));
-        attachLogoutHandler();
-        return;
-      }
-      window.history.replaceState({}, "", "/reset-password");
+async function renderResetPassword(view, { sessionReady = false } = {}){
+  if(!hasSupabaseConfig){
+    view.innerHTML = renderShell("Lỗi cấu hình", `<div class="auth-alert error">${escapeHtml(getSupabaseConfigError())}</div>`);
+    return;
+  }
+
+  if(!sessionReady){
+    view.innerHTML = renderShell("Đang xác thực", `<div class="auth-loading">Đang xử lý link đặt lại mật khẩu...</div>`);
+    const { session, error } = await establishSessionFromAuthUrl();
+    if(error || !session){
+      renderRecoveryLinkError(view);
+      return;
     }
+    window.history.replaceState({}, "", "/reset-password");
   }
 
   view.innerHTML = renderShell("Đặt lại mật khẩu", `
     ${renderConfigWarning()}
     <form class="auth-card auth-form" id="resetPasswordForm">
       <p class="auth-form-note">Tạo mật khẩu mới để tiếp tục học ${COURSE_TOTAL_LESSONS} buổi TuWi A1.</p>
-      <label>Mật khẩu mới<input name="password" type="password" autocomplete="new-password" required minlength="6"></label>
-      <label>Xác nhận mật khẩu<input name="confirmPassword" type="password" autocomplete="new-password" required minlength="6"></label>
+      <label>Mật khẩu mới<input name="password" type="password" autocomplete="new-password" required minlength="8"></label>
+      <label>Xác nhận mật khẩu<input name="confirmPassword" type="password" autocomplete="new-password" required minlength="8"></label>
       <button class="btn-primary auth-submit" type="submit">Cập nhật mật khẩu</button>
       <div class="auth-message" id="resetPasswordMessage" role="status"></div>
     </form>
@@ -413,6 +431,10 @@ async function renderResetPassword(view){
     const form = new FormData(event.currentTarget);
     const password = String(form.get("password") || "");
     const confirmPassword = String(form.get("confirmPassword") || "");
+    if(password.length < 8){
+      setMessage(message, "Mật khẩu mới phải có ít nhất 8 ký tự.", "error");
+      return;
+    }
     if(password !== confirmPassword){
       setMessage(message, "Mật khẩu xác nhận chưa khớp.", "error");
       return;
@@ -421,27 +443,51 @@ async function renderResetPassword(view){
     submit.disabled = true;
     submit.textContent = "Đang cập nhật...";
     setMessage(message, "Đang cập nhật mật khẩu...", "");
-    const { session, error: sessionError } = await getCurrentSession();
-    if(sessionError || !session){
+    try{
+      const { session, error: sessionError } = await getCurrentSession();
+      if(sessionError || !session){
+        renderRecoveryLinkError(view);
+        return;
+      }
+      const { error } = await updatePassword(password);
+      if(error){
+        setMessage(message, friendlyAuthError(error.message), "error");
+        return;
+      }
+      await signOut();
+      window.history.replaceState({}, "", "/login?reset=success");
+      renderStudentLogin(view);
+      await window.refreshAuthNavbar?.();
+    }catch(error){
+      setMessage(message, friendlyAuthError(error?.message || error), "error");
+    }finally{
       submit.disabled = false;
       submit.textContent = "Cập nhật mật khẩu";
-      setMessage(message, "Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng gửi lại email quên mật khẩu.", "error");
-      return;
     }
-    const { error } = await updatePassword(password);
-    submit.disabled = false;
-    submit.textContent = "Cập nhật mật khẩu";
-    if(error){
-      setMessage(message, friendlyAuthError(error.message), "error");
-      return;
-    }
-    setMessage(message, "Đã cập nhật mật khẩu. Bạn có thể đăng nhập lại.", "success");
-    setTimeout(async () => {
-      await signOut();
-      window.history.pushState({}, "", "/login");
-      await renderAuthRoute();
-    }, 900);
   });
+}
+
+function isRecoveryAuthUrl(){
+  const query = new URLSearchParams(window.location.search);
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  return query.get("type") === "recovery" || hash.get("type") === "recovery";
+}
+
+function isExpiredRecoveryError(error){
+  return /otp_expired|expired|invalid/i.test(`${error?.code || ""} ${error?.message || ""}`);
+}
+
+function renderRecoveryLinkError(view){
+  view.innerHTML = renderShell("Link đặt lại mật khẩu không hợp lệ", `
+    <section class="auth-card recovery-error-card">
+      <div class="recovery-error-mark" aria-hidden="true">!</div>
+      <p>Link đặt lại mật khẩu đã hết hạn hoặc không hợp lệ. Vui lòng gửi lại yêu cầu đặt lại mật khẩu.</p>
+      <div class="student-actions">
+        <a class="btn-primary" href="/forgot-password">Gửi lại link đặt mật khẩu</a>
+        <a class="btn-ghost" href="/login">Quay lại đăng nhập</a>
+      </div>
+    </section>
+  `, "Liên kết bảo mật chỉ có hiệu lực trong thời gian ngắn.");
 }
 
 async function redirectAfterAuthCallback(view){
@@ -1421,11 +1467,11 @@ function setMessage(element, text, kind){
 function friendlyAuthError(message){
   const msg = String(message || "");
   if(/already registered|already exists|email_exists/i.test(msg)) return "Email này đã được đăng ký sử dụng.";
-  if(/password/i.test(msg)) return "Mật khẩu quá yếu (yêu cầu tối thiểu 6 ký tự).";
-  if(/email confirmation|confirm email|token|invalid or has expired/i.test(msg)) return "Đường liên kết xác nhận đã hết hạn hoặc không hợp lệ. Vui lòng đăng ký/đăng nhập lại để nhận link mới.";
+  if(/password/i.test(msg)) return "Mật khẩu quá yếu (yêu cầu tối thiểu 8 ký tự).";
+  if(/email confirmation|confirm email|token|otp_expired|invalid or has expired/i.test(msg)) return "Đường liên kết đã hết hạn hoặc không hợp lệ. Vui lòng yêu cầu gửi lại liên kết mới.";
   if(/network|fetch|connect/i.test(msg)) return "Không kết nối được với Supabase. Vui lòng kiểm tra kết nối mạng.";
   if(/violates row level security/i.test(msg)) return "Không có quyền lưu thông tin tài khoản. Vui lòng liên hệ admin.";
-  return msg || "Không thể xử lý yêu cầu.";
+  return "Không thể xử lý yêu cầu. Vui lòng thử lại.";
 }
 
 function membershipStatusLabel(status){

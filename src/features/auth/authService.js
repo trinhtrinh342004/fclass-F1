@@ -1,4 +1,5 @@
 export {
+  establishSessionFromAuthUrl,
   getCurrentProfile,
   getCurrentSession,
   getCurrentUser,
