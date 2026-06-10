@@ -109,6 +109,7 @@ for (const lesson of LESSONS) {
 }
 
 const lesson01 = LESSONS.find((lesson) => lesson.id === 1);
+const lesson04 = LESSONS.find((lesson) => lesson.id === 4);
 const lesson01RequiredSections = [
   "review",
   "video",
@@ -164,6 +165,152 @@ if (!lesson01) {
   }
 }
 
+const lesson02 = LESSONS.find((lesson) => lesson.id === 2);
+const lesson02RequiredSections = [
+  "review",
+  "video",
+  "vocab",
+  "vocab_match",
+  "listen_pick",
+  "grammar",
+  "listen_quiz",
+  "translate",
+  "dialogue_video",
+  "dialogue_video_quiz",
+  "dialogue_video_order",
+  "speaking",
+  "minitest",
+  "mindmap",
+  "homework",
+  "homework_answers",
+  "common_mistakes",
+  "lesson_end",
+];
+
+if (!lesson02) {
+  console.error("ERROR: Lesson 2 is missing.");
+  failed = true;
+} else {
+  const lesson02Status = typeof lesson02.status === "object" ? lesson02.status.content : lesson02.status;
+  const fillBlankCount = (lesson02.dialogueVideo?.fillConversation?.[0]?.lines || [])
+    .reduce((count, line) => count + (String(line.text || "").match(/\[\[[^\]]+\]\]/g)?.length || 0), 0);
+  const lesson02Checks = [
+    [lesson02.slug === "singular-plural-nouns", "slug must remain singular-plural-nouns"],
+    [lesson02.title === "BUỔI 2: TOPIC 2 — SINGULAR & PLURAL NOUNS", "title is incorrect"],
+    [lesson02Status === "ready", "status must be ready"],
+    [lesson02.metadata?.contentImported === true, "metadata.contentImported must be true"],
+    [lesson02.metadata?.localContentAuthoritative === true, "local content must be authoritative"],
+    [lesson02.review?.reviewGames?.vocabulary?.length === 20, "review listening game must have 20 questions"],
+    [lesson02.review?.reviewGames?.quizBomb?.questions?.length === 20, "Quiz Bomb must have 20 questions"],
+    [Object.keys(lesson02.vocabGroups || {}).length === 4, "flashcards must have 4 tabs"],
+    [lesson02.matchingPairs?.length === 34, "matching game must contain all 34 singular/plural pairs"],
+    [lesson02.listenPick?.questions?.length === 20, "Listening Quiz must have 20 questions"],
+    [lesson02.grammar?.structures?.length === 5, "grammar must have 5 structures"],
+    [lesson02.listening?.questions?.length === 20, "Nghe trả lời must have 20 questions"],
+    [lesson02.translation?.sentences?.length === 24, "translation must have 24 questions"],
+    [lesson02.dialogueVideo?.transcript?.length === 12, "dialogue transcript must have 12 bilingual lines"],
+    [lesson02.dialogueVideo?.listenPickLine?.length === 6, "Nghe chọn thoại must have 6 questions"],
+    [fillBlankCount === 8, "fill conversation must have 8 blanks"],
+    [lesson02.speaking?.turns?.length === 5, "AI Speaking must have 5 prompts"],
+    [lesson02.minitest?.length === 12, "Minitest must have 12 questions"],
+    [lesson02.homeworkRich?.tasks?.length === 3, "Homework must have 3 tasks"],
+    [lesson02.homeworkAnswers?.rows?.length === 20, "Homework answers must have 20 rows"],
+    [lesson02.commonMistakes?.length === 12, "common mistakes must have 12 rows"],
+    [lesson02.video?.embedUrl === "DÁN_LINK_EMBED_VIDEO_Ở_ĐÂY", "intro video placeholder changed"],
+    [lesson02.video?.watchUrl === "DÁN_LINK_GỐC_Ở_ĐÂY", "intro video original placeholder changed"],
+    [lesson02.dialogueVideo?.embedUrl === "DÁN_LINK_EMBED_VIDEO_HỘI_THOẠI_Ở_ĐÂY", "dialogue video placeholder changed"],
+    [lesson02RequiredSections.every((section) => lesson02.sectionFlow?.includes(section)), "lesson is missing one or more required sections"],
+    [lesson02.sectionFlow?.at(-1) === "lesson_end", "lesson end must be the final section"],
+    [lesson02.__architectureWarnings?.length === 0, "lesson has architecture warnings"],
+  ];
+
+  for (const [ok, message] of lesson02Checks) {
+    if (!ok) {
+      console.error(`ERROR: Lesson 2 ${message}.`);
+      failed = true;
+    }
+  }
+}
+
+if (!lesson04) {
+  console.error("ERROR: Lesson 4 is missing.");
+  failed = true;
+} else {
+  const lesson04Status = typeof lesson04.status === "object" ? lesson04.status.content : lesson04.status;
+  const lesson04Checks = [
+    [lesson04Status === "ready", "status must be ready"],
+    [lesson04.title === "BUỔI 4: PERSONAL PRONOUNS — ĐẠI TỪ NHÂN XƯNG", "title is incorrect"],
+    [lesson04.review?.reviewGames?.vocabulary?.length === 20, "review listening game must have 20 questions"],
+    [lesson04.review?.reviewGames?.quizBomb?.questions?.length === 20, "review Quiz Bomb must have 20 questions"],
+    [Object.keys(lesson04.vocabGroups || {}).length === 3, "flashcards must have 3 tabs"],
+    [lesson04.vocabulary?.length === 24, "flashcards must contain 24 supplied cards"],
+    [lesson04.listenPick?.questions?.length === 20, "Listening Quiz must have 20 questions"],
+    [lesson04.grammar?.structures?.length === 4, "grammar must have 4 structures"],
+    [lesson04.listening?.questions?.length === 20, "Nghe trả lời must have 20 questions"],
+    [lesson04.translation?.sentences?.length === 20, "Luyện dịch must have 20 questions"],
+    [lesson04.dialogueVideo?.transcript?.length === 10, "dialogue transcript must have 10 bilingual lines"],
+    [lesson04.dialogueVideo?.listenPickLine?.length === 4, "Nghe chọn thoại must have 4 questions"],
+    [lesson04.dialogueVideo?.fillConversation?.[0]?.lines?.filter((line) => /\[\[[^\]]+\]\]/.test(line.text || "")).length === 5, "dialogue cloze must have 5 blanks"],
+    [lesson04.speaking?.turns?.length === 5, "AI speaking must have 5 prompts"],
+    [lesson04.minitest?.length === 10, "Minitest must have 10 questions"],
+    [lesson04.homeworkRich?.tasks?.length === 2, "Homework must have 2 tasks"],
+    [lesson04.video?.embedUrl === "https://www.youtube.com/embed/vhQt5hWAEuc", "intro video URL is incorrect"],
+    [lesson04.dialogueVideo?.embedUrl === "https://www.youtube.com/embed/zprayQY3cBk", "dialogue video URL is incorrect"],
+    [lesson04.__architectureWarnings?.length === 0, `architecture warnings: ${(lesson04.__architectureWarnings || []).join("; ")}`],
+    [lesson01RequiredSections.every((section) => lesson04.sectionFlow?.includes(section)), "lesson is missing one or more required sections"],
+    [!JSON.stringify(lesson04).includes("TODO:"), "lesson still contains TODO content"],
+  ];
+
+  for (const [ok, message] of lesson04Checks) {
+    if (!ok) {
+      console.error(`ERROR: Lesson 4 ${message}.`);
+      failed = true;
+    }
+  }
+}
+
+const lesson26 = LESSONS.find((lesson) => lesson.id === 26);
+if (!lesson26) {
+  console.error("ERROR: Lesson 26 is missing.");
+  failed = true;
+} else {
+  const lesson26Status = typeof lesson26.status === "object" ? lesson26.status.content : lesson26.status;
+  const fillBlankCount = (lesson26.dialogueVideo?.fillConversation?.[0]?.lines || [])
+    .reduce((count, line) => count + (String(line.text || "").match(/\[\[[^\]]+\]\]/g)?.length || 0), 0);
+  const lesson26Checks = [
+    [lesson26Status === "ready", "status must be ready"],
+    [lesson26.title === "BUỔI 26: TAG QUESTIONS — CÂU HỎI ĐUÔI", "title is incorrect"],
+    [lesson26.metadata?.localContentAuthoritative === true, "local content must be authoritative"],
+    [lesson26.review?.reviewGames?.vocabulary?.length === 20, "review listening game must have 20 questions"],
+    [lesson26.review?.reviewGames?.quizBomb?.questions?.length === 20, "review Quiz Bomb must have 20 questions"],
+    [Object.keys(lesson26.vocabGroups || {}).length === 2, "flashcards must have 2 tabs"],
+    [lesson26.vocabulary?.length === 30, "flashcards must contain 30 supplied cards"],
+    [lesson26.listenPick?.questions?.length === 20, "Listening Quiz must have 20 questions"],
+    [lesson26.grammar?.structures?.length === 4, "grammar must have 4 structures"],
+    [lesson26.grammar?.commonQA?.length === 6, "Common Q&A must have 6 pairs"],
+    [lesson26.listening?.questions?.length === 20, "Nghe trả lời must have 20 questions"],
+    [lesson26.translation?.sentences?.length === 20, "Luyện dịch must have 20 questions"],
+    [lesson26.dialogueVideo?.transcript?.length === 8, "dialogue transcript must have 8 bilingual lines"],
+    [lesson26.dialogueVideo?.listenPickLine?.length === 4, "Nghe chọn thoại must have 4 questions"],
+    [fillBlankCount === 6, "dialogue cloze must have 6 blanks"],
+    [lesson26.speaking?.turns?.length === 5, "AI Speaking must have 5 prompts"],
+    [lesson26.minitest?.length === 10, "Minitest must have 10 questions"],
+    [lesson26.homeworkRich?.tasks?.length === 2, "Homework must have 2 tasks"],
+    [lesson26.video?.embedUrl === "https://www.youtube.com/embed/YTbGMGcyLPo", "intro video URL is incorrect"],
+    [lesson26.dialogueVideo?.embedUrl === "https://www.youtube.com/embed/UUUlMyFewwc", "dialogue video URL is incorrect"],
+    [lesson01RequiredSections.every((section) => lesson26.sectionFlow?.includes(section)), "lesson is missing one or more required sections"],
+    [lesson26.__architectureWarnings?.length === 0, `architecture warnings: ${(lesson26.__architectureWarnings || []).join("; ")}`],
+    [!JSON.stringify(lesson26).includes("TODO:"), "lesson still contains TODO content"],
+  ];
+
+  for (const [ok, message] of lesson26Checks) {
+    if (!ok) {
+      console.error(`ERROR: Lesson 26 ${message}.`);
+      failed = true;
+    }
+  }
+}
+
 const lesson23 = LESSONS.find((lesson) => lesson.id === 23);
 if (!lesson23) {
   console.error("ERROR: Lesson 23 is missing.");
@@ -189,6 +336,7 @@ if (!lesson23) {
     [lesson23.homeworkRich?.tasks?.length === 2, "Homework must have 2 tasks"],
     [lesson23.video?.embedUrl === "https://www.youtube.com/embed/oq9N9hBccV4", "intro video URL is incorrect"],
     [lesson23.dialogueVideo?.embedUrl === "https://www.youtube.com/embed/gzLPbSMeUQY", "dialogue video URL is incorrect"],
+    [lesson23.__architectureWarnings?.length === 0, `architecture warnings: ${(lesson23.__architectureWarnings || []).join("; ")}`],
     [!JSON.stringify(lesson23).includes("TODO:"), "lesson still contains TODO content"],
   ];
 

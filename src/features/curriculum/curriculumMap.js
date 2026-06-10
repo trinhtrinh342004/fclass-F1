@@ -10,12 +10,12 @@ export const TUWI_27_CURRICULUM_MAP = [
   },
   {
     lessonId: 2,
-    topicEnglish: "TOPIC2: Singular & Plural Nouns",
-    topicVietnamese: "Danh từ số ít - Danh từ số nhiều",
+    topicEnglish: "TOPIC 2 — SINGULAR & PLURAL NOUNS",
+    topicVietnamese: "Danh từ số ít & Danh từ số nhiều",
     slug: "singular-plural-nouns",
     sourceLessons: [],
-    status: "partial",
-    notes: "Cần biên soạn nội dung riêng cho danh từ số ít/số nhiều.",
+    status: "ready",
+    notes: "Nội dung Buổi 2 đã được biên soạn đầy đủ; video đang dùng placeholder an toàn.",
   },
   {
     lessonId: 3,
@@ -32,8 +32,8 @@ export const TUWI_27_CURRICULUM_MAP = [
     topicVietnamese: "Đại từ nhân xưng",
     slug: "personal-pronoun",
     sourceLessons: [],
-    status: "draft",
-    notes: "Chưa có buổi cũ tách riêng đại từ nhân xưng.",
+    status: "ready",
+    notes: "Đã tích hợp đầy đủ nội dung Personal Pronouns theo kiến trúc Buổi 9.",
   },
   {
     lessonId: 5,
@@ -226,12 +226,12 @@ export const TUWI_27_CURRICULUM_MAP = [
   },
   {
     lessonId: 26,
-    topicEnglish: "Tag questions",
+    topicEnglish: "Tag Questions",
     topicVietnamese: "Câu hỏi đuôi",
     slug: "tag-questions",
     sourceLessons: [],
-    status: "draft",
-    notes: "Chưa có nội dung cũ phù hợp.",
+    status: "ready",
+    notes: "Đã tích hợp đầy đủ nội dung Tag Questions theo kiến trúc Buổi 9.",
   },
   {
     lessonId: 27,
