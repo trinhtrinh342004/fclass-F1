@@ -1,4 +1,4 @@
-import { getCurrentProfile, getCurrentSession, getCurrentUser, profileStatusLabel, requireAdmin, requireApprovedStudent, STATUS_MESSAGES } from "./authGuard.js";
+import { getCurrentProfile, getCurrentSession, getCurrentUser, profileStatusLabel, requireAdmin, requireApprovedStudent } from "./authGuard.js";
 import { getSupabaseConfigError, hasSupabaseConfig } from "../../lib/supabase/client.js";
 import { exchangeCodeForSession, resetPasswordForEmail, signInStudent, signOut, signUpStudent, updatePassword } from "./authService.js";
 import { getLessons } from "../lessons/lessonRepository.js";
@@ -84,18 +84,19 @@ export async function renderAuthRoute(){
   clearRealtime(studentChannels);
 
   const view = ensureAuthView();
+  document.getElementById("authCheckView")?.classList.remove("active");
   document.getElementById("homeView")?.classList.remove("active");
   document.getElementById("lessonView")?.classList.remove("active");
   view.classList.add("active");
-  view.innerHTML = renderShell("Đang tải...", `<div class="auth-loading">Đang tải...</div>`);
+  view.innerHTML = renderShell("Đang kiểm tra tài khoản...", `<div class="auth-loading"><span class="auth-spinner" aria-hidden="true"></span>Đang kiểm tra tài khoản...</div>`);
 
   if(path === "/register" || path === "/student-register") renderStudentRegister(view);
   if(path === "/login" || path === "/student-login") renderStudentLogin(view);
   if(path === "/forgot-password") renderForgotPassword(view);
   if(path === "/auth/callback") await renderAuthCallback(view);
   if(path === "/reset-password") await renderResetPassword(view);
-  if(path === "/pending-approval") await renderAccountStatusPage(view, "pending");
-  if(path === "/rejected") await renderAccountStatusPage(view, "rejected");
+  if(path === "/pending-approval") await renderAccountStatusPage(view);
+  if(path === "/rejected") await renderAccountStatusPage(view);
   if(path === "/student") await renderStudentDashboard(view);
   if(path.startsWith("/admin")){
     if(path === "/admin/approvals") currentAdminTab = "approvals";
@@ -122,12 +123,13 @@ function ensureAuthView(){
   return view;
 }
 
-function renderShell(title, body){
+function renderShell(title, body, subtitle = ""){
   return `
     <section class="auth-shell">
       <div class="auth-header">
-        <span class="eyebrow auth-eyebrow">Tuwi Nguyễn · FClass</span>
+        <span class="eyebrow auth-eyebrow">Tuwi A1 · 27 buổi</span>
         <h1>${escapeHtml(title)}</h1>
+        ${subtitle ? `<p>${escapeHtml(subtitle)}</p>` : ""}
       </div>
       ${body}
     </section>
@@ -143,28 +145,26 @@ function renderStudentRegister(view){
   view.innerHTML = renderShell("Đăng ký học viên", `
     ${renderConfigWarning()}
     <form class="auth-card auth-form" id="studentRegisterForm">
-      <label>Họ tên<input name="fullName" autocomplete="name" required></label>
-      <label>Số điện thoại<input name="phone" autocomplete="tel" required></label>
+      <label>Họ và tên<input name="fullName" autocomplete="name" required></label>
       <label>Email<input name="email" type="email" autocomplete="email" required></label>
       <label>Mật khẩu<input name="password" type="password" autocomplete="new-password" required minlength="6"></label>
       <label>Xác nhận mật khẩu<input name="confirmPassword" type="password" autocomplete="new-password" required minlength="6"></label>
       <button class="btn-primary auth-submit" type="submit">Đăng ký</button>
-      <p class="auth-switch">Đã có tài khoản? <a href="/student-login">Đăng nhập</a></p>
+      <p class="auth-switch">Đã có tài khoản? <a href="/login">Đăng nhập</a></p>
       <div class="auth-message" id="studentRegisterMessage" role="status"></div>
     </form>
-  `);
+  `, "Tạo tài khoản để chờ admin duyệt vào lớp TuWi A1.");
 
   document.getElementById("studentRegisterForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     const message = document.getElementById("studentRegisterMessage");
     const form = new FormData(event.currentTarget);
     const fullName = String(form.get("fullName") || "").trim();
-    const phone = String(form.get("phone") || "").trim();
     const email = String(form.get("email") || "").trim();
     const password = String(form.get("password") || "");
     const confirmPassword = String(form.get("confirmPassword") || "");
 
-    if(!fullName || !phone || !email || !password || !confirmPassword){
+    if(!fullName || !email || !password || !confirmPassword){
       setMessage(message, "Vui lòng nhập đầy đủ thông tin.", "error");
       return;
     }
@@ -179,35 +179,40 @@ function renderStudentRegister(view){
 
     const submit = event.currentTarget.querySelector("button[type='submit']");
     submit.disabled = true;
+    submit.textContent = "Đang tạo tài khoản...";
     setMessage(message, "Đang tạo tài khoản...", "");
-    const { error } = await signUpStudent({ fullName, phone, email, password });
+    const { data, error } = await signUpStudent({ fullName, phone: "", email, password });
     submit.disabled = false;
+    submit.textContent = "Đăng ký";
 
     if(error){
       setMessage(message, friendlyAuthError(error.message), "error");
       return;
     }
 
-    await signOut();
     event.currentTarget.reset();
     setMessage(message, "Đăng ký thành công. Vui lòng chờ admin duyệt tài khoản.", "success");
+    if(data?.session || data?.user){
+      window.history.pushState({}, "", "/pending-approval");
+      await renderAuthRoute();
+    }
   });
 }
 
 function renderStudentLogin(view){
-  view.innerHTML = renderShell("Đăng nhập", `
+  view.innerHTML = renderShell("Đăng nhập học viên", `
     ${renderConfigWarning()}
     <form class="auth-card auth-form" id="studentLoginForm">
       <label>Email<input name="email" type="email" autocomplete="email" required></label>
       <label>Mật khẩu<input name="password" type="password" autocomplete="current-password" required></label>
       <button class="btn-primary auth-submit" type="submit">Đăng nhập</button>
       <div class="auth-row">
-        <a href="/student-register">Đăng ký học viên</a>
+        <span>Chưa có tài khoản? <a href="/register">Đăng ký</a></span>
         <a href="/forgot-password">Quên mật khẩu?</a>
       </div>
       <div class="auth-message" id="studentLoginMessage" role="status"></div>
     </form>
-  `);
+  `, "Vào lớp TuWi A1 để tiếp tục học 27 buổi.");
 
   document.getElementById("studentLoginForm").addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -227,9 +232,11 @@ function renderStudentLogin(view){
 
     const submit = event.currentTarget.querySelector("button[type='submit']");
     submit.disabled = true;
+    submit.textContent = "Đang đăng nhập...";
     setMessage(message, "Đang đăng nhập...", "");
     const { data, error } = await signInStudent(email, password);
     submit.disabled = false;
+    submit.textContent = "Đăng nhập";
 
     if(error || !data?.user){
       setMessage(message, "Thông tin đăng nhập chưa đúng.", "error");
@@ -242,7 +249,7 @@ function renderStudentLogin(view){
       return;
     }
     if(profile.role === "admin" && profile.status === "approved"){
-      window.history.pushState({}, "", "/admin");
+      window.history.pushState({}, "", "/admin/approvals");
       await renderAuthRoute();
       return;
     }
@@ -251,7 +258,7 @@ function renderStudentLogin(view){
       return;
     }
 
-    window.history.pushState({}, "", profile.status === "rejected" ? "/rejected" : "/pending-approval");
+    window.history.pushState({}, "", profile.status === "rejected" || profile.status === "blocked" ? "/rejected" : "/pending-approval");
     await renderAuthRoute();
   });
 }
@@ -260,12 +267,13 @@ function renderForgotPassword(view){
   view.innerHTML = renderShell("Quên mật khẩu", `
     ${renderConfigWarning()}
     <form class="auth-card auth-form" id="forgotPasswordForm">
+      <p class="auth-form-note">Nhập email đã đăng ký. Hệ thống sẽ gửi link đặt lại mật khẩu về hộp thư của bạn.</p>
       <label>Email<input name="email" type="email" autocomplete="email" required></label>
       <button class="btn-primary auth-submit" type="submit">Gửi link đặt lại mật khẩu</button>
-      <p class="auth-switch"><a href="/student-login">Quay lại đăng nhập</a></p>
+      <p class="auth-switch"><a href="/login">Quay lại đăng nhập</a></p>
       <div class="auth-message" id="forgotPasswordMessage" role="status"></div>
     </form>
-  `);
+  `, "Lấy lại quyền vào lớp TuWi A1 bằng email của bạn.");
 
   document.getElementById("forgotPasswordForm").addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -277,9 +285,11 @@ function renderForgotPassword(view){
     }
     const submit = event.currentTarget.querySelector("button[type='submit']");
     submit.disabled = true;
+    submit.textContent = "Đang gửi...";
     setMessage(message, "Đang gửi email...", "");
     const { error } = await resetPasswordForEmail(email);
     submit.disabled = false;
+    submit.textContent = "Gửi link đặt lại mật khẩu";
     if(error){
       setMessage(message, friendlyAuthError(error.message), "error");
       return;
@@ -328,12 +338,13 @@ async function renderResetPassword(view){
   view.innerHTML = renderShell("Đặt lại mật khẩu", `
     ${renderConfigWarning()}
     <form class="auth-card auth-form" id="resetPasswordForm">
+      <p class="auth-form-note">Tạo mật khẩu mới để tiếp tục học 27 buổi TuWi A1.</p>
       <label>Mật khẩu mới<input name="password" type="password" autocomplete="new-password" required minlength="6"></label>
       <label>Xác nhận mật khẩu<input name="confirmPassword" type="password" autocomplete="new-password" required minlength="6"></label>
       <button class="btn-primary auth-submit" type="submit">Cập nhật mật khẩu</button>
       <div class="auth-message" id="resetPasswordMessage" role="status"></div>
     </form>
-  `);
+  `, "Hoàn tất đổi mật khẩu trong một bước.");
 
   document.getElementById("resetPasswordForm").addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -347,15 +358,18 @@ async function renderResetPassword(view){
     }
     const submit = event.currentTarget.querySelector("button[type='submit']");
     submit.disabled = true;
+    submit.textContent = "Đang cập nhật...";
     setMessage(message, "Đang cập nhật mật khẩu...", "");
     const { session, error: sessionError } = await getCurrentSession();
     if(sessionError || !session){
       submit.disabled = false;
+      submit.textContent = "Cập nhật mật khẩu";
       setMessage(message, "Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng gửi lại email quên mật khẩu.", "error");
       return;
     }
     const { error } = await updatePassword(password);
     submit.disabled = false;
+    submit.textContent = "Cập nhật mật khẩu";
     if(error){
       setMessage(message, friendlyAuthError(error.message), "error");
       return;
@@ -363,7 +377,7 @@ async function renderResetPassword(view){
     setMessage(message, "Đã cập nhật mật khẩu. Bạn có thể đăng nhập lại.", "success");
     setTimeout(async () => {
       await signOut();
-      window.history.pushState({}, "", "/student-login");
+      window.history.pushState({}, "", "/login");
       await renderAuthRoute();
     }, 900);
   });
@@ -385,7 +399,7 @@ async function redirectAfterAuthCallback(view){
   }
 
   if(profile.role === "admin" && profile.status === "approved"){
-    window.history.replaceState({}, "", "/admin");
+    window.history.replaceState({}, "", "/admin/approvals");
     await renderAdmin(view);
     return;
   }
@@ -395,10 +409,10 @@ async function redirectAfterAuthCallback(view){
   }
 
   window.history.replaceState({}, "", profile.status === "rejected" || profile.status === "blocked" ? "/rejected" : "/pending-approval");
-  await renderAccountStatusPage(view, profile.status);
+  await renderAccountStatusPage(view);
 }
 
-async function renderAccountStatusPage(view, expectedStatus){
+async function renderAccountStatusPage(view){
   const { user } = await getCurrentUser();
   if(!user){
     window.history.replaceState({}, "", "/student-login");
@@ -423,9 +437,15 @@ async function renderAccountStatusPage(view, expectedStatus){
     return;
   }
 
-  const title = profile.status === "rejected" || profile.status === "blocked" ? "Tài khoản chưa được mở" : "Đang chờ duyệt";
-  const message = STATUS_MESSAGES[profile.status] || (expectedStatus === "rejected" ? STATUS_MESSAGES.rejected : STATUS_MESSAGES.pending);
-  view.innerHTML = renderShell(title, renderStatusCard(message));
+  const isRejected = profile.status === "rejected" || profile.status === "blocked";
+  const title = isRejected ? "Tài khoản chưa được chấp nhận" : "Tài khoản đang chờ duyệt";
+  const message = isRejected
+    ? "Tài khoản của bạn chưa được mở vào lớp TuWi A1. Vui lòng liên hệ giáo viên hoặc admin nếu cần hỗ trợ."
+    : "Admin sẽ duyệt tài khoản của bạn trước khi bạn vào lớp.";
+  view.innerHTML = renderShell(title, renderStatusCard(message, {
+    status: isRejected ? "rejected" : "pending",
+    label: isRejected ? "Chưa được chấp nhận" : "Chờ duyệt",
+  }), isRejected ? "Thông tin tài khoản đã được ghi nhận." : "Đăng ký thành công. Vui lòng chờ admin duyệt tài khoản.");
   attachLogoutHandler();
   attachStudentRealtime(view, user.id);
 }
@@ -610,12 +630,13 @@ async function renderAdmin(view){
     return;
   }
   if(!guard.ok){
-    view.innerHTML = renderShell("Admin", renderStatusCard(guard.message));
+    view.innerHTML = renderShell("Admin TuWi A1", renderStatusCard(guard.message, { showLogin: true }));
     attachLogoutHandler();
     return;
   }
 
-  view.innerHTML = renderShell("Admin", `
+  const { title, subtitle } = getAdminShellCopy();
+  view.innerHTML = renderShell(title, `
     <section class="auth-card admin-panel">
       <div class="admin-toolbar">
         <div class="filter-tabs">
@@ -628,7 +649,7 @@ async function renderAdmin(view){
       <div class="auth-message" id="adminMessage" role="status"></div>
       <div id="adminContent" class="admin-list">Đang tải dữ liệu...</div>
     </section>
-  `);
+  `, subtitle);
 
   attachLogoutHandler();
   view.querySelectorAll("[data-admin-tab]").forEach((button) => {
@@ -658,15 +679,29 @@ async function renderAdminTab(view, adminId){
   if(currentAdminTab === "progress") return renderAdminProgress();
 }
 
+function getAdminShellCopy(){
+  const copy = {
+    overview: ["Admin TuWi A1", "Tổng quan học viên, lớp học và tiến độ."],
+    approvals: ["Duyệt học viên", "Quản lý học viên đăng ký vào lớp TuWi A1"],
+    students: ["Danh sách học viên", "Theo dõi trạng thái học viên của lớp TuWi A1."],
+    classes: ["Lớp học", "Quản lý lớp TuWi A1 và các lớp đang mở."],
+    requests: ["Duyệt vào lớp", "Xử lý yêu cầu tham gia lớp của học viên đã được duyệt."],
+    progress: ["Tiến độ học viên", "Theo dõi số buổi đã mở, hoàn thành và hoạt động gần nhất."],
+  };
+  const [title, subtitle] = copy[currentAdminTab] || copy.overview;
+  return { title, subtitle };
+}
+
 async function renderAdminOverview(){
   const content = document.getElementById("adminContent");
-  const [pendingStudents, approvedStudents, pendingRequests, classesResult] = await Promise.all([
+  const [pendingStudents, approvedStudents, rejectedStudents, pendingRequests, classesResult] = await Promise.all([
     listStudents("pending"),
     listStudents("approved"),
+    listStudents("rejected"),
     listPendingClassRequests(),
     listClasses(),
   ]);
-  const errors = [pendingStudents.error, approvedStudents.error, pendingRequests.error, classesResult.error].filter(Boolean);
+  const errors = [pendingStudents.error, approvedStudents.error, rejectedStudents.error, pendingRequests.error, classesResult.error].filter(Boolean);
   if(errors.length){
     content.innerHTML = `<div class="empty-state">Không tải được tổng quan. ${escapeHtml(errors[0].message)}</div>`;
     return;
@@ -674,8 +709,9 @@ async function renderAdminOverview(){
   const activeClasses = (classesResult.data || []).filter((klass) => klass.status === "active");
   content.innerHTML = `
     <div class="admin-stat-grid">
-      ${renderAdminStat("Học viên chờ duyệt", pendingStudents.data?.length || 0)}
-      ${renderAdminStat("Học viên đã duyệt", approvedStudents.data?.length || 0)}
+      ${renderAdminStat("Pending", pendingStudents.data?.length || 0)}
+      ${renderAdminStat("Approved", approvedStudents.data?.length || 0)}
+      ${renderAdminStat("Rejected", rejectedStudents.data?.length || 0)}
       ${renderAdminStat("Yêu cầu vào lớp", pendingRequests.data?.length || 0)}
       ${renderAdminStat("Lớp active", activeClasses.length)}
     </div>
@@ -708,14 +744,18 @@ async function renderAdminApprovals(adminId){
     return;
   }
   if(!studentsResult.data?.length){
-    content.innerHTML = `<div class="empty-state">Không có học viên pending.</div>`;
+    content.innerHTML = `<div class="empty-state">Không có học viên chờ duyệt.</div>`;
     return;
   }
 
   content.innerHTML = `
+    <div class="admin-section-head">
+      <h2>Duyệt học viên</h2>
+      <p>Quản lý học viên đăng ký vào lớp TuWi A1</p>
+    </div>
     <div class="admin-table admin-table-approvals" role="table">
       <div class="admin-table-head" role="row">
-        <span>Họ tên</span><span>Số điện thoại</span><span>Email</span><span>Ngày đăng ký</span><span>Lớp</span><span>Hành động</span>
+        <span>Họ tên</span><span>Email</span><span>Ngày đăng ký</span><span>Lớp</span><span>Hành động</span>
       </div>
       ${studentsResult.data.map((student) => renderApprovalRow(student, classes)).join("")}
     </div>
@@ -731,10 +771,12 @@ async function renderAdminApprovals(adminId){
         return;
       }
       button.disabled = true;
+      button.textContent = "Đang duyệt...";
       setMessage(message, "Đang duyệt học viên và thêm vào lớp...", "");
       const { error } = await approveStudentForClass(button.dataset.approveStudent, classId, adminId);
       if(error){
         button.disabled = false;
+        button.textContent = "Duyệt";
         setMessage(message, `Duyệt thất bại: ${error.message}`, "error");
         return;
       }
@@ -750,10 +792,12 @@ async function renderAdminApprovals(adminId){
       const row = button.closest("[data-student-row]");
       const classId = row?.querySelector("[data-approval-class]")?.value || null;
       button.disabled = true;
+      button.textContent = "Đang từ chối...";
       setMessage(message, "Đang từ chối học viên...", "");
       const { error } = await rejectStudent(button.dataset.rejectStudent, adminId, classId);
       if(error){
         button.disabled = false;
+        button.textContent = "Từ chối";
         setMessage(message, `Từ chối thất bại: ${error.message}`, "error");
         return;
       }
@@ -767,6 +811,10 @@ async function renderAdminStudents(adminId){
   const content = document.getElementById("adminContent");
   content.innerHTML = `
     <div class="admin-toolbar">
+      <div class="admin-section-head compact">
+        <h2>Danh sách học viên</h2>
+        <p>Xem học viên pending, approved và rejected của lớp TuWi A1.</p>
+      </div>
       <div class="filter-tabs">
         ${STUDENT_STATUS_FILTERS.map(([value, label]) => `
           <button class="${value === currentAdminFilter ? "active" : ""}" data-filter="${value}">${label}</button>
@@ -810,6 +858,7 @@ async function loadAdminStudents(adminId){
 
   list.querySelectorAll("[data-action-status]").forEach((button) => {
     button.addEventListener("click", async () => {
+      if(button.dataset.actionStatus === "rejected" && !window.confirm("Từ chối học viên này?")) return;
       button.disabled = true;
       setMessage(message, "Đang cập nhật học viên...", "");
       let result;
@@ -1048,7 +1097,6 @@ function renderApprovalRow(student, classes){
   return `
     <div class="admin-table-row" role="row" data-student-row>
       <span data-label="Họ tên">${escapeHtml(student.full_name || "")}</span>
-      <span data-label="Số điện thoại">${escapeHtml(student.phone || "")}</span>
       <span data-label="Email">${escapeHtml(student.email || "")}</span>
       <span data-label="Ngày đăng ký">${escapeHtml(createdAt)}</span>
       <span data-label="Lớp">
@@ -1057,8 +1105,8 @@ function renderApprovalRow(student, classes){
         </select>
       </span>
       <span class="admin-actions" data-label="Hành động">
-        <button data-approve-student="${student.id}">Duyệt</button>
-        <button data-reject-student="${student.id}">Từ chối</button>
+        <button class="admin-action-primary" data-approve-student="${student.id}">Duyệt</button>
+        <button class="admin-action-danger" data-reject-student="${student.id}">Từ chối</button>
       </span>
     </div>
   `;
@@ -1115,12 +1163,17 @@ function renderProgressRow(row){
   `;
 }
 
-function renderStatusCard(message){
+function renderStatusCard(message, options = {}){
+  const label = options.label || (options.status ? profileStatusLabel(options.status) : "");
+  const statusMarkup = options.status
+    ? `<span class="status-badge status-${escapeHtml(options.status)}">${escapeHtml(label)}</span>`
+    : "";
   return `
     <section class="auth-card status-card">
+      ${statusMarkup}
       <p>${escapeHtml(message)}</p>
       <div class="student-actions">
-        <a class="btn-primary" href="/student-login">Đăng nhập</a>
+        ${options.showLogin ? `<a class="btn-primary" href="/login">Đăng nhập</a>` : ""}
         <button class="btn-ghost" id="studentLogoutBtn">Đăng xuất</button>
       </div>
     </section>
