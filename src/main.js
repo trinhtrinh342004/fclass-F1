@@ -1329,7 +1329,7 @@ function renderVocab(l){
             <div class="fc-emoji">${v.img||"📝"}</div>
             <div class="fc-vi">${v.vi}</div>
             ${v.note?`<div class="fc-ipa fc-ipa--back">${v.note}</div>`:""}
-            ${v.example?`<div class="fc-ipa fc-ipa--back">${escAttr(v.example)}</div>`:""}
+            ${v.example?`<div class="fc-example">${escAttr(v.example)}</div>`:""}
             ${v.exampleQuestion?`<div class="fc-ipa fc-ipa--back"><b>Q:</b> ${escAttr(v.exampleQuestion)}${v.exampleAnswer?`<br><b>A:</b> ${escAttr(v.exampleAnswer)}`:""}</div>`:""}
           </div>
         </div>
@@ -1363,7 +1363,7 @@ function renderVocab(l){
           <div class="fc-vi">${v.vi}</div>
           ${v.ipa?`<div class="fc-ipa fc-ipa--back">${v.ipa}</div>`:""}
           ${v.note?`<div class="fc-ipa fc-ipa--back">${escAttr(v.note)}</div>`:""}
-          ${v.example?`<div class="fc-ipa fc-ipa--back">${escAttr(v.example)}</div>`:""}
+          ${v.example?`<div class="fc-example">${escAttr(v.example)}</div>`:""}
           ${v.exampleQuestion?`<div class="fc-ipa fc-ipa--back"><b>Q:</b> ${escAttr(v.exampleQuestion)}${v.exampleAnswer?`<br><b>A:</b> ${escAttr(v.exampleAnswer)}`:""}</div>`:""}
         </div>
       </div>
@@ -3121,7 +3121,8 @@ window.trSpeakPrompt = function(idx){
 };
 
 window.trCheckCur = function(idx){
-  const correct = getTranslationAnswer(window._trData?.sentences?.[idx] || {});
+  const item = window._trData?.sentences?.[idx] || {};
+  const correct = getTranslationAnswer(item);
   const card = document.getElementById("tr-card-cur");
   if(!card || card.dataset.done || !correct) return;
   const inp = document.getElementById("trInput");
@@ -3131,9 +3132,10 @@ window.trCheckCur = function(idx){
   inp.disabled = true;
   document.getElementById("tr-mic-cur").disabled = true;
   const norm = s => s.toLowerCase().replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
+  const normCase = s => s.replace(/[“”]/g, '"').replace(/[^A-Za-z0-9 ]/g," ").replace(/\s+/g," ").trim();
   const sc = similarity(norm(typed), norm(correct));
   const pct = Math.round(sc*100);
-  const isRight = pct >= 70;
+  const isRight = item.strictCase ? normCase(typed) === normCase(correct) : pct >= 70;
   if(isRight) playCorrect(); else playWrong();
   const dot = document.getElementById(`tr-dot-${idx}`);
   if(dot) dot.className="oat-dot "+(isRight?"done-right":"done-wrong");
@@ -3145,7 +3147,7 @@ window.trCheckCur = function(idx){
   const canSpeakAnswer = !shouldUseDay31TranslationTts() || !hasVietnameseText(correct);
   fb.innerHTML = `
     <div style="width:100%">
-      <div><span class="${feedbackClass}">${emoji} ${pct}% khớp</span></div>
+      <div><span class="${feedbackClass}">${emoji} ${item.strictCase && !isRight ? "Chưa đúng chữ hoa/thường" : `${pct}% khớp`}</span></div>
       <div class="tr-model-answer">💡 Câu mẫu: <b>${escAttr(correct)}</b>
         ${canSpeakAnswer ? `<button class="rp-speak-btn" onclick="speakById('${regTxt(correct)}')">🔊</button>` : ""}
       </div>
