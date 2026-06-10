@@ -156,7 +156,7 @@ export function normalizeLessonToBuoi9Architecture(rawLesson={}, previousLesson=
   const id = Number(lesson.id || lesson.lessonNumber || lesson.dayNumber || 0);
   lesson.id = id;
   lesson.unit = lesson.unit || inferUnit(id);
-  lesson.title = lesson.titleVi || lesson.title || `${LESSON_PLACEHOLDER} - Buổi ${id || "?"}`;
+  lesson.title = lesson.title || lesson.titleVi || `${LESSON_PLACEHOLDER} - Buổi ${id || "?"}`;
   lesson.subtitle = lesson.titleEn || lesson.subtitle || lesson.mainTopic || "";
   lesson.objectives = normalizeObjectives(lesson.learningObjectives || lesson.objectives);
 
@@ -175,8 +175,9 @@ export function normalizeLessonToBuoi9Architecture(rawLesson={}, previousLesson=
   const vocabBundle = normalizeVocabulary(lesson);
   lesson.vocabulary = vocabBundle.vocabulary;
   lesson.vocabGroups = vocabBundle.vocabGroups;
-  lesson.matchAll = true;
-  lesson.listenPickAll = true;
+  lesson.matchAll = lesson.matchAll ?? true;
+  lesson.matchDefaultGroup = lesson.matchDefaultGroup || null;
+  lesson.listenPickAll = lesson.listenPickAll ?? true;
   lesson.listenPick = normalizeListenPick(lesson, lesson.vocabulary);
   lesson.grammar = normalizeGrammar(lesson.grammar, lesson);
   lesson.listening = normalizeListening(lesson.listening, lesson);
@@ -249,13 +250,15 @@ export function validateLessonArchitecture(lesson){
       .filter(line => !line.__placeholder && line.en && line.vi).length;
     if(bilingualLines < 1) warnings.push("dialogue transcript: thiếu transcript song ngữ");
   }
-  if(isActive("dialogue_video_quiz")) requireCount("Nghe chọn thoại", lesson.dialogueVideo?.listenPickLine, 10);
+  if(isActive("dialogue_video_quiz")) {
+    requireCount("Nghe chọn thoại", lesson.dialogueVideo?.listenPickLine, contentCount(lesson, "dialogueListen", 10));
+  }
   if(isActive("dialogue_video_order")){
     const clozeCount = countReal(lesson.dialogueVideo?.fillConversation);
     if(clozeCount < 1) warnings.push("Điền hội thoại: cần ít nhất 1 dialogue cloze");
   }
   if(isActive("speaking")) requireCount("Luyện nói AI", lesson.speaking?.turns, 5);
-  if(isActive("minitest")) requireCount("Minitest", lesson.minitest, 20);
+  if(isActive("minitest")) requireCount("Minitest", lesson.minitest, contentCount(lesson, "minitest", 20));
   if(isActive("mindmap") && (!lesson.mindmap || lesson.mindmap.__placeholder)) warnings.push("mindmap: thiếu nội dung mindmap");
   if(isActive("homework")){
     const homeworkCount = countReal(lesson.homeworkRich?.tasks);
@@ -299,6 +302,7 @@ function normalizeMetadata(lesson){
   const grammarFocus = lesson.grammarFocus || lesson.grammar?.title || lesson.grammar?.formula || LESSON_PLACEHOLDER;
   const mainTopic = lesson.mainTopic || lesson.topic || lesson.title || LESSON_PLACEHOLDER;
   return {
+    ...(lesson.metadata || {}),
     lessonNumber: lesson.lessonNumber || lesson.id,
     dayNumber: lesson.dayNumber || lesson.id,
     titleVi,
@@ -620,7 +624,11 @@ function normalizeTranslation(translation={}, lesson){
 
 function normalizeDialogueVideo(dialogueVideo={}, lesson){
   const transcript = normalizeTranscript(dialogueVideo.transcript || dialogueVideo.dialogue || []);
-  const listenPickLine = normalizeDialogueListen(dialogueVideo.listenPickLine || dialogueVideo.listenChoose || [], transcript);
+  const listenPickLine = normalizeDialogueListen(
+    dialogueVideo.listenPickLine || dialogueVideo.listenChoose || [],
+    transcript,
+    contentCount(lesson, "dialogueListen", 10)
+  );
   return {
     ...dialogueVideo,
     title: dialogueVideo.title || "Video hội thoại",
@@ -655,9 +663,9 @@ function normalizeTranscript(lines){
   }];
 }
 
-function normalizeDialogueListen(rounds, transcript){
+function normalizeDialogueListen(rounds, transcript, targetCount=10){
   const normalized = (rounds || []).map((round, i) => normalizeLinePickRound(round, transcript, i));
-  return fillToCount(normalized, 10, i => linePickFromTranscript(transcript, i));
+  return fillToCount(normalized, targetCount, i => linePickFromTranscript(transcript, i));
 }
 
 function normalizeLinePickRound(round={}, transcript, i){
@@ -745,7 +753,8 @@ function speakingFromLegacy(speaking={}){
 
 function normalizeMinitest(minitest=[], lesson){
   const source = Array.isArray(minitest) ? minitest : [];
-  return fillToCount(source.map((q, i) => normalizeQuizQuestion(q, i, "Minitest")), 20, i => minitestFromLesson(lesson, i));
+  const targetCount = contentCount(lesson, "minitest", 20);
+  return fillToCount(source.map((q, i) => normalizeQuizQuestion(q, i, "Minitest")), targetCount, i => minitestFromLesson(lesson, i));
 }
 
 function normalizeMindmap(mindmap={}, lesson){
@@ -788,7 +797,7 @@ function normalizeHomeworkRich(homeworkRich={}, homeworkList=[], lesson){
   return {
     title: homeworkRich.title || `Homework - Buổi ${lesson.id}`,
     submit: homeworkRich.submit || "Nộp bài qua nhóm lớp.",
-    deadline: homeworkRich.deadline || "Trước buổi học tiếp theo",
+    deadline: homeworkRich.deadline ?? "Trước buổi học tiếp theo",
     tasks
   };
 }
@@ -995,6 +1004,11 @@ function fillToCount(items, count, factory){
   const result = Array.isArray(items) ? [...items] : [];
   for(let i=result.length; i<count; i++) result.push(factory(i));
   return result;
+}
+
+function contentCount(lesson, key, fallback){
+  const value = Number(lesson?.contentCounts?.[key]);
+  return Number.isInteger(value) && value >= 0 ? value : fallback;
 }
 
 function collectExtensionSections(rawLesson){

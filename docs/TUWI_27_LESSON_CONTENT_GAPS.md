@@ -42,5 +42,5 @@ Báo cáo chi tiết về tình trạng sẵn sàng của nội dung từng bu�
 2. **Các buổi cần bổ sung video/hội thoại (3 buổi - P2)**:
    - Buổi 12, 14, 21 hiện lấy dữ liệu từ Buổi 31 cũ. Buổi 31 cũ không có các phần như video chính, video hội thoại và game nghe chọn thoại. Cần bổ sung các video và hội thoại tương ứng để các buổi học này sinh động và đạt chuẩn cấu trúc Buổi 8/9.
 
-3. **Các buổi cần viết mới hoàn toàn (8 buổi - P1)**:
-   - Buổi 1, 2, 4, 8, 11, 23, 25, 26 hiện tại đã được dựng khung skeleton (`DRAFT`) để bảo đảm giao diện không bị crash hay hiển thị trống trơn. Tuy nhiên, các buổi này đang sử dụng nội dung placeholder/TODO. Cần chuẩn bị file `.md` nội dung chi tiết theo đúng hướng dẫn tại dự án để cập nhật nội dung thực tế.
+3. **Các buổi cần viết mới hoàn toàn (6 buổi - P1)**:
+   - Buổi 4, 8, 11, 23, 25, 26 hiện tại đã được dựng khung skeleton (`DRAFT`) để bảo đảm giao diện không bị crash hay hiển thị trống trơn. Các buổi này vẫn cần file `.md` nội dung chi tiết theo đúng hướng dẫn tại dự án.

@@ -17,6 +17,12 @@ export const lesson01 = {
       import: "manual"
     }
   },
+  contentCounts: {
+    dialogueListen: 6,
+    minitest: 10
+  },
+  matchAll: false,
+  matchDefaultGroup: "lessonPhrases",
   objectives: [
     "Nhận diện và phát âm đúng 26 chữ cái tiếng Anh.",
     "Biết cách hỏi và trả lời khi cần đánh vần tên/từ vựng bằng mẫu How do you spell...?",
@@ -89,10 +95,10 @@ export const lesson01 = {
   },
   video: {
     title: "English Alphabet Pronunciation for Beginners",
-    channel: "English Alphabet Channel (TODO)",
-    duration: "2-5 phút (TODO)",
-    embedUrl: "",
-    watchUrl: "",
+    channel: "TODO: Chọn kênh học tiếng Anh phù hợp",
+    duration: "TODO: Ưu tiên 2–5 phút",
+    embedUrl: "TODO_VIDEO_EMBED_ALPHABET",
+    watchUrl: "TODO_VIDEO_ORIGINAL_ALPHABET",
     description: "Video giúp học viên nghe và lặp lại 26 chữ cái tiếng Anh. Học viên tập phân biệt các chữ dễ nhầm như B/P, C/S, G/J, I/E, M/N, V/W.",
     scenes: [
       { label: "Phát âm 26 chữ cái tiếng Anh" },
@@ -164,6 +170,32 @@ export const lesson01 = {
     { en: "word 🔡", vi: "từ", img: "🔡", ipa: "/wɜːrd/", group: "lessonPhrases" },
     { en: "noun 📌", vi: "danh từ", img: "📌", ipa: "/naʊn/", group: "lessonPhrases" }
   ],
+  listenPick: {
+    title: "Nghe chọn từ",
+    instruction: "Phát audio từng chữ cái/từ vựng Buổi 1. Mỗi câu có 4 lựa chọn nghĩa tiếng Việt hoặc chữ cái tương ứng.",
+    questions: [
+      { q: "Nghe và chọn đáp án đúng.", audio: "A", options: ["A", "E", "I", "R"], answer: 0 },
+      { q: "Nghe và chọn đáp án đúng.", audio: "B", options: ["P", "B", "D", "V"], answer: 1 },
+      { q: "Nghe và chọn đáp án đúng.", audio: "C", options: ["S", "Z", "C", "G"], answer: 2 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "apple", options: ["quả cam", "quả táo", "quyển sách", "cây bút"], answer: 1 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "book", options: ["cái ghế", "quyển sách", "cái bàn", "điện thoại"], answer: 1 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "teacher", options: ["học sinh", "giáo viên", "bạn bè", "người đàn ông"], answer: 1 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "student", options: ["giáo viên", "học sinh / sinh viên", "phòng học", "trường học"], answer: 1 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "cat", options: ["con chó", "con cá", "con mèo", "con chim"], answer: 2 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "dog", options: ["con chó", "con mèo", "con cá", "con ngựa"], answer: 0 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "school", options: ["căn phòng", "trường học", "thành phố", "ngôi nhà"], answer: 1 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "pen", options: ["cây bút mực", "cây bút chì", "cái túi", "điện thoại"], answer: 0 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "pencil", options: ["cây bút mực", "cây bút chì", "máy tính", "quyển sách"], answer: 1 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "phone", options: ["máy tính", "điện thoại", "cái bàn", "cái ghế"], answer: 1 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "computer", options: ["điện thoại", "máy tính", "cây bút", "cái túi"], answer: 1 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "chair", options: ["cái bàn", "cái ghế", "căn phòng", "cửa sổ"], answer: 1 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "table", options: ["cái ghế", "cái bàn", "căn phòng", "ngôi nhà"], answer: 1 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "name", options: ["danh từ", "tên", "chữ cái", "từ"], answer: 1 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "letter", options: ["từ", "câu", "chữ cái", "danh từ"], answer: 2 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "word", options: ["từ", "chữ cái", "tên", "con vật"], answer: 0 },
+      { q: "Nghe và chọn nghĩa đúng.", audio: "noun", options: ["động từ", "danh từ", "tính từ", "giới từ"], answer: 1 }
+    ]
+  },
   grammar: {
     title: "Ngữ pháp",
     intro: "Bài học ngữ pháp về chữ cái, danh từ và mạo từ a/an.",
@@ -212,6 +244,107 @@ export const lesson01 = {
         exampleVi: "một quả táo, một quyển sách, một cái ô",
         context: "Dùng trước danh từ đếm được số ít khi nói chung chung.",
         commonMistake: "Viết nhầm 'a apple' hoặc 'an book'."
+      }
+    ],
+    sections: [
+      {
+        title: "PHẦN 1: Bảng chữ cái tiếng Anh",
+        intro: "Tiếng Anh có 26 chữ cái.",
+        tables: [
+          {
+            headers: ["Nhóm", "Chữ cái"],
+            rows: [
+              ["Nguyên âm — vowels", "A, E, I, O, U"],
+              ["Phụ âm — consonants", "B, C, D, F, G, H, J, K, L, M, N, P, Q, R, S, T, V, W, X, Y, Z"]
+            ]
+          },
+          {
+            headers: ["Cặp dễ nhầm", "Cách nhớ"],
+            rows: [
+              ["B / P", "B = /biː/, P = /piː/"],
+              ["C / S", "C = /siː/, S = /es/"],
+              ["G / J", "G = /dʒiː/, J = /dʒeɪ/"],
+              ["M / N", "M = /em/, N = /en/"],
+              ["V / W", "V = /viː/, W = /ˈdʌbəl juː/"]
+            ]
+          }
+        ],
+        items: [
+          "Lưu ý: Chữ Y đôi khi có âm giống nguyên âm, nhưng ở mức cơ bản, học viên chỉ cần nhớ 5 nguyên âm chính: A, E, I, O, U."
+        ]
+      },
+      {
+        title: "PHẦN 2: Hỏi và trả lời cách đánh vần",
+        tables: [
+          {
+            headers: ["Mục đích", "Cấu trúc", "Ví dụ"],
+            rows: [
+              ["Hỏi cách đánh vần", "How do you spell + từ/tên?", "How do you spell your name?"],
+              ["Trả lời", "It's + chữ cái đánh vần.", "It's A-N-N-A."],
+              ["Hỏi lại khi chưa nghe rõ", "Can you spell it, please?", "Can you spell it, please?"]
+            ]
+          }
+        ],
+        examples: [
+          "How do you spell cat? — It's C-A-T.",
+          "How do you spell book? — It's B-O-O-K.",
+          "How do you spell your name? — It's M-A-I.",
+          "Can you spell it, please? — Sure. P-E-N."
+        ]
+      },
+      {
+        title: "PHẦN 3: Danh từ là gì?",
+        intro: "Danh từ — noun là từ dùng để gọi tên:",
+        tables: [
+          {
+            headers: ["Loại danh từ", "Ví dụ"],
+            rows: [
+              ["Người — person", "student, teacher, friend"],
+              ["Đồ vật — thing", "book, pen, phone, table"],
+              ["Con vật — animal", "cat, dog, fish"],
+              ["Địa điểm — place", "school, classroom, house, city"],
+              ["Tên/ý tưởng cơ bản — name/idea", "name, word, letter, noun"]
+            ]
+          }
+        ],
+        examples: [
+          "Student is a noun.",
+          "Book is a noun.",
+          "Cat is a noun.",
+          "School is a noun."
+        ],
+        items: [
+          "Lưu ý: Buổi 1 chỉ cần nhận diện danh từ. Danh từ số ít/số nhiều sẽ học kỹ ở Buổi 2."
+        ]
+      },
+      {
+        title: "PHẦN 4: A / An + danh từ số ít",
+        intro: "Khi nói một danh từ số ít, tiếng Anh thường dùng a hoặc an phía trước.",
+        tables: [
+          {
+            headers: ["Dùng", "Khi nào dùng", "Ví dụ"],
+            rows: [
+              ["a", "trước âm phụ âm", "a book, a pen, a teacher"],
+              ["an", "trước âm nguyên âm", "an apple, an egg, an umbrella"]
+            ]
+          }
+        ],
+        items: [
+          "Lưu ý quan trọng: Dùng a/an theo âm đầu, không chỉ nhìn chữ cái."
+        ],
+        examples: [
+          "a book",
+          "a cat",
+          "a student",
+          "an apple",
+          "an egg",
+          "an umbrella"
+        ],
+        mistakes: [
+          { wrong: "a apple", right: "an apple" },
+          { wrong: "an book", right: "a book" },
+          { wrong: "a umbrella", right: "an umbrella" }
+        ]
       }
     ],
     commonQA: [
@@ -276,9 +409,10 @@ export const lesson01 = {
   },
   dialogueVideo: {
     title: "Video hội thoại",
-    dialogueVideoTitle: "Spelling Names and Nouns Dialogue (TODO)",
-    embedUrl: "",
-    watchUrl: "",
+    dialogueVideoTitle: "Hội thoại đánh vần tên và nhận diện danh từ cơ bản.",
+    channel: "TODO: Chọn video hội thoại beginner phù hợp",
+    embedUrl: "TODO_VIDEO_EMBED_DIALOGUE_ALPHABET_NOUNS",
+    watchUrl: "TODO_VIDEO_ORIGINAL_DIALOGUE_ALPHABET_NOUNS",
     description: "Hội thoại ngắn giúp học viên luyện hỏi tên, đánh vần tên/từ vựng, và nhận biết danh từ trong lớp học.",
     transcript: [
       { speaker: "A", en: "Hello! What's your name?", vi: "Xin chào! Bạn tên là gì?" },
@@ -431,19 +565,25 @@ export const lesson01 = {
         label: "Place Nouns",
         sub: "Danh từ chỉ địa điểm",
         items: ["school", "classroom", "house", "city"]
+      },
+      {
+        icon: "🔡",
+        label: "Name / Word & A / An",
+        sub: "Tên gọi, từ và mạo từ",
+        items: ["name", "word", "letter", "noun", "a book", "a pen", "an apple", "an egg"]
       }
     ]
   },
   homeworkRich: {
-    title: "Homework - Buổi 1: Alphabet and Nouns",
-    submit: "Nộp bài qua nhóm lớp Zalo (chụp ảnh viết + ghi âm)",
-    deadline: "Trước buổi học tiếp theo",
+    title: "Bài tập về nhà",
+    submit: "Học viên nộp bài qua nhóm lớp. Khuyến khích gửi voice note ngắn 30–60 giây.",
+    deadline: "",
     tasks: [
       {
         icon: "✍️",
         title: "Bài tập 1: Viết — My Alphabet & Noun List",
-        badge: "Bắt buộc",
-        desc: "Viết danh sách 10 danh từ tiếng Anh quanh bạn (3 đồ vật, 2 người, 2 địa điểm, 2 con vật, thêm a/an).",
+        badge: "",
+        desc: "Viết danh sách 10 danh từ tiếng Anh quanh bạn.",
         items: [
           "Ít nhất 3 danh từ chỉ đồ vật",
           "Ít nhất 2 danh từ chỉ người",
@@ -451,23 +591,29 @@ export const lesson01 = {
           "Ít nhất 2 danh từ chỉ con vật",
           "Viết thêm a/an trước mỗi danh từ nếu là danh từ số ít"
         ],
+        showSample: true,
         sample: "1. a book — đồ vật\n2. a pen — đồ vật\n3. a teacher — người\n4. a student — người\n5. a school — địa điểm\n6. an apple — đồ vật\n7. a cat — con vật\n8. a dog — con vật",
-        rubric: "Đúng phân loại danh từ, đúng định dạng a/an cho mỗi từ."
+        rubric: ""
       },
       {
         icon: "🎙️",
         title: "Bài tập 2: Nói / Ghi âm — Spell Your Name & 5 Nouns",
-        badge: "Bắt buộc",
-        desc: "Ghi âm 5–8 câu ngắn nói tên bạn, đánh vần tên và nói 5 danh từ tiếng Anh kèm nhóm của chúng (person, place, animal, or thing).",
+        badge: "",
+        desc: "Ghi âm 5–8 câu ngắn.",
         items: [
           "Nói tên của bạn",
           "Đánh vần tên của bạn",
           "Nói 5 danh từ tiếng Anh",
           "Nói rõ danh từ đó thuộc nhóm nào: person, place, animal, or thing",
-          "Thời lượng 30–60 giây"
+          "What's your name?",
+          "How do you spell your name?",
+          "What is a noun?",
+          "Can you say five nouns?",
+          "Is \"teacher\" a person, place, animal, or thing?"
         ],
+        showSample: true,
         sample: "My name is Mai. It's M-A-I. A noun is a person, place, animal, or thing. Book is a noun. It is a thing. Teacher is a noun. It is a person. School is a noun. It is a place. Cat is a noun. It is an animal.",
-        rubric: "Phát âm rõ ràng, đánh vần chính xác chữ cái, phân loại danh từ đúng."
+        rubric: ""
       }
     ]
   },

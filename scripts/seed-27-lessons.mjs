@@ -40,7 +40,7 @@ function toLessonRow(lesson){
   const status = normalizeStatus(lesson.curriculumStatus || lesson.metadata?.status?.content);
   return {
     lesson_number: lesson.id,
-    slug: `lesson-${lesson.id}`,
+    slug: lesson.slug,
     title: lesson.title,
     topic_english: lesson.titleEn || lesson.mainTopic || lesson.title,
     topic_vietnamese: lesson.titleVi || lesson.subtitle || lesson.title,

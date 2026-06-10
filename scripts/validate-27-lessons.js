@@ -108,6 +108,62 @@ for (const lesson of LESSONS) {
   }
 }
 
+const lesson01 = LESSONS.find((lesson) => lesson.id === 1);
+const lesson01RequiredSections = [
+  "review",
+  "video",
+  "vocab",
+  "vocab_match",
+  "listen_pick",
+  "grammar",
+  "listen_quiz",
+  "translate",
+  "dialogue_video",
+  "dialogue_video_quiz",
+  "dialogue_video_order",
+  "speaking",
+  "minitest",
+  "mindmap",
+  "homework",
+];
+
+if (!lesson01) {
+  console.error("ERROR: Lesson 1 is missing.");
+  failed = true;
+} else {
+  const lesson01Status = typeof lesson01.status === "object" ? lesson01.status.content : lesson01.status;
+  const lesson01Checks = [
+    [lesson01.slug === "alphabet-and-nouns", "slug must remain alphabet-and-nouns"],
+    [lesson01.title === "Bảng chữ cái & Danh từ", "title must remain Bảng chữ cái & Danh từ"],
+    [lesson01.topicEnglish === "Alphabet and Nouns", "topicEnglish is incorrect"],
+    [lesson01.topicVietnamese === "Bảng chữ cái và Danh từ", "topicVietnamese is incorrect"],
+    [lesson01Status === "partial", "status must be partial while video URLs are TODO"],
+    [lesson01.metadata?.contentImported === true, "metadata.contentImported must be true"],
+    [lesson01.metadata?.hasTodoVideo === true, "metadata.hasTodoVideo must be true"],
+    [lesson01.review?.reviewGames?.vocabulary?.length === 20, "review listening game must have 20 questions"],
+    [lesson01.review?.reviewGames?.quizBomb?.questions?.length === 20, "Quiz Bomb must have 20 questions"],
+    [lesson01.vocabulary?.length === 50, "flashcards must contain 26 letters and 24 nouns"],
+    [lesson01.listenPick?.questions?.length === 20, "Nghe chọn từ must have 20 questions"],
+    [lesson01.listening?.questions?.length === 20, "Nghe trả lời must have 20 questions"],
+    [lesson01.translation?.sentences?.length === 20, "Luyện dịch must have 20 questions"],
+    [lesson01.dialogueVideo?.listenPickLine?.length === 6, "Nghe chọn thoại must keep the 6 supplied questions"],
+    [lesson01.speaking?.turns?.length === 5, "Luyện nói AI must have 5 prompts"],
+    [lesson01.minitest?.length === 10, "Minitest must keep the 10 supplied questions"],
+    [lesson01.homeworkRich?.tasks?.length === 2, "Homework must have 2 tasks"],
+    [lesson01.video?.embedUrl === "TODO_VIDEO_EMBED_ALPHABET", "alphabet video TODO marker changed"],
+    [lesson01.dialogueVideo?.embedUrl === "TODO_VIDEO_EMBED_DIALOGUE_ALPHABET_NOUNS", "dialogue video TODO marker changed"],
+    [!JSON.stringify(lesson01).includes("Nội dung đang được biên soạn"), "lesson still contains the empty-content placeholder"],
+    [lesson01RequiredSections.every((section) => lesson01.sectionFlow?.includes(section)), "lesson is missing one or more required sections"],
+  ];
+
+  for (const [ok, message] of lesson01Checks) {
+    if (!ok) {
+      console.error(`ERROR: Lesson 1 ${message}.`);
+      failed = true;
+    }
+  }
+}
+
 // Check completeness of IDs (1 to 27)
 for (let i = 1; i <= 27; i++) {
   if (!seenIds.has(i)) {
