@@ -511,6 +511,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 }
 .admin-table-classes .admin-table-head,
 .admin-table-classes .admin-table-row,
+.admin-table-approvals .admin-table-head,
+.admin-table-approvals .admin-table-row,
 .admin-table-requests .admin-table-head,
 .admin-table-requests .admin-table-row,
 .admin-table-progress .admin-table-head,
@@ -539,6 +541,16 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   display:flex;
   flex-wrap:wrap;
   gap:7px;
+}
+.admin-select{
+  width:100%;
+  min-width:140px;
+  border:1.5px solid var(--line);
+  border-radius:8px;
+  padding:8px 10px;
+  background:#fff;
+  color:var(--ink);
+  font:inherit;
 }
 .admin-actions button{
   padding:7px 10px;

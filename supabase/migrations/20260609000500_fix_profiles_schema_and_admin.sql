@@ -167,26 +167,5 @@ create index if not exists profiles_status_idx on public.profiles(status);
 create index if not exists profiles_role_idx on public.profiles(role);
 create index if not exists profiles_email_idx on public.profiles(email);
 
--- 7. Safe SQL block to promote admin@gmail.com to admin (if the user exists)
-do $$
-declare
-  admin_uid uuid;
-begin
-  select id into admin_uid
-  from auth.users
-  where email = 'admin@gmail.com'
-  limit 1;
-
-  if admin_uid is not null then
-    insert into public.profiles (id, full_name, email, role, status)
-    values (admin_uid, 'Admin', 'admin@gmail.com', 'admin', 'approved')
-    on conflict (id) do update
-    set role = 'admin',
-        status = 'approved',
-        full_name = 'Admin',
-        email = 'admin@gmail.com';
-    raise notice 'Successfully promoted admin@gmail.com to admin.';
-  else
-    raise notice 'User admin@gmail.com does not exist in auth.users. Cannot promote to admin.';
-  end if;
-end $$;
+-- First admin is intentionally not hardcoded here.
+-- Register the admin account, then run src/sql/003_seed_first_admin.sql with the real email.

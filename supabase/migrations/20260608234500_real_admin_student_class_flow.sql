@@ -223,6 +223,7 @@ with check (public.is_admin(auth.uid()));
 
 drop policy if exists "Admins can manage classes" on public.classes;
 drop policy if exists "Approved students can read active classes" on public.classes;
+drop policy if exists "Assigned approved students can read active classes" on public.classes;
 
 create policy "Admins can manage classes"
 on public.classes for all
@@ -230,10 +231,14 @@ to authenticated
 using (public.is_admin(auth.uid()))
 with check (public.is_admin(auth.uid()));
 
-create policy "Approved students can read active classes"
+create policy "Assigned approved students can read active classes"
 on public.classes for select
 to authenticated
-using (status = 'active' and public.is_approved_student(auth.uid()));
+using (
+  status = 'active'
+  and public.is_approved_student(auth.uid())
+  and public.is_class_member(auth.uid(), id)
+);
 
 drop policy if exists "Students can read own class memberships" on public.class_memberships;
 drop policy if exists "Students can request class membership" on public.class_memberships;
