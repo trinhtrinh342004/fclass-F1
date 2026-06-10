@@ -226,12 +226,12 @@ export const TUWI_27_CURRICULUM_MAP = [
   },
   {
     lessonId: 26,
-    topicEnglish: "Tag questions",
+    topicEnglish: "Tag Questions",
     topicVietnamese: "Câu hỏi đuôi",
     slug: "tag-questions",
     sourceLessons: [],
-    status: "draft",
-    notes: "Chưa có nội dung cũ phù hợp.",
+    status: "ready",
+    notes: "Đã tích hợp đầy đủ nội dung Tag Questions theo kiến trúc Buổi 9.",
   },
   {
     lessonId: 27,
