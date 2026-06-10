@@ -200,11 +200,11 @@ export const TUWI_27_CURRICULUM_MAP = [
   {
     lessonId: 23,
     topicEnglish: "Numbers and Time in English",
-    topicVietnamese: "Số thứ tự, số đếm, ngày, tháng",
+    topicVietnamese: "Số đếm, số thứ tự, ngày, tháng & giờ",
     slug: "numbers-and-time-in-english",
     sourceLessons: [],
-    status: "draft",
-    notes: "Chưa có nội dung cũ tách riêng numbers/time.",
+    status: "ready",
+    notes: "Nội dung Buổi 23 đã được biên soạn đầy đủ theo flow Buổi 9.",
   },
   {
     lessonId: 24,

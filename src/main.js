@@ -2180,12 +2180,14 @@ function _pickQB(chosen){
 // --- GRAMMAR ---
 function renderGrammarRichTable(table){
   if(!table?.headers?.length || !table?.rows?.length) return "";
-  return `<table class="grammar-table grammar-rich-table">
-    <thead><tr>${table.headers.map(h=>`<th>${escAttr(h)}</th>`).join("")}</tr></thead>
-    <tbody>${table.rows.map(row=>`
-      <tr>${row.map(cell=>`<td>${highlightText(escAttr(cell))}</td>`).join("")}</tr>
-    `).join("")}</tbody>
-  </table>`;
+  return `<div class="responsive-table-wrap">
+    <table class="grammar-table grammar-rich-table">
+      <thead><tr>${table.headers.map(h=>`<th>${escAttr(h)}</th>`).join("")}</tr></thead>
+      <tbody>${table.rows.map(row=>`
+        <tr>${row.map(cell=>`<td>${highlightText(escAttr(cell))}</td>`).join("")}</tr>
+      `).join("")}</tbody>
+    </table>
+  </div>`;
 }
 
 function renderGrammarRichExamples(examples=[]){

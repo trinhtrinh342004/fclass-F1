@@ -134,7 +134,26 @@ function getLocalLessons(){
 }
 
 function mapLessonRow(row){
-  const content = row.content && Object.keys(row.content).length ? row.content : {};
+  const remoteContent = row.content && Object.keys(row.content).length ? row.content : {};
+  const localLesson = LOCAL_LESSONS.find((lesson) => lesson.id === row.lesson_number);
+  if(localLesson?.metadata?.localContentAuthoritative){
+    const localStatus = localLesson.curriculumStatus || localLesson.metadata?.status?.content || "ready";
+    return {
+      ...structuredClone(localLesson),
+      dbLessonId: row.id,
+      curriculumStatus: localStatus,
+      metadata: {
+        ...(localLesson.metadata || {}),
+        sourceLessonIds: row.source_lessons || localLesson.metadata?.sourceLessonIds || [],
+        status: {
+          ...(localLesson.metadata?.status || {}),
+          content: localStatus,
+          code: "local-authoritative",
+        },
+      },
+    };
+  }
+  const content = remoteContent;
   return {
     ...content,
     id: row.lesson_number,
