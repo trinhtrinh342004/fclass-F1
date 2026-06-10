@@ -379,6 +379,21 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   font-weight:800;
   color:var(--navy);
 }
+.auth-recovery-state{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  text-align:center;
+}
+.auth-recovery-state strong{
+  color:var(--navy);
+  font-size:18px;
+}
+.auth-recovery-state span{
+  color:var(--ink-mute);
+  max-width:560px;
+}
 .status-card{
   max-width:620px;
   display:grid;

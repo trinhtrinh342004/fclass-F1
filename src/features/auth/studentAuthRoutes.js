@@ -105,17 +105,28 @@ export async function renderAuthRoute(){
   view.classList.add("active");
   view.innerHTML = renderShell("Đang kiểm tra tài khoản...", `<div class="auth-loading"><span class="auth-spinner" aria-hidden="true"></span>Đang kiểm tra tài khoản...</div>`);
 
-  if(path === "/register" || path === "/student-register") renderStudentRegister(view);
-  if(path === "/login" || path === "/student-login") renderStudentLogin(view);
-  if(path === "/forgot-password") renderForgotPassword(view);
-  if(path === "/auth/callback") await renderAuthCallback(view);
-  if(path === "/reset-password") await renderResetPassword(view);
-  if(path === "/pending-approval") await renderAccountStatusPage(view);
-  if(path === "/rejected") await renderAccountStatusPage(view);
-  if(path === "/student") await renderStudentDashboard(view);
-  if(path.startsWith("/admin")){
-    currentAdminTab = getAdminTabFromPath(path);
-    await renderAdmin(view);
+  try{
+    if(path === "/register" || path === "/student-register") renderStudentRegister(view);
+    if(path === "/login" || path === "/student-login") renderStudentLogin(view);
+    if(path === "/forgot-password") renderForgotPassword(view);
+    if(path === "/auth/callback") await renderAuthCallback(view);
+    if(path === "/reset-password") await renderResetPassword(view);
+    if(path === "/pending-approval") await renderAccountStatusPage(view);
+    if(path === "/rejected") await renderAccountStatusPage(view);
+    if(path === "/student") await renderStudentDashboard(view);
+    if(path.startsWith("/admin")){
+      currentAdminTab = getAdminTabFromPath(path);
+      await renderAdmin(view);
+    }
+  }catch(error){
+    console.error("[FClass auth] Route check failed", error);
+    document.body.classList.remove("admin-active");
+    view.classList.remove("admin-route");
+    view.innerHTML = renderShell(
+      "Không thể kiểm tra tài khoản",
+      renderStatusCard("Không thể kiểm tra tài khoản. Vui lòng tải lại trang hoặc đăng nhập lại.", { showReload: true }),
+    );
+    attachAuthRecoveryHandlers();
   }
 
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -403,7 +414,7 @@ async function renderResetPassword(view){
 async function redirectAfterAuthCallback(view){
   const { user } = await getCurrentUser();
   if(!user){
-    window.history.replaceState({}, "", "/student-login");
+    window.history.replaceState({}, "", "/login");
     renderStudentLogin(view);
     return;
   }
@@ -432,7 +443,7 @@ async function redirectAfterAuthCallback(view){
 async function renderAccountStatusPage(view){
   const { user } = await getCurrentUser();
   if(!user){
-    window.history.replaceState({}, "", "/student-login");
+    window.history.replaceState({}, "", "/login");
     renderStudentLogin(view);
     return;
   }
@@ -470,13 +481,14 @@ async function renderAccountStatusPage(view){
 async function renderStudentDashboard(view){
   const guard = await requireApprovedStudent();
   if(guard.reason === "unauthenticated"){
-    window.history.replaceState({}, "", "/student-login");
+    window.history.replaceState({}, "", "/login");
     renderStudentLogin(view);
     return;
   }
   if(!guard.ok){
-    view.innerHTML = renderShell("Trạng thái tài khoản", renderStatusCard(guard.message));
+    view.innerHTML = renderShell("Trạng thái tài khoản", renderStatusCard(guard.message, { showReload: isRecoverableAuthGuardFailure(guard.reason) }));
     attachLogoutHandler();
+    attachReloadHandler();
     attachStudentRealtime(view, guard.user?.id);
     return;
   }
@@ -644,15 +656,19 @@ async function renderAdmin(view){
   if(guard.reason === "unauthenticated"){
     document.body.classList.remove("admin-active");
     view.classList.remove("admin-route");
-    window.history.replaceState({}, "", "/student-login");
+    window.history.replaceState({}, "", "/login");
     renderStudentLogin(view);
     return;
   }
   if(!guard.ok){
     document.body.classList.remove("admin-active");
     view.classList.remove("admin-route");
-    view.innerHTML = renderShell("Admin TuWi A1", renderStatusCard(guard.message, { showLogin: true }));
+    view.innerHTML = renderShell("Admin TuWi A1", renderStatusCard(guard.message, {
+      showLogin: true,
+      showReload: isRecoverableAuthGuardFailure(guard.reason),
+    }));
     attachLogoutHandler();
+    attachReloadHandler();
     return;
   }
 
@@ -1320,10 +1336,21 @@ function renderStatusCard(message, options = {}){
       <p>${escapeHtml(message)}</p>
       <div class="student-actions">
         ${options.showLogin ? `<a class="btn-primary" href="/login">Đăng nhập</a>` : ""}
+        ${options.showReload ? `<button class="btn-primary" id="authReloadBtn">Tải lại</button>` : ""}
         <button class="btn-ghost" id="studentLogoutBtn">Đăng xuất</button>
       </div>
     </section>
   `;
+}
+
+function isRecoverableAuthGuardFailure(reason){
+  return ["auth-error", "auth-timeout", "profile-error", "profile-timeout"].includes(reason);
+}
+
+function attachReloadHandler(){
+  document.getElementById("authReloadBtn")?.addEventListener("click", () => {
+    window.location.reload();
+  });
 }
 
 function attachLogoutHandler(){
@@ -1331,10 +1358,15 @@ function attachLogoutHandler(){
     clearRealtime(adminChannels);
     clearRealtime(studentChannels);
     if(hasSupabaseConfig) await signOut();
-    window.history.pushState({}, "", "/student-login");
+    window.history.pushState({}, "", "/login");
     await renderAuthRoute();
     await window.refreshAuthNavbar?.();
   });
+}
+
+function attachAuthRecoveryHandlers(){
+  attachReloadHandler();
+  attachLogoutHandler();
 }
 
 function openLessonFromAuth(lessonId){
