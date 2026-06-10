@@ -7,6 +7,21 @@ export const lesson02 = {
   status: "ready",
   unit: "Tuwi 1",
   mainTopic: "Singular & Plural Nouns",
+  sectionFlow: [
+    "intro",
+    "review",
+    "video",
+    "vocab",
+    "vocab_match",
+    "listen_pick",
+    "grammar",
+    "dialogue_video",
+    "dialogue_video_quiz",
+    "speaking",
+    "minitest",
+    "mindmap",
+    "homework"
+  ],
   contentCounts: {
     dialogueListen: 6,
     minitest: 12
