@@ -1,4 +1,5 @@
 import { lesson04LongVowels } from "../lessons/lesson-04-long-vowels.js";
+import { lesson06Consonants1 } from "../lessons/lesson-06-consonants-1.js";
 import { lesson03Diphthongs } from "../lessons/lesson-03-diphthongs.js";
 import { lesson08IpaReview } from "../lessons/lesson-08-ipa-review.js";
 import { lesson07Consonants2 } from "../lessons/lesson-07-consonants-2.js";
@@ -200,12 +201,12 @@ export const IPA_BOOTCAMP_CURRICULUM_MAP = [
   },
   {
     lessonId: 6,
-    topicEnglish: "Difficult Consonants – Âm dễ sai với người Việt",
-    topicVietnamese: "Sửa lỗi ch, j, l, r, w, y",
-    slug: "difficult-consonants",
+    topicEnglish: "Consonants 1 – Phụ âm bật, âm mũi, âm cuối",
+    topicVietnamese: "Bật âm rõ, không nuốt âm cuối",
+    slug: "consonants-1-stop-sounds-and-nasals",
     sourceLessons: [],
     status: "ready",
-    notes: "IPA Bootcamp lesson.",
+    notes: "Buổi 6 có structure riêng theo Consonants 1.",
   },
   {
     lessonId: 7,
@@ -276,14 +277,16 @@ export const IPA_BOOTCAMP_LESSONS = [
     learningItems: "/f/ /v/ /θ/ /ð/ /s/ /z/ /ʃ/ /ʒ/ /h/",
     outcome: "Học sinh phân biệt s/z, f/v, th hữu thanh/vô thanh, sh và zh.",
   }),
-  createIpaLesson({
+  {
+    ...lesson06Consonants1,
     id: 6,
-    title: "Difficult Consonants – Âm dễ sai với người Việt",
-    subtitle: "Sửa lỗi ch, j, l, r, w, y",
-    topic: "Âm ch, j, l, r, w, y",
-    learningItems: "/tʃ/ /dʒ/ /l/ /r/ /w/ /j/",
-    outcome: "Học sinh sửa các lỗi Việt Nam hay gặp như l/r, w/v, ch/j.",
-  }),
+    lessonNumber: 6,
+    dayNumber: 6,
+    slug: "consonants-1-stop-sounds-and-nasals",
+    module: "ipa-bootcamp",
+    topicEnglish: "Consonants 1 – Phụ âm bật, âm mũi, âm cuối",
+    topicVietnamese: "Bật âm rõ, không nuốt âm cuối",
+  },
   createConsonants2Lesson(),
   {
     ...lesson08IpaReview,

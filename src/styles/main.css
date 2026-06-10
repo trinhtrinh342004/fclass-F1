@@ -3542,4 +3542,21 @@ body.admin-active > .topbar{
 .ipa-mind-center,.ipa-mindmap span{display:grid;min-height:84px;place-items:center;border:1.5px solid var(--line);border-radius:var(--radius);background:#fff;color:var(--navy);font-weight:900;text-align:center;padding:12px}
 .ipa-mind-center{grid-column:1/-1;background:var(--navy);color:#fff;font-family:var(--font-display);font-size:24px}
 @media (max-width:760px){.ipa-hero-panel,.ipa-mouth-layout,.ipa-game-row,.ipa-reading-card,.ipa-glide-row{grid-template-columns:1fr}.ipa-symbol-stack{justify-content:flex-start}.ipa-process-flow{grid-template-columns:repeat(2,minmax(0,1fr))}.ipa-mouth-figure{position:relative;top:auto}.ipa-mindmap{grid-template-columns:1fr 1fr}}
+.consonants-three-col{grid-template-columns:repeat(3,minmax(0,1fr))}
+.consonants-card-symbols{margin:8px 0;color:var(--navy);font-family:var(--font-display);font-size:22px;font-weight:900}
+.consonants-flow,.consonants-nose-flow{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;border:1.5px solid var(--line);border-radius:var(--radius);background:#fff;padding:22px;margin-bottom:16px;color:var(--navy);font-size:20px}
+.consonants-flow b,.consonants-nose-flow span{border-radius:8px;background:var(--yellow-soft);padding:10px 14px}
+.consonants-warning{border:1.5px solid #f59e0b;border-radius:8px;background:#fffbeb;color:#92400e;padding:12px 14px;font-weight:700;margin:12px 0}
+.consonant-sound-card{min-height:0}.consonant-sound-card h3 span{font-size:14px;color:var(--ink-soft)}
+.consonant-sound-card dl{display:grid;grid-template-columns:56px minmax(0,1fr);gap:5px 8px;margin:4px 0;font-size:13px}
+.consonant-sound-card dt{font-weight:900;color:var(--navy)}.consonant-sound-card dd{margin:0;color:var(--ink-mute);font-weight:650}
+.consonants-fix{border-radius:8px;background:var(--bg-soft);padding:10px;color:var(--ink-mute);font-size:12px;font-weight:650}
+.ipa-mouth-figure small{display:block;margin-top:8px;color:var(--ink-soft);font-weight:650}.consonants-ng-card{border-color:#f59e0b}
+.final-sound-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.final-sound-card{border:1.5px solid var(--line);border-radius:var(--radius);padding:14px;background:#fff}.final-sound-card>span{color:var(--ink-soft);font-size:11px;font-weight:900;text-transform:uppercase}.final-sound-card h3{font-size:28px;margin:4px 0}.final-sound-card p{margin:0;color:var(--ink-mute);font-weight:800}.final-sound-split{margin:10px 0;border-radius:8px;background:var(--yellow-soft);padding:9px;color:var(--navy);font-weight:800}
+.consonants-word{font-family:var(--font-display);font-size:26px;color:var(--navy)}
+.consonants-compare-card h3{margin:0 0 6px;color:var(--navy)}.consonants-compare-card p{color:var(--ink-mute);font-weight:650}
+.consonants-pair-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.consonants-pair-grid button{display:grid;gap:4px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg-soft);padding:12px;text-align:left;color:var(--navy)}.consonants-pair-grid b{font-family:var(--font-display);font-size:28px}.consonants-pair-grid span,.consonants-pair-grid small{font-weight:750}
+.consonants-minimal-pairs{display:grid;gap:6px;margin-top:10px}.consonants-minimal-pairs span{border-radius:8px;background:var(--yellow-soft);padding:8px;color:var(--navy);font-weight:800}
+@media (max-width:760px){.consonants-three-col,.consonants-pair-grid{grid-template-columns:1fr}.consonants-flow,.consonants-nose-flow{justify-content:flex-start}}
 

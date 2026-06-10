@@ -49,7 +49,7 @@ const expectedTitles = new Map([
   [3, "Diphthongs – Nguyên âm đôi"],
   [4, "BUỔI 4: Long Vowels - Nguyên âm dài"],
   [5, "Fricatives – Âm gió / âm ma sát"],
-  [6, "Difficult Consonants – Âm dễ sai với người Việt"],
+  [6, "BUỔI 6: Consonants 1 – Phụ âm bật, âm mũi, âm cuối"],
   [7, "BUỔI 7: Consonants 2 – Phụ âm gió & Âm khó"],
   [8, "IPA Review + Word Stress – Tổng ôn IPA và trọng âm"],
 ]);
@@ -68,6 +68,15 @@ check(lesson01?.ipa?.videoSlots?.length === 7, "Lesson 1 must have 7 video slots
 check(lesson01?.ipa?.imageSlots?.length === 6, "Lesson 1 must have 6 vocabulary image slots.");
 check(lesson01?.ipa?.blendGame?.length >= 4, "Lesson 1 must have blend game data.");
 check(lesson01?.ipa?.listenChooseGame?.length >= 4, "Lesson 1 must have listen-and-choose game data.");
+
+const lesson06 = lessonById(6);
+check(lesson06?.sectionFlow?.length === 16, "Lesson 6 sidebar must have the 16 requested sections.");
+check(lesson06?.consonants?.sounds?.length === 9, "Lesson 6 must have 9 consonant sound cards.");
+check(
+  lesson06?.consonants?.sounds?.every((sound) => ["lips", "tongue", "teeth", "air", "voice"].every((key) => Boolean(sound[key]))),
+  "Lesson 6 sound cards must include lips, tongue, teeth, air, and voice guidance."
+);
+check(lesson06?.consonants?.sounds?.find((sound) => sound.symbol === "/ŋ/")?.fixTip?.includes("Không thêm /g/"), "Lesson 6 /ŋ/ card must warn learners not to add /g/.");
 
 const lesson03 = lessonById(3);
 check(lesson03?.sectionFlow?.length === 16, "Lesson 3 Diphthongs sidebar must have exactly 16 sections.");
