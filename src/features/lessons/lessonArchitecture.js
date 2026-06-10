@@ -162,12 +162,16 @@ export function normalizeLessonToBuoi9Architecture(rawLesson={}, previousLesson=
 
   lesson.metadata = normalizeMetadata(lesson);
   lesson.status = lesson.metadata.status;
-  lesson.sectionFlow = [...canonicalLessonSections];
+  const appendedSections = Array.isArray(rawLesson.appendSections)
+    ? rawLesson.appendSections.filter(Boolean)
+    : [];
+  lesson.sectionFlow = [...canonicalLessonSections, ...appendedSections];
   lesson.skipSections = [];
   lesson.architecture = {
     version: LESSON_ARCHITECTURE_VERSION,
     normalizedAt: "build-time",
-    sourceOfTruth: "Buổi 9"
+    sourceOfTruth: "Buổi 9",
+    ...(appendedSections.length ? { sectionFlowExtension: appendedSections } : {})
   };
 
   lesson.review = normalizeReview(lesson, previousLesson);
@@ -219,7 +223,10 @@ export function ensureLessonRange(rawLessons, total=31){
 export function validateLessonArchitecture(lesson){
   const warnings = [];
   const activeSections = new Set(lesson.sectionFlow || canonicalLessonSections);
-  const hasCustomFlow = Boolean(lesson.architecture?.sectionFlowOverride);
+  const hasCustomFlow = Boolean(
+    lesson.architecture?.sectionFlowOverride ||
+    lesson.architecture?.sectionFlowExtension
+  );
   const isActive = section => activeSections.has(section);
   const countReal = arr => (arr || []).filter(item => !item?.__placeholder).length;
   const requireCount = (label, arr, required) => {

@@ -1,19 +1,29 @@
 export const lesson02 = {
   id: 2,
-  title: "TOPIC2: Singular & Plural Nouns - Danh từ số ít - Danh từ số nhiều",
-  titleEn: "TOPIC2: Singular & Plural Nouns",
-  titleVi: "Danh từ số ít - Danh từ số nhiều",
+  title: "BUỔI 2: TOPIC 2 — SINGULAR & PLURAL NOUNS",
+  titleEn: "TOPIC 2 — SINGULAR & PLURAL NOUNS",
+  titleVi: "Danh từ số ít & Danh từ số nhiều",
   slug: "singular-plural-nouns",
-  status: "partial",
+  status: "ready",
   unit: "Tuwi 1",
   mainTopic: "Singular & Plural Nouns",
+  contentCounts: {
+    dialogueListen: 6,
+    minitest: 12
+  },
+  appendSections: [
+    "homework_answers",
+    "common_mistakes",
+    "lesson_end"
+  ],
   metadata: {
     contentImported: true,
     importedFromMd: true,
     hasTodoVideo: true,
+    localContentAuthoritative: true,
     sourceLessonIds: [],
     status: {
-      content: "partial",
+      content: "ready",
       code: "tuwi27",
       import: "manual"
     }
@@ -90,9 +100,9 @@ export const lesson02 = {
     title: "Singular and Plural Nouns for Kids",
     channel: "Smile and Learn / Kids Academy / English Singsing",
     duration: "3–5 phút",
-    embedUrl: "",
-    watchUrl: "",
-    originalUrl: "",
+    embedUrl: "DÁN_LINK_EMBED_VIDEO_Ở_ĐÂY",
+    watchUrl: "DÁN_LINK_GỐC_Ở_ĐÂY",
+    originalUrl: "DÁN_LINK_GỐC_Ở_ĐÂY",
     description: "Video giới thiệu khái niệm one thing và many things, cách đổi danh từ số ít sang số nhiều bằng -s / -es, và một vài danh từ bất quy tắc đơn giản như child → children.",
     scenes: [
       { label: "Khái niệm Singular (số ít) và Plural (số nhiều)" },
@@ -118,7 +128,7 @@ export const lesson02 = {
     // regularPlurals
     { en: "book (books)", vi: "quyển sách", img: "📖", ipa: "/bʊk/ — /bʊks/", example: "I have two books.", group: "regularPlurals", note: "Quy tắc: thêm -s" },
     { en: "pen (pens)", vi: "cây bút", img: "🖊️", ipa: "/pen/ — /penz/", example: "There are three pens on the desk.", group: "regularPlurals", note: "Quy tắc: thêm -s" },
-    { en: "pencil (pencils)", vi: "bút chì", img: "✏️", ipa: "/ˈtensəl/ — /ˈtensəlz/", example: "She has five pencils.", group: "regularPlurals", note: "Quy tắc: thêm -s" },
+    { en: "pencil (pencils)", vi: "bút chì", img: "✏️", ipa: "/ˈpensəl/ — /ˈpensəlz/", example: "She has five pencils.", group: "regularPlurals", note: "Quy tắc: thêm -s" },
     { en: "bag (bags)", vi: "cái cặp", img: "🎒", ipa: "/bæɡ/ — /bæɡz/", example: "They have new bags.", group: "regularPlurals", note: "Quy tắc: thêm -s" },
     { en: "desk (desks)", vi: "bàn học", img: "💻", ipa: "/desk/ — /desks/", example: "There are two desks.", group: "regularPlurals", note: "Quy tắc: thêm -s" },
     { en: "chair (chairs)", vi: "cái ghế", img: "🪑", ipa: "/tʃer/ — /tʃerz/", example: "There are three chairs in the room.", group: "regularPlurals", note: "Quy tắc: thêm -s" },
@@ -156,6 +166,46 @@ export const lesson02 = {
     { en: "foot (feet)", vi: "bàn chân", img: "🦶", ipa: "/fʊt/ — /fiːt/", example: "My feet hurt.", group: "irregularPlurals", note: "Bất quy tắc: foot ➔ feet" },
     { en: "tooth (teeth)", vi: "răng", img: "🦷", ipa: "/tuːθ/ — /tiːθ/", example: "Brush your teeth.", group: "irregularPlurals", note: "Bất quy tắc: tooth ➔ teeth" },
     { en: "mouse (mice)", vi: "con chuột", img: "🐭", ipa: "/maʊs/ — /maɪs/", example: "There are two mice.", group: "irregularPlurals", note: "Bất quy tắc: mouse ➔ mice" }
+  ],
+  matchLabels: {
+    left: "Singular",
+    right: "Plural"
+  },
+  matchingPairs: [
+    { en: "book", vi: "books", group: "regularPlurals" },
+    { en: "pen", vi: "pens", group: "regularPlurals" },
+    { en: "pencil", vi: "pencils", group: "regularPlurals" },
+    { en: "bag", vi: "bags", group: "regularPlurals" },
+    { en: "desk", vi: "desks", group: "regularPlurals" },
+    { en: "chair", vi: "chairs", group: "regularPlurals" },
+    { en: "student", vi: "students", group: "regularPlurals" },
+    { en: "teacher", vi: "teachers", group: "regularPlurals" },
+    { en: "cat", vi: "cats", group: "regularPlurals" },
+    { en: "dog", vi: "dogs", group: "regularPlurals" },
+    { en: "class", vi: "classes", group: "endingEs" },
+    { en: "box", vi: "boxes", group: "endingEs" },
+    { en: "watch", vi: "watches", group: "endingEs" },
+    { en: "dish", vi: "dishes", group: "endingEs" },
+    { en: "bus", vi: "buses", group: "endingEs" },
+    { en: "tomato", vi: "tomatoes", group: "endingEs" },
+    { en: "potato", vi: "potatoes", group: "endingEs" },
+    { en: "baby", vi: "babies", group: "changeYf" },
+    { en: "city", vi: "cities", group: "changeYf" },
+    { en: "story", vi: "stories", group: "changeYf" },
+    { en: "family", vi: "families", group: "changeYf" },
+    { en: "country", vi: "countries", group: "changeYf" },
+    { en: "leaf", vi: "leaves", group: "changeYf" },
+    { en: "knife", vi: "knives", group: "changeYf" },
+    { en: "wife", vi: "wives", group: "changeYf" },
+    { en: "wolf", vi: "wolves", group: "changeYf" },
+    { en: "life", vi: "lives", group: "changeYf" },
+    { en: "man", vi: "men", group: "irregularPlurals" },
+    { en: "woman", vi: "women", group: "irregularPlurals" },
+    { en: "child", vi: "children", group: "irregularPlurals" },
+    { en: "person", vi: "people", group: "irregularPlurals" },
+    { en: "foot", vi: "feet", group: "irregularPlurals" },
+    { en: "tooth", vi: "teeth", group: "irregularPlurals" },
+    { en: "mouse", vi: "mice", group: "irregularPlurals" }
   ],
   grammar: {
     title: "Ngữ pháp",
@@ -235,6 +285,99 @@ export const lesson02 = {
       { q: "What are these?", a: "These are books." },
       { q: "How many pens do you have?", a: "I have two pens." },
       { q: "How many students are there?", a: "There are many students." }
+    ],
+    sections: [
+      {
+        title: "Cấu trúc 1: Singular noun + a/an",
+        intro: "Danh từ số ít đếm được thường cần a/an ở phía trước.",
+        tables: [
+          {
+            headers: ["Loại", "Cấu trúc", "Ví dụ"],
+            rows: [
+              ["Bắt đầu bằng âm phụ âm", "a + singular noun", "a book, a pen, a student"],
+              ["Bắt đầu bằng âm nguyên âm", "an + singular noun", "an apple, an egg, an orange"]
+            ]
+          }
+        ],
+        examples: ["This is a book.", "She is a student.", "I have an orange."],
+        mistakes: [
+          { wrong: "This is book.", right: "This is a book." },
+          { wrong: "This is a apple.", right: "This is an apple." }
+        ]
+      },
+      {
+        title: "Cấu trúc 2: Thêm -s cho đa số danh từ",
+        intro: "Khi có số lượng từ 2 trở lên, danh từ đếm được thường phải ở dạng số nhiều.",
+        tables: [
+          {
+            headers: ["Loại", "Cấu trúc", "Ví dụ"],
+            rows: [
+              ["Danh từ thường", "singular noun + s", "book → books"],
+              ["Danh từ thường", "singular noun + s", "pen → pens"],
+              ["Danh từ thường", "singular noun + s", "student → students"]
+            ]
+          }
+        ],
+        examples: ["I have two books.", "There are three pens on the desk.", "They are students."],
+        mistakes: [
+          { wrong: "two book", right: "two books" },
+          { wrong: "three student", right: "three students" }
+        ]
+      },
+      {
+        title: "Cấu trúc 3: Thêm -es với s, x, ch, sh, o",
+        intro: "Các danh từ có đuôi đặc biệt thường thêm -es.",
+        tables: [
+          {
+            headers: ["Đuôi từ", "Quy tắc", "Ví dụ"],
+            rows: [
+              ["s", "+ es", "class → classes"],
+              ["x", "+ es", "box → boxes"],
+              ["ch", "+ es", "watch → watches"],
+              ["sh", "+ es", "dish → dishes"],
+              ["o", "thường + es", "tomato → tomatoes"]
+            ]
+          }
+        ],
+        examples: ["I have two boxes.", "There are three classes today.", "She has two watches."],
+        mistakes: [
+          { wrong: "two boxs", right: "two boxes" },
+          { wrong: "three classs", right: "three classes" }
+        ]
+      },
+      {
+        title: "Cấu trúc 4: Đổi y → ies và f/fe → ves",
+        intro: "Không phải mọi từ kết thúc bằng y đều đổi thành ies: toy → toys vì trước y là nguyên âm.",
+        tables: [
+          {
+            headers: ["Loại", "Quy tắc", "Ví dụ"],
+            rows: [
+              ["Phụ âm + y", "bỏ y + ies", "baby → babies"],
+              ["Phụ âm + y", "bỏ y + ies", "city → cities"],
+              ["Nguyên âm + y", "chỉ thêm s", "toy → toys"],
+              ["Một số từ f/fe", "đổi f/fe → ves", "leaf → leaves"],
+              ["Một số từ f/fe", "đổi f/fe → ves", "knife → knives"]
+            ]
+          }
+        ],
+        examples: ["There are two babies in the room.", "I read many stories.", "There are many leaves on the tree."]
+      },
+      {
+        title: "Cấu trúc 5: This is / These are — There is / There are",
+        intro: "This is / There is dùng với số ít. These are / There are dùng với số nhiều.",
+        tables: [
+          {
+            headers: ["Ý nghĩa", "Cấu trúc", "Ví dụ"],
+            rows: [
+              ["Đây là 1 vật/người", "This is + a/an + singular noun", "This is a book."],
+              ["Đây là nhiều vật/người", "These are + plural noun", "These are books."],
+              ["Có 1 vật/người", "There is + a/an + singular noun", "There is a chair."],
+              ["Có nhiều vật/người", "There are + plural noun", "There are three chairs."]
+            ]
+          }
+        ],
+        examples: ["What is this? — This is a book.", "What are these? — These are books.", "How many pens do you have? — I have two pens.", "How many students are there? — There are many students."]
+      }
     ]
   },
   listenPick: {
@@ -323,8 +466,8 @@ export const lesson02 = {
   dialogueVideo: {
     title: "Video hội thoại",
     dialogueVideoTitle: "Hội thoại về đồ vật trong lớp học — số ít và số nhiều",
-    embedUrl: "",
-    watchUrl: "",
+    embedUrl: "DÁN_LINK_EMBED_VIDEO_HỘI_THOẠI_Ở_ĐÂY",
+    watchUrl: "DÁN_LINK_GỐC_Ở_ĐÂY",
     description: "Hai bạn học sinh nói về đồ vật trong lớp: một quyển sách, nhiều quyển sách, một cây bút, nhiều cây bút, một cái hộp, nhiều cái hộp. Video giúp học viên nhận diện nhanh This is / These are / There is / There are.",
     transcript: [
       { speaker: "A", en: "What is this?", vi: "Đây là gì?" },
@@ -506,13 +649,19 @@ export const lesson02 = {
         icon: "✍️",
         title: "Bài tập 1: Viết — Make It Plural",
         badge: "Bắt buộc",
-        desc: "Viết dạng số nhiều của 20 từ sau: book, pen, student, teacher, chair, desk, box, class, watch, dish, baby, city, story, leaf, knife, man, woman, child, person, tooth.",
-        items: [
-          "10 từ thêm -s thường",
-          "5 từ đuôi đặc biệt thêm -es",
-          "5 từ đổi y->ies, f/fe->ves và bất quy tắc",
-          "Viết rõ ràng cả dạng số ít và số nhiều"
-        ],
+        desc: "Viết dạng số nhiều của 20 từ sau.",
+        table: {
+          headers: ["#", "Singular", "Plural"],
+          rows: [
+            ["1", "book", "______"], ["2", "pen", "______"], ["3", "student", "______"], ["4", "teacher", "______"],
+            ["5", "chair", "______"], ["6", "desk", "______"], ["7", "box", "______"], ["8", "class", "______"],
+            ["9", "watch", "______"], ["10", "dish", "______"], ["11", "baby", "______"], ["12", "city", "______"],
+            ["13", "story", "______"], ["14", "leaf", "______"], ["15", "knife", "______"], ["16", "man", "______"],
+            ["17", "woman", "______"], ["18", "child", "______"], ["19", "person", "______"], ["20", "tooth", "______"]
+          ]
+        },
+        showSample: true,
+        showRubric: true,
         sample: "1. book ➔ books\n2. class ➔ classes\n3. baby ➔ babies\n4. leaf ➔ leaves\n5. child ➔ children\n(Xem thêm ở phần đáp án chi tiết)",
         rubric: "Đúng chính tả dạng số nhiều của cả 20 từ theo quy tắc đã học."
       },
@@ -526,6 +675,8 @@ export const lesson02 = {
           "5 câu danh từ số nhiều (có đuôi số nhiều chuẩn)",
           "Sử dụng đa dạng cấu trúc chỉ định, tồn tại và sở hữu"
         ],
+        showSample: true,
+        showRubric: true,
         sample: "1. This is a book.\n2. I have a pen.\n3. These are books.\n4. I have two pens.\n5. There are many students.",
         rubric: "Đúng cấu trúc ngữ pháp chỉ định (this/these) và sự tồn tại (there is/are) tương thích với dạng số ít/nhiều."
       },
@@ -535,13 +686,65 @@ export const lesson02 = {
         badge: "Bắt buộc",
         desc: "Ghi âm đọc rõ ràng 12 câu mẫu nói về các đồ vật trong lớp học và số ít / số nhiều.",
         items: [
-          "Đọc rõ ràng 12 câu mẫu được cho",
-          "Chú ý phát âm đuôi số nhiều (-s, -es)",
-          "Thời lượng từ 30–60 giây"
+          "This is a book.",
+          "These are books.",
+          "This is a pen.",
+          "These are pens.",
+          "I have a pencil.",
+          "I have two pencils.",
+          "There is a chair.",
+          "There are three chairs.",
+          "There is an apple.",
+          "There are many apples.",
+          "They are children.",
+          "I see many people."
         ],
+        showSample: true,
+        showRubric: true,
         sample: "1. This is a book. 2. These are books. 3. This is a pen. 4. These are pens. 5. I have a pencil. 6. I have two pencils. 7. There is a chair. 8. There are three chairs. 9. There is an apple. 10. There are many apples. 11. They are children. 12. I see many people.",
         rubric: "Phát âm rõ ràng, đọc đúng âm cuối s/es và các từ bất quy tắc."
       }
+    ]
+  },
+  homeworkAnswers: {
+    title: "Đáp án Homework 1",
+    headers: ["#", "Singular", "Plural"],
+    rows: [
+      ["1", "book", "books"], ["2", "pen", "pens"], ["3", "student", "students"], ["4", "teacher", "teachers"],
+      ["5", "chair", "chairs"], ["6", "desk", "desks"], ["7", "box", "boxes"], ["8", "class", "classes"],
+      ["9", "watch", "watches"], ["10", "dish", "dishes"], ["11", "baby", "babies"], ["12", "city", "cities"],
+      ["13", "story", "stories"], ["14", "leaf", "leaves"], ["15", "knife", "knives"], ["16", "man", "men"],
+      ["17", "woman", "women"], ["18", "child", "children"], ["19", "person", "people"], ["20", "tooth", "teeth"]
+    ]
+  },
+  commonMistakes: [
+    { mistake: "two book", correction: "two books", explanation: "Có số lượng từ 2 trở lên → danh từ số nhiều." },
+    { mistake: "a books", correction: "a book / books", explanation: "a chỉ dùng với danh từ số ít." },
+    { mistake: "an book", correction: "a book", explanation: "book bắt đầu bằng âm phụ âm." },
+    { mistake: "a apple", correction: "an apple", explanation: "apple bắt đầu bằng âm nguyên âm." },
+    { mistake: "boxs", correction: "boxes", explanation: "box kết thúc bằng x → thêm es." },
+    { mistake: "classs", correction: "classes", explanation: "class kết thúc bằng s → thêm es." },
+    { mistake: "babys", correction: "babies", explanation: "phụ âm + y → ies." },
+    { mistake: "leafs", correction: "leaves", explanation: "leaf là từ đổi f → ves thường gặp." },
+    { mistake: "childs", correction: "children", explanation: "Danh từ bất quy tắc." },
+    { mistake: "persons", correction: "people", explanation: "person → people trong nghĩa thông dụng." },
+    { mistake: "There is three books.", correction: "There are three books.", explanation: "Số nhiều dùng there are." },
+    { mistake: "These is pens.", correction: "These are pens.", explanation: "These đi với are." }
+  ],
+  lessonEnd: {
+    title: "Kết thúc Buổi 2",
+    intro: "Học viên cần nhớ:",
+    items: [
+      "Singular noun = danh từ số ít = 1 người/vật.",
+      "Plural noun = danh từ số nhiều = từ 2 người/vật trở lên.",
+      "Danh từ số ít thường dùng a/an.",
+      "Phần lớn danh từ số nhiều thêm -s.",
+      "Từ kết thúc bằng s, x, ch, sh, o thường thêm -es.",
+      "Phụ âm + y đổi thành ies.",
+      "Một số từ f/fe đổi thành ves.",
+      "Một số từ bất quy tắc cần học thuộc.",
+      "Dùng This is / There is với số ít.",
+      "Dùng These are / There are với số nhiều."
     ]
   },
   homework: [
