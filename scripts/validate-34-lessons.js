@@ -69,6 +69,15 @@ check(lesson01?.ipa?.imageSlots?.length === 6, "Lesson 1 must have 6 vocabulary 
 check(lesson01?.ipa?.blendGame?.length >= 4, "Lesson 1 must have blend game data.");
 check(lesson01?.ipa?.listenChooseGame?.length >= 4, "Lesson 1 must have listen-and-choose game data.");
 
+const lesson03 = lessonById(3);
+check(lesson03?.sectionFlow?.length === 16, "Lesson 3 Diphthongs sidebar must have exactly 16 sections.");
+check(lesson03?.ipa?.sounds?.length === 8, "Lesson 3 Diphthongs must have 8 sound cards.");
+check(lesson03?.ipa?.videoSlots?.length === 4, "Lesson 3 Diphthongs must have 4 safe video placeholders.");
+check(lesson03?.ipa?.imageSlots?.length === 8, "Lesson 3 Diphthongs must have 8 safe image placeholders.");
+check(lesson03?.ipa?.blendGame?.length === 8, "Lesson 3 Diphthongs must have 8 blend-game words.");
+check(lesson03?.ipa?.listenChooseGame?.length === 8, "Lesson 3 Diphthongs must have 8 listen-and-choose rounds.");
+check(lesson03?.ipa?.isGlideLesson === true, "Lesson 3 Diphthongs must enable the glide animation.");
+
 const lesson08 = lessonById(8);
 check(lesson08?.sectionFlow?.length === 18, "Lesson 8 IPA review sidebar must have exactly 18 sections.");
 check(lesson08?.sectionFlow?.every((section) => section.startsWith("review8_")), "Lesson 8 must use its dedicated review section flow.");

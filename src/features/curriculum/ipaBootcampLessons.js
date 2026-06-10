@@ -1,4 +1,5 @@
 import { lesson04LongVowels } from "../lessons/lesson-04-long-vowels.js";
+import { lesson03Diphthongs } from "../lessons/lesson-03-diphthongs.js";
 import { lesson08IpaReview } from "../lessons/lesson-08-ipa-review.js";
 import { lesson07Consonants2 } from "../lessons/lesson-07-consonants-2.js";
 
@@ -173,11 +174,11 @@ export const IPA_BOOTCAMP_CURRICULUM_MAP = [
   {
     lessonId: 3,
     topicEnglish: "Diphthongs – Nguyên âm đôi",
-    topicVietnamese: "Học cách đọc âm trượt",
+    topicVietnamese: "Học cách đọc âm trượt từ âm này sang âm khác",
     slug: "diphthongs-nguyen-am-doi",
     sourceLessons: [],
     status: "ready",
-    notes: "IPA Bootcamp lesson.",
+    notes: "Buổi 3 có structure riêng theo tài liệu Diphthongs.",
   },
   {
     lessonId: 4,
@@ -256,14 +257,7 @@ export const IPA_BOOTCAMP_LESSONS = [
     learningItems: "/iː/ /uː/ /ɑː/ /ɔː/ /ɜː/",
     outcome: "Học sinh hiểu dấu /ː/ là kéo dài âm, phân biệt được âm ngắn và âm dài.",
   }),
-  createIpaLesson({
-    id: 3,
-    title: "Diphthongs – Nguyên âm đôi",
-    subtitle: "Học cách đọc âm trượt",
-    topic: "Nguyên âm đôi",
-    learningItems: "/eɪ/ /aɪ/ /ɔɪ/ /aʊ/ /əʊ/ /ɪə/ /eə/ /ʊə/",
-    outcome: "Học sinh biết đọc các âm trượt như say, time, boy, house, go.",
-  }),
+  createDiphthongLesson(lesson03Diphthongs),
   {
     ...lesson04LongVowels,
     id: 4,
@@ -459,4 +453,94 @@ function createDefaultIpaMinitest(topic){
     { q: "Khi luyện phát âm, bước nào quan trọng nhất?", options: ["Nghe - nhìn khẩu hình - nhắc lại", "Chép 20 lần", "Dịch sang tiếng Việt", "Bỏ âm cuối"], answer: 0 },
     { q: "Nếu chưa có audio thật, em nên dùng gì trong app?", options: ["nút nghe placeholder/TTS", "bỏ qua bài", "đổi bài", "tắt trình duyệt"], answer: 0 },
   ];
+}
+
+function createDiphthongLesson(baseLesson){
+  const sounds = baseLesson.diphthongs.sounds.map((sound) => ({
+    ...sound,
+    word: sound.keyword,
+    mouth: {
+      lips: sound.lips,
+      tongue: sound.tongue,
+      teeth: "Di chuyển tự nhiên theo khẩu hình bắt đầu và kết thúc.",
+      air: sound.air,
+      voice: sound.voice,
+      mistake: sound.mistake,
+    },
+  }));
+  const choices = sounds.map((sound) => sound.symbol);
+
+  return {
+    ...baseLesson,
+    unit: "IPA Bootcamp",
+    title: "Diphthongs – Nguyên âm đôi",
+    topicEnglish: "Diphthongs – Nguyên âm đôi",
+    topicVietnamese: baseLesson.subtitle,
+    slug: "diphthongs-nguyen-am-doi",
+    module: "ipa-bootcamp",
+    sectionFlow: [
+      "ipa_intro",
+      "ipa_word_process",
+      "ipa_sound_table",
+      "ipa_mouth_visual",
+      "ipa_video_mouth",
+      "ipa_audio_samples",
+      "ipa_read_symbols",
+      "ipa_spell_words",
+      "ipa_compare_sounds",
+      "ipa_image_sentence",
+      "ipa_blend_words",
+      "ipa_listen_choose_sound",
+      "ipa_sentence_practice",
+      "ipa_ai_speaking",
+      "ipa_mini_test",
+      "ipa_homework",
+    ],
+    sectionLabels: {
+      ipa_intro: "Nguyên âm đôi là gì?",
+      ipa_word_process: "Cách trượt âm",
+      ipa_sound_table: "Bảng âm hôm nay",
+      ipa_mouth_visual: "Khẩu hình âm trượt",
+      ipa_video_mouth: "Video khẩu hình",
+      ipa_audio_samples: "Nghe âm mẫu",
+      ipa_read_symbols: "Nhìn IPA đọc âm",
+      ipa_spell_words: "Đánh vần từ mẫu",
+      ipa_compare_sounds: "So sánh âm dễ nhầm",
+      ipa_image_sentence: "Hình ảnh & câu minh họa",
+      ipa_blend_words: "Ghép âm thành từ",
+      ipa_listen_choose_sound: "Nghe chọn âm",
+      ipa_sentence_practice: "Luyện đọc câu",
+      ipa_ai_speaking: "Luyện nói AI",
+      ipa_mini_test: "Mini test",
+      ipa_homework: "Bài tập về nhà",
+    },
+    ipa: {
+      topic: "Diphthongs – Nguyên âm đôi",
+      outcome: "Nguyên âm đôi là âm trượt từ âm đầu sang âm sau trong cùng một âm đọc.",
+      learningItems: sounds.map((sound) => sound.symbol).join(" "),
+      isGlideLesson: true,
+      sounds,
+      videoSlots: baseLesson.diphthongs.videos.map((video) => video.slot),
+      imageSlots: sounds.map((sound) => ({
+        word: sound.word,
+        ipa: sound.ipa,
+        sentence: sound.sentence,
+        slot: sound.imageSlot,
+      })),
+      blendGame: baseLesson.diphthongs.spellingWords.map((item) => ({
+        sounds: item.split,
+        answer: item.word,
+      })),
+      listenChooseGame: sounds.map((sound, index) => ({
+        audioText: sound.word,
+        answer: sound.symbol,
+        options: [
+          sound.symbol,
+          choices[(index + 1) % choices.length],
+          choices[(index + 2) % choices.length],
+        ],
+      })),
+      comparisons: baseLesson.diphthongs.comparisons,
+    },
+  };
 }
