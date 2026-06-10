@@ -1,5 +1,5 @@
 import { lesson04LongVowels } from "../lessons/lesson-04-long-vowels.js";
-import { lesson05 } from "../lessons/lesson-05-diphthongs.js";
+import { lesson03Diphthongs } from "../lessons/lesson-03-diphthongs.js";
 import { lesson07Consonants2 } from "../lessons/lesson-07-consonants-2.js";
 
 export const IPA_BOOTCAMP_SECTION_FLOW = [
@@ -173,11 +173,11 @@ export const IPA_BOOTCAMP_CURRICULUM_MAP = [
   {
     lessonId: 3,
     topicEnglish: "Diphthongs – Nguyên âm đôi",
-    topicVietnamese: "Học cách đọc âm trượt",
+    topicVietnamese: "Học cách đọc âm trượt từ âm này sang âm khác",
     slug: "diphthongs-nguyen-am-doi",
     sourceLessons: [],
     status: "ready",
-    notes: "IPA Bootcamp lesson.",
+    notes: "Buổi 3 có structure riêng theo tài liệu Diphthongs.",
   },
   {
     lessonId: 4,
@@ -190,12 +190,12 @@ export const IPA_BOOTCAMP_CURRICULUM_MAP = [
   },
   {
     lessonId: 5,
-    topicEnglish: "Diphthongs – Nguyên âm đôi",
-    topicVietnamese: "Học cách đọc âm trượt từ âm này sang âm khác",
-    slug: "diphthongs-buoi-5",
+    topicEnglish: "Fricatives – Âm gió / âm ma sát",
+    topicVietnamese: "Phân biệt hơi và rung giọng",
+    slug: "fricatives-am-gio-am-ma-sat",
     sourceLessons: [],
     status: "ready",
-    notes: "Buổi 5 có structure riêng theo tài liệu Diphthongs.",
+    notes: "IPA Bootcamp lesson.",
   },
   {
     lessonId: 6,
@@ -256,30 +256,25 @@ export const IPA_BOOTCAMP_LESSONS = [
     learningItems: "/iː/ /uː/ /ɑː/ /ɔː/ /ɜː/",
     outcome: "Học sinh hiểu dấu /ː/ là kéo dài âm, phân biệt được âm ngắn và âm dài.",
   }),
-  createIpaLesson({
-    id: 3,
-    title: "Diphthongs – Nguyên âm đôi",
-    subtitle: "Học cách đọc âm trượt",
-    topic: "Nguyên âm đôi",
-    learningItems: "/eɪ/ /aɪ/ /ɔɪ/ /aʊ/ /əʊ/ /ɪə/ /eə/ /ʊə/",
-    outcome: "Học sinh biết đọc các âm trượt như say, time, boy, house, go.",
-  }),
+  createDiphthongLesson(lesson03Diphthongs),
   {
     ...lesson04LongVowels,
     id: 4,
     lessonNumber: 4,
     dayNumber: 4,
-    title: "Long Vowels – Nguyên âm dài",
-    titleEn: "Long Vowels",
-    titleVi: "Nguyên âm dài",
-    topicEnglish: "Long Vowels – Nguyên âm dài",
-    topicVietnamese: "Hiểu dấu /ː/ và biết kéo dài âm đúng cách",
     slug: "long-vowels",
     module: "ipa-bootcamp",
     topicEnglish: "Long Vowels – Nguyên âm dài",
     topicVietnamese: "Hiểu dấu /ː/ và biết kéo dài âm đúng cách",
   },
-  createDiphthongLesson(lesson05),
+  createIpaLesson({
+    id: 5,
+    title: "Fricatives – Âm gió / âm ma sát",
+    subtitle: "Phân biệt hơi và rung giọng",
+    topic: "Phụ âm gió / ma sát",
+    learningItems: "/f/ /v/ /θ/ /ð/ /s/ /z/ /ʃ/ /ʒ/ /h/",
+    outcome: "Học sinh phân biệt s/z, f/v, th hữu thanh/vô thanh, sh và zh.",
+  }),
   createIpaLesson({
     id: 6,
     title: "Difficult Consonants – Âm dễ sai với người Việt",
@@ -476,7 +471,7 @@ function createDiphthongLesson(baseLesson){
     title: "Diphthongs – Nguyên âm đôi",
     topicEnglish: "Diphthongs – Nguyên âm đôi",
     topicVietnamese: baseLesson.subtitle,
-    slug: "diphthongs-buoi-5",
+    slug: "diphthongs-nguyen-am-doi",
     module: "ipa-bootcamp",
     sectionFlow: [
       "ipa_intro",

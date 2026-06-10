@@ -47,8 +47,8 @@ const expectedTitles = new Map([
   [1, "IPA Foundation – Cách đọc một từ tiếng Anh"],
   [2, "Short vs Long Vowels – Nguyên âm ngắn và dài"],
   [3, "Diphthongs – Nguyên âm đôi"],
-  [4, "Long Vowels – Nguyên âm dài"],
-  [5, "Diphthongs – Nguyên âm đôi"],
+  [4, "BUỔI 4: Long Vowels - Nguyên âm dài"],
+  [5, "Fricatives – Âm gió / âm ma sát"],
   [6, "Difficult Consonants – Âm dễ sai với người Việt"],
   [7, "BUỔI 7: Consonants 2 – Phụ âm gió & Âm khó"],
   [8, "IPA Review – Tổng ôn IPA và đọc từ/câu"],
@@ -69,14 +69,14 @@ check(lesson01?.ipa?.imageSlots?.length === 6, "Lesson 1 must have 6 vocabulary 
 check(lesson01?.ipa?.blendGame?.length >= 4, "Lesson 1 must have blend game data.");
 check(lesson01?.ipa?.listenChooseGame?.length >= 4, "Lesson 1 must have listen-and-choose game data.");
 
-const lesson05 = lessonById(5);
-check(lesson05?.sectionFlow?.length === 16, "Lesson 5 Diphthongs sidebar must have exactly 16 sections.");
-check(lesson05?.ipa?.sounds?.length === 8, "Lesson 5 Diphthongs must have 8 sound cards.");
-check(lesson05?.ipa?.videoSlots?.length === 4, "Lesson 5 Diphthongs must have 4 safe video placeholders.");
-check(lesson05?.ipa?.imageSlots?.length === 8, "Lesson 5 Diphthongs must have 8 safe image placeholders.");
-check(lesson05?.ipa?.blendGame?.length === 8, "Lesson 5 Diphthongs must have 8 blend-game words.");
-check(lesson05?.ipa?.listenChooseGame?.length === 8, "Lesson 5 Diphthongs must have 8 listen-and-choose rounds.");
-check(lesson05?.ipa?.isGlideLesson === true, "Lesson 5 Diphthongs must enable the glide animation.");
+const lesson03 = lessonById(3);
+check(lesson03?.sectionFlow?.length === 16, "Lesson 3 Diphthongs sidebar must have exactly 16 sections.");
+check(lesson03?.ipa?.sounds?.length === 8, "Lesson 3 Diphthongs must have 8 sound cards.");
+check(lesson03?.ipa?.videoSlots?.length === 4, "Lesson 3 Diphthongs must have 4 safe video placeholders.");
+check(lesson03?.ipa?.imageSlots?.length === 8, "Lesson 3 Diphthongs must have 8 safe image placeholders.");
+check(lesson03?.ipa?.blendGame?.length === 8, "Lesson 3 Diphthongs must have 8 blend-game words.");
+check(lesson03?.ipa?.listenChooseGame?.length === 8, "Lesson 3 Diphthongs must have 8 listen-and-choose rounds.");
+check(lesson03?.ipa?.isGlideLesson === true, "Lesson 3 Diphthongs must enable the glide animation.");
 
 const lesson07 = lessonById(7);
 check(lesson07?.slug === "consonants-2-am-gio-va-am-kho-voi-nguoi-viet", "Lesson 7 must route to Consonants 2.");

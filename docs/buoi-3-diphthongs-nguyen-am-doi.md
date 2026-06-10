@@ -1,6 +1,6 @@
-# Buổi 5: Diphthongs – Nguyên âm đôi
+# Buổi 3: Diphthongs – Nguyên âm đôi
 
-- ID: 5
+- ID: 3
 - Unit: ABC & IPA Foundation
 - Title VI: Nguyên âm đôi
 - Title EN: Diphthongs

@@ -1,8 +1,8 @@
-export const lesson05 = {
-  id: 5,
-  lessonNumber: 5,
-  dayNumber: 5,
-  title: "BUỔI 5: Diphthongs – Nguyên âm đôi",
+export const lesson03Diphthongs = {
+  id: 3,
+  lessonNumber: 3,
+  dayNumber: 3,
+  title: "Diphthongs – Nguyên âm đôi",
   titleEn: "Diphthongs",
   titleVi: "Nguyên âm đôi",
   subtitle: "Học cách đọc âm trượt từ âm này sang âm khác",
@@ -35,8 +35,8 @@ export const lesson05 = {
   ],
   architecture: {
     preserveSectionFlow: true,
-    source: "Buổi 5 MD: Diphthongs",
-    sourceOfTruth: "Buổi 5 MD"
+    source: "Buổi 3 MD: Diphthongs",
+    sourceOfTruth: "Buổi 3 MD"
   },
   metadata: {
     contentImported: true,
@@ -338,7 +338,7 @@ export const lesson05 = {
     ]
   },
   homeworkRich: {
-    title: "Bài tập về nhà - Buổi 5: Nguyên âm đôi",
+    title: "Bài tập về nhà - Buổi 3: Nguyên âm đôi",
     submit: "Nộp file ghi âm qua nhóm lớp Zalo.",
     deadline: "Trước buổi học tiếp theo",
     tasks: [
