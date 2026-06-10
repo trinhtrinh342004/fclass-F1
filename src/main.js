@@ -1412,6 +1412,7 @@ window.switchVocabGroup = function(group){
 function renderVocabMatch(l){
   const matchingPool = l.matchingPairs?.length ? l.matchingPairs : l.vocabulary;
   const hasGroups = matchingPool.some(v=>v.group) && l.vocabGroups;
+  const matchLabels = l.matchLabels || { left: "English", right: "Tiếng Việt" };
   const tabsHtml = hasGroups ? `
     <div class="match-group-tabs">
       ${Object.keys(l.vocabGroups).map((gk,i)=>`
@@ -1422,8 +1423,8 @@ function renderVocabMatch(l){
   ` : "";
   return `
     <div class="stage-h"><span class="stage-tag">Minigame · Ghép từ</span><span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span></div>
-    <h2 class="stage-title">🧩 Ghép từ với nghĩa</h2>
-    <p class="stage-sub">Chọn 1 từ tiếng Anh, sau đó chọn nghĩa tiếng Việt tương ứng. Sai sẽ rung — đúng sẽ phát âm.</p>
+    <h2 class="stage-title">🧩 Ghép ${escAttr(matchLabels.left)} với ${escAttr(matchLabels.right)}</h2>
+    <p class="stage-sub">Chọn một thẻ ${escAttr(matchLabels.left)}, sau đó chọn thẻ ${escAttr(matchLabels.right)} tương ứng. Mỗi vòng tối đa 10 cặp và không lặp trước khi hết danh sách.</p>
     ${tabsHtml}
     <div class="mg-block accent">
       <div class="mg-head">
@@ -1485,15 +1486,16 @@ function _renderMatchRound(){
   const viList = shuffle(currentChunk.map((v,i)=>({...v, side:"vi", id:i})));
 
   const grid = document.getElementById("matchGrid");
+  const labels = STATE._matchLesson?.matchLabels || { left: "English", right: "Tiếng Việt" };
   grid.innerHTML = `
     <div class="match-col">
-      <h5>English</h5>
+      <h5>${escAttr(labels.left)}</h5>
       ${enList.map(v=>`<button class="match-item" data-side="en" data-id="${v.id}" onclick="pickMatch(this)">
         ${v.img||""} ${v.en}${v.ipa?`<span class="match-ipa">${v.ipa}</span>`:""}
       </button>`).join("")}
     </div>
     <div class="match-col">
-      <h5>Tiếng Việt</h5>
+      <h5>${escAttr(labels.right)}</h5>
       ${viList.map(v=>`<button class="match-item" data-side="vi" data-id="${v.id}" onclick="pickMatch(this)">${v.vi}</button>`).join("")}
     </div>
   `;

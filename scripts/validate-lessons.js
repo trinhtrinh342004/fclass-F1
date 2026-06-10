@@ -13,7 +13,7 @@ for(const lesson of LESSONS){
   const flow = lesson.sectionFlow || [];
   const sameFlow = flow.length === canonicalLessonSections.length &&
     flow.every((section, index) => section === canonicalLessonSections[index]);
-  if(!sameFlow && !lesson.architecture?.sectionFlowOverride){
+  if(!sameFlow && !lesson.architecture?.sectionFlowOverride && !lesson.architecture?.sectionFlowExtension){
     console.error(`Buổi ${lesson.id}: sectionFlow does not match canonicalLessonSections.`);
     failed = true;
   }
