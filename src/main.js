@@ -973,10 +973,18 @@ function resolveYouTubeVideo(video={}){
     const iframeSrc = `https://www.youtube.com/embed/${escAttr(ytId)}?rel=0&modestbranding=1`;
     // Clean original watch URL or construct standard watch URL if original is search
     const videoUrl = (originalUrl.includes("results") || originalUrl.includes("listType")) ? `https://www.youtube.com/watch?v=${ytId}` : originalUrl;
-    return { iframeSrc, videoUrl, hasVideo: true, ytId };
+    return { iframeSrc, videoUrl, hasVideo: true, isPending: false, ytId };
   } else {
-    // No valid video ID (e.g. search list or invalid URL)
-    return { iframeSrc: "", videoUrl: originalUrl, hasVideo: false, ytId: "" };
+    const isPending = [video.embedUrl, video.watchUrl, video.url, video.sourceUrl]
+      .filter(Boolean)
+      .some(value => /^TODO(?:_|:)/i.test(String(value).trim()));
+    return {
+      iframeSrc: "",
+      videoUrl: isPending ? "" : originalUrl,
+      hasVideo: false,
+      isPending,
+      ytId: ""
+    };
   }
 }
 
@@ -1019,6 +1027,7 @@ function renderVideo(l){
   // store data globally so onclick doesn't need to embed JSON in HTML
   window._currentVideoData = { videos, questions: v.questions||[] };
   const videoCards = videos.map((item,i)=>{
+    const { isPending } = resolveYouTubeVideo(item);
     const scenes = item.scenes || [];
     const scenesHtml = scenes.map(s=>`<li>${s.label}</li>`).join("");
     const sceneSummary = item.sceneSummary || v.sceneSummary || "mục nội dung chính";
@@ -1042,10 +1051,15 @@ function renderVideo(l){
           <p>Hãy chú ý các <b>CẤU TRÚC CÂU</b> và <b>TỪ VỰNG</b> được sử dụng!</p>
           <p class="vid-duration">⏱️ Thời gian xem video: <b>${duration}</b></p>
         </div>
+        ${isPending ? `
+        <div class="video-pending-box">
+          <span>Video sẽ được cập nhật sau.</span>
+          <button class="yt-open-btn" onclick="openVideoModal(${i})">Làm câu hỏi trắc nghiệm</button>
+        </div>` : `
         <button class="yt-open-btn" onclick="openVideoModal(${i})">
           <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8z"/><polygon points="9.75,15.02 15.5,12 9.75,8.98 9.75,15.02" fill="white"/></svg>
           Xem video YouTube
-        </button>
+        </button>`}
       </div>
     `;
   }).join("");
@@ -1053,7 +1067,9 @@ function renderVideo(l){
     <div class="stage-h"><span class="stage-tag">Video</span><span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span></div>
     <h2 class="stage-title">🎬 Giới Thiệu Video</h2>
     ${videoCards}
-    <p style="color:var(--ink-mute);font-style:italic;text-align:center;margin-top:14px">💡 Nhấn nút để xem video và trả lời câu hỏi.</p>
+    ${videos.some(item => !resolveYouTubeVideo(item).isPending)
+      ? `<p style="color:var(--ink-mute);font-style:italic;text-align:center;margin-top:14px">💡 Nhấn nút để xem video và trả lời câu hỏi.</p>`
+      : ""}
   `;
 }
 
@@ -1061,7 +1077,7 @@ window.openVideoModal = function(videoIndex=0){
   stopCurrentSpeech();
   const data = window._currentVideoData || {};
   const selected = data.videos?.[videoIndex] || data;
-  const { iframeSrc, videoUrl, hasVideo } = resolveYouTubeVideo(selected);
+  const { iframeSrc, videoUrl, hasVideo, isPending } = resolveYouTubeVideo(selected);
   const qs = selected.questions || data.questions || [];
   window._VIDEO_QUESTIONS = qs;
 
@@ -1119,13 +1135,13 @@ window.openVideoModal = function(videoIndex=0){
             onload="hideYouTubeFallback(this)"
             onerror="showYouTubeFallback(this)"></iframe>` : ""}
           <div class="yt-fallback-bar${hasVideo ? "" : " show"}">
-            <span class="yt-fallback-text">Không thể nhúng video này. Bấm mở YouTube để xem.</span>
-            <a class="yt-fallback-link" href="${escAttr(videoUrl)}" target="_blank" rel="noopener">Mở YouTube</a>
+            <span class="yt-fallback-text">${isPending ? "Video sẽ được cập nhật sau." : "Không thể nhúng video này. Bấm mở YouTube để xem."}</span>
+            ${videoUrl ? `<a class="yt-fallback-link" href="${escAttr(videoUrl)}" target="_blank" rel="noopener">Mở YouTube</a>` : ""}
           </div>
         </div>
-        <div class="yt-modal-bottom-link-bar" style="background:#111; text-align:center; padding:6px; border-top:1px solid #222; font-size:12px; color:#aaa; flex-shrink:0;">
+        ${videoUrl ? `<div class="yt-modal-bottom-link-bar" style="background:#111; text-align:center; padding:6px; border-top:1px solid #222; font-size:12px; color:#aaa; flex-shrink:0;">
           Không thể nhúng video này. Bấm mở YouTube để xem. <a href="${escAttr(videoUrl)}" target="_blank" rel="noopener" style="color:#ff3b30; font-weight:bold; text-decoration:underline; margin-left:4px;">Mở YouTube</a>
-        </div>
+        </div>` : ""}
       </div>
       <div class="video-modal-right">
         <h3 class="vq-title">❓ Câu hỏi trong khi xem video</h3>
@@ -1390,7 +1406,7 @@ function renderVocabMatch(l){
   const tabsHtml = hasGroups ? `
     <div class="match-group-tabs">
       ${Object.keys(l.vocabGroups).map((gk,i)=>`
-        <button class="match-gtab ${!l.matchAll && i===0?'active':''}" onclick="switchMatchGroup('${gk}')">${l.vocabGroups[gk]}</button>
+        <button class="match-gtab ${!l.matchAll && (l.matchDefaultGroup ? l.matchDefaultGroup===gk : i===0)?'active':''}" onclick="switchMatchGroup('${gk}')">${l.vocabGroups[gk]}</button>
       `).join("")}
       <button class="match-gtab ${l.matchAll?'active':''}" onclick="switchMatchGroup('all')">🔀 Tất cả</button>
     </div>
@@ -1412,13 +1428,14 @@ function renderVocabMatch(l){
 }
 
 function initMatchGame(l){
-  const firstGroup = l.matchAll ? null : (l.vocabulary.find(v=>v.group)?.group || null);
+  const firstGroup = l.matchAll ? null : (l.matchDefaultGroup || l.vocabulary.find(v=>v.group)?.group || null);
   STATE._matchLesson = l;
   STATE._matchGroup = firstGroup;
   _runMatchGame(l, firstGroup);
 }
 
 function _runMatchGame(l, group){
+  STATE._matchGroup = group;
   const pool = group && group!=="all" ? l.vocabulary.filter(v=>v.group===group) : l.vocabulary;
 
   // Bước 1: Shuffle toàn bộ pool 1 lần duy nhất
@@ -3155,19 +3172,19 @@ window.trRecord = function(idx){
 function renderDialogueVideo(l){
   const v = l.dialogueVideo;
   if(!v) return "";
-  const { iframeSrc, videoUrl, hasVideo } = resolveYouTubeVideo(v);
+  const { iframeSrc, videoUrl, hasVideo, isPending } = resolveYouTubeVideo(v);
   const formatDialogueText = (text) => highlightText(escAttr(text || ""));
   return `
     <div class="stage-h"><span class="stage-tag">Video</span><span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span></div>
     <h2 class="stage-title">${escAttr(v.title || "Video hội thoại")}</h2>
     <p class="stage-sub">${escAttr(v.description || "Xem video hội thoại rồi làm 2 mini game sau video.")}</p>
     <div class="lt-video-card">
-      <div class="lt-video-head"><span class="lt-video-label">${escAttr(v.label || "Dialogue video")}</span><a class="mt-video-link" href="${escAttr(videoUrl)}" target="_blank" rel="noopener noreferrer">Mở YouTube</a></div>
+      <div class="lt-video-head"><span class="lt-video-label">${escAttr(v.label || "Dialogue video")}</span>${videoUrl ? `<a class="mt-video-link" href="${escAttr(videoUrl)}" target="_blank" rel="noopener noreferrer">Mở YouTube</a>` : ""}</div>
       <div class="yt-embed">
         ${hasVideo ? `<iframe src="${escAttr(iframeSrc)}" title="${escAttr(v.title||"Dialogue video")}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" loading="lazy" onload="hideYouTubeFallback(this)" onerror="showYouTubeFallback(this)"></iframe>` : ""}
          <div class="yt-fallback-bar${hasVideo ? "" : " show"}">
-          <span class="yt-fallback-text">Không thể nhúng video này. Bấm mở YouTube để xem.</span>
-          <a class="yt-fallback-link" href="${escAttr(videoUrl)}" target="_blank" rel="noopener">Mở YouTube</a>
+          <span class="yt-fallback-text">${isPending ? "Video sẽ được cập nhật sau." : "Không thể nhúng video này. Bấm mở YouTube để xem."}</span>
+          ${videoUrl ? `<a class="yt-fallback-link" href="${escAttr(videoUrl)}" target="_blank" rel="noopener">Mở YouTube</a>` : ""}
         </div>
       </div>
     </div>
@@ -4276,10 +4293,10 @@ function renderHomework(l){
       <div class="hw2-block">
         <div class="hw2-header">
           <div class="hw2-header-title">🏠 ${escAttr(hw.title)}</div>
-          <div class="hw2-meta">
-            <span>📤 <b>Nộp bài:</b> ${escAttr(hw.submit)}</span>
-            <span>⏰ <b>Hạn nộp:</b> ${escAttr(hw.deadline)}</span>
-          </div>
+          ${hw.submit || hw.deadline ? `<div class="hw2-meta">
+            ${hw.submit ? `<span>📤 <b>Nộp bài:</b> ${escAttr(hw.submit)}</span>` : ""}
+            ${hw.deadline ? `<span>⏰ <b>Hạn nộp:</b> ${escAttr(hw.deadline)}</span>` : ""}
+          </div>` : ""}
         </div>
         ${tasksHtml}
         ${summaryHtml}

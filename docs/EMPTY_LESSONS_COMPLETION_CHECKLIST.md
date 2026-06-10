@@ -14,6 +14,6 @@ Bảng theo dõi tiến độ biên soạn và tích hợp nội dung chi tiết
 | **Buổi 26** | Tag questions | `DRAFT` (Skeleton) | ✅ Có sẵn khung | 🟥 Cần soạn mới | 🟥 Cần video câu hỏi đuôi | ✅ Có bài tập mẫu | Chưa có buổi cũ tương ứng. |
 
 ## Các bước tiếp theo để hoàn thiện:
-1. **Soạn thảo Markdown**: Biên soạn 8 file `.md` riêng lẻ theo định dạng hướng dẫn tại [HOW_TO_FILL_EMPTY_LESSON_MD.md](file:///d:/github_desktop/fclass-F1/docs/HOW_TO_FILL_EMPTY_LESSON_MD.md).
+1. **Soạn thảo Markdown**: Tiếp tục biên soạn các buổi còn ở trạng thái `DRAFT` theo định dạng hướng dẫn tại `docs/HOW_TO_FILL_EMPTY_LESSON_MD.md`.
 2. **Chọn Video**: Thu thập link video giảng dạy chất lượng trên YouTube (giới thiệu từ vựng/ngữ pháp và video hội thoại giao tiếp).
 3. **Chạy Script Import**: Chạy script `node scripts/import-lesson-md.js docs/lesson-[ID]-[slug].md --day [ID] --write` để chuyển đổi tự động sang code.
