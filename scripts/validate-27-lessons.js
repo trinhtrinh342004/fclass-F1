@@ -405,6 +405,47 @@ if (!lesson26) {
   }
 }
 
+const lesson23 = LESSONS.find((lesson) => lesson.id === 23);
+if (!lesson23) {
+  console.error("ERROR: Lesson 23 is missing.");
+  failed = true;
+} else {
+  const lesson23Status = typeof lesson23.status === "object" ? lesson23.status.content : lesson23.status;
+  const lesson23Checks = [
+    [lesson23Status === "ready", "status must be ready"],
+    [lesson23.metadata?.localContentAuthoritative === true, "must use authoritative local content"],
+    [lesson23.review?.reviewGames?.vocabulary?.length === 20, "review listening game must have 20 questions"],
+    [lesson23.review?.reviewGames?.quizBomb?.questions?.length === 20, "review Quiz Bomb must have 20 questions"],
+    [Object.keys(lesson23.vocabGroups || {}).length === 3, "flashcards must have 3 tabs"],
+    [lesson23.vocabulary?.length === 60, "flashcards must contain 60 supplied terms"],
+    [lesson23.listenPick?.questions?.length === 20, "Listening Quiz must have 20 questions"],
+    [lesson23.grammar?.structures?.length === 5, "grammar must have 5 structures"],
+    [lesson23.grammar?.commonQA?.length === 6, "Common Q&A must have 6 pairs"],
+    [lesson23.listening?.questions?.length === 20, "Nghe trả lời must have 20 questions"],
+    [lesson23.translation?.sentences?.length === 20, "translation must have 20 questions"],
+    [lesson23.dialogueVideo?.transcript?.length === 10, "dialogue transcript must have 10 bilingual lines"],
+    [lesson23.dialogueVideo?.listenPickLine?.length === 4, "Nghe chọn thoại must have 4 questions"],
+    [lesson23.speaking?.turns?.length === 5, "AI Speaking must have 5 prompts"],
+    [lesson23.minitest?.length === 10, "Minitest must have 10 questions"],
+    [lesson23.homeworkRich?.tasks?.length === 2, "Homework must have 2 tasks"],
+    [lesson23.video?.embedUrl === "https://www.youtube.com/embed/oq9N9hBccV4", "intro video URL is incorrect"],
+    [lesson23.dialogueVideo?.embedUrl === "https://www.youtube.com/embed/gzLPbSMeUQY", "dialogue video URL is incorrect"],
+    [lesson23.__architectureWarnings?.length === 0, `architecture warnings: ${(lesson23.__architectureWarnings || []).join("; ")}`],
+    [!JSON.stringify(lesson23).includes("TODO:"), "lesson still contains TODO content"],
+  ];
+
+  const fillBlankCount = (lesson23.dialogueVideo?.fillConversation?.[0]?.lines || [])
+    .reduce((total, line) => total + (String(line.text || "").match(/\[\[[^\]]+\]\]/g) || []).length, 0);
+  lesson23Checks.push([fillBlankCount === 6, "fill conversation must have 6 blanks"]);
+
+  for (const [ok, message] of lesson23Checks) {
+    if (!ok) {
+      console.error(`ERROR: Lesson 23 ${message}.`);
+      failed = true;
+    }
+  }
+}
+
 // Check completeness of IDs (1 to 27)
 for (let i = 1; i <= 27; i++) {
   if (!seenIds.has(i)) {
