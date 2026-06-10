@@ -1,5 +1,6 @@
 import { lesson04LongVowels } from "../lessons/lesson-04-long-vowels.js";
 import { lesson06Consonants1 } from "../lessons/lesson-06-consonants-1.js";
+import { lesson07Consonants2 } from "../lessons/lesson-07-consonants-2.js";
 
 export const IPA_BOOTCAMP_SECTION_FLOW = [
   "ipa_intro",
@@ -207,12 +208,12 @@ export const IPA_BOOTCAMP_CURRICULUM_MAP = [
   },
   {
     lessonId: 7,
-    topicEnglish: "Word Stress & Schwa – Trọng âm và âm /ə/",
-    topicVietnamese: "Biết vì sao tiếng Anh không đọc đều từng chữ",
-    slug: "word-stress-and-schwa",
+    topicEnglish: "Consonants 2 – Âm gió và âm khó",
+    topicVietnamese: "Phân biệt hơi, rung giọng và sửa âm khó với người Việt",
+    slug: "consonants-2-am-gio-va-am-kho-voi-nguoi-viet",
     sourceLessons: [],
     status: "ready",
-    notes: "IPA Bootcamp lesson.",
+    notes: "Buổi 7 dùng nội dung chi tiết từ MD Consonants 2.",
   },
   {
     lessonId: 8,
@@ -270,6 +271,8 @@ export const IPA_BOOTCAMP_LESSONS = [
     dayNumber: 4,
     slug: "long-vowels",
     module: "ipa-bootcamp",
+    topicEnglish: "Long Vowels – Nguyên âm dài",
+    topicVietnamese: "Hiểu dấu /ː/ và biết kéo dài âm đúng cách",
   },
   createIpaLesson({
     id: 5,
@@ -289,14 +292,7 @@ export const IPA_BOOTCAMP_LESSONS = [
     topicEnglish: "Consonants 1 – Phụ âm bật, âm mũi, âm cuối",
     topicVietnamese: "Bật âm rõ, không nuốt âm cuối",
   },
-  createIpaLesson({
-    id: 7,
-    title: "Word Stress & Schwa – Trọng âm và âm /ə/",
-    subtitle: "Biết vì sao tiếng Anh không đọc đều từng chữ",
-    topic: "Trọng âm + âm schwa",
-    learningItems: "word stress, syllable, /ə/",
-    outcome: "Học sinh hiểu trọng âm, âm tiết, âm schwa; biết vì sao teacher, banana, about không đọc đều từng chữ.",
-  }),
+  createConsonants2Lesson(),
   createIpaLesson({
     id: 8,
     title: "IPA Review – Tổng ôn IPA và đọc từ/câu",
@@ -382,6 +378,54 @@ function createIpaLesson({
         code: "ipa",
         import: "manual",
       },
+    },
+  };
+}
+
+function createConsonants2Lesson(){
+  const sounds = lesson07Consonants2.consonants.sounds.map((sound) => ({
+    ...sound,
+    word: sound.keyword,
+    mouth: {
+      lips: sound.lips,
+      tongue: sound.tongue,
+      teeth: sound.teeth,
+      air: sound.air,
+      voice: sound.voice,
+      mistake: sound.commonMistake,
+      fixTip: sound.fixTip,
+    },
+  }));
+  const comparisons = lesson07Consonants2.consonants.comparisons;
+
+  return {
+    ...structuredClone(lesson07Consonants2),
+    module: "ipa-bootcamp",
+    topicEnglish: "Consonants 2 – Âm gió và âm khó",
+    topicVietnamese: "Phân biệt hơi, rung giọng và sửa âm khó với người Việt",
+    curriculumStatus: "ready",
+    ipa: {
+      topic: lesson07Consonants2.mainTopic,
+      learningItems: sounds.map((sound) => sound.symbol).join(" "),
+      outcome: lesson07Consonants2.objectives.join(" "),
+      sounds,
+      comparisons,
+      videoSlots: lesson07Consonants2.consonants.videos.map((video) => video.slot),
+      imageSlots: sounds.map((sound) => ({
+        word: sound.word,
+        ipa: sound.ipa,
+        sentence: sound.sentence,
+        slot: sound.imageSlot,
+      })),
+      blendGame: comparisons.flatMap((comparison) => comparison.pairs).map((pair) => ({
+        sounds: [pair.ipaA, pair.ipaB],
+        answer: pair.wordA,
+      })),
+      listenChooseGame: comparisons.flatMap((comparison) => comparison.items.map((item) => ({
+          audioText: item.keyword,
+          answer: item.symbol,
+          options: comparison.items.map((option) => option.symbol),
+        }))),
     },
   };
 }
