@@ -109,6 +109,7 @@ for (const lesson of LESSONS) {
 }
 
 const lesson01 = LESSONS.find((lesson) => lesson.id === 1);
+const lesson08 = LESSONS.find((lesson) => lesson.id === 8);
 const lesson01RequiredSections = [
   "review",
   "video",
@@ -159,6 +160,49 @@ if (!lesson01) {
   for (const [ok, message] of lesson01Checks) {
     if (!ok) {
       console.error(`ERROR: Lesson 1 ${message}.`);
+      failed = true;
+    }
+  }
+}
+
+if (!lesson08) {
+  console.error("ERROR: Lesson 8 is missing.");
+  failed = true;
+} else {
+  const lesson08Status = typeof lesson08.status === "object" ? lesson08.status.content : lesson08.status;
+  const fillBlankCount = (lesson08.dialogueVideo?.fillConversation?.[0]?.lines || [])
+    .reduce((count, line) => count + (String(line.text || "").match(/\[\[[^\]]+\]\]/g)?.length || 0), 0);
+  const lesson08Checks = [
+    [lesson08Status === "ready", "status must be ready"],
+    [lesson08.title === "BUỔI 8: CAPITAL LETTER RULES — NGUYÊN TẮC VIẾT HOA", "title is incorrect"],
+    [lesson08.metadata?.contentImported === true, "metadata.contentImported must be true"],
+    [lesson08.metadata?.localContentAuthoritative === true, "local content must be authoritative"],
+    [lesson08.review?.reviewGames?.vocabulary?.length === 20, "review listening game must have 20 questions"],
+    [lesson08.review?.reviewGames?.quizBomb?.questions?.length === 20, "review Quiz Bomb must have 20 questions"],
+    [lesson08.video?.embedUrl === "https://www.youtube.com/embed/OQnIb4Hdwys", "intro video embed URL is incorrect"],
+    [Object.keys(lesson08.vocabGroups || {}).length === 2, "flashcards must have 2 tabs"],
+    [lesson08.vocabulary?.length === 33, "flashcards must contain 33 items"],
+    [lesson08.listenPick?.questions?.length === 20, "Listening Quiz must have 20 questions"],
+    [lesson08.grammar?.sections?.filter((section) => section.title?.startsWith("Quy tắc ")).length === 7, "grammar must show 7 capitalization rules"],
+    [lesson08.listening?.questions?.length === 20, "Nghe trả lời must have 20 questions"],
+    [lesson08.translation?.sentences?.length === 20, "translation and correction practice must have 20 questions"],
+    [lesson08.translation?.sentences?.every((sentence) => sentence.strictCase), "capitalization exercises must use strict case checking"],
+    [lesson08.dialogueVideo?.embedUrl === "https://www.youtube.com/embed/mrUGNyo2P-w", "dialogue video embed URL is incorrect"],
+    [lesson08.dialogueVideo?.transcript?.length === 10, "dialogue transcript must have 10 bilingual lines"],
+    [lesson08.dialogueVideo?.listenPickLine?.length === 4, "Nghe chọn thoại must have 4 questions"],
+    [fillBlankCount === 5, "dialogue cloze must have 5 blanks"],
+    [lesson08.speaking?.turns?.length === 5, "AI Speaking must have 5 prompts"],
+    [lesson08.minitest?.length === 10, "Minitest must have 10 questions"],
+    [lesson08.mindmap?.branches?.length === 8, "mindmap must cover 8 capitalization groups"],
+    [lesson08.homeworkRich?.tasks?.length === 3, "homework must have 3 tasks"],
+    [lesson08.__architectureWarnings?.length === 0, `architecture warnings: ${(lesson08.__architectureWarnings || []).join("; ")}`],
+    [lesson01RequiredSections.every((section) => lesson08.sectionFlow?.includes(section)), "lesson is missing one or more required sections"],
+    [!JSON.stringify(lesson08).includes("TODO:"), "lesson still contains TODO content"],
+  ];
+
+  for (const [ok, message] of lesson08Checks) {
+    if (!ok) {
+      console.error(`ERROR: Lesson 8 ${message}.`);
       failed = true;
     }
   }
