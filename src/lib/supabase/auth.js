@@ -12,6 +12,12 @@ export async function getCurrentSession(){
   return { session: data?.session || null, error };
 }
 
+export async function exchangeCodeForSession(code){
+  if(!hasSupabaseConfig) return { data: null, error: new Error(getSupabaseConfigError()) };
+  if(!code) return { data: null, error: new Error("Thiếu mã xác thực Supabase.") };
+  return supabase.auth.exchangeCodeForSession(code);
+}
+
 export async function signInStudent(email, password){
   if(!hasSupabaseConfig) return { data: null, error: new Error(getSupabaseConfigError()) };
   return supabase.auth.signInWithPassword({ email, password });
@@ -27,6 +33,7 @@ export async function signUpStudent({ fullName, phone, email, password }){
     email,
     password,
     options: {
+      emailRedirectTo: `${window.location.origin}/auth/callback`,
       data: {
         full_name: fullName,
         phone,
@@ -49,6 +56,8 @@ export async function resetPasswordForEmail(email){
 
 export async function updatePassword(password){
   if(!hasSupabaseConfig) return { data: null, error: new Error(getSupabaseConfigError()) };
+  const { session, error } = await getCurrentSession();
+  if(error || !session) return { data: null, error: error || new Error("Phiên đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.") };
   return supabase.auth.updateUser({ password });
 }
 

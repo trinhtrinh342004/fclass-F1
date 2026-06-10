@@ -11,7 +11,20 @@ VITE_SUPABASE_ANON_KEY=
 
 Do not expose private Supabase credentials in Vite source, docs examples, or frontend env files.
 
-The app also accepts existing `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` as a temporary compatibility fallback.
+The frontend reads only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Do not use `NEXT_PUBLIC_*` or any `service_role` key in frontend env files.
+
+## Auth Redirect URLs
+
+In Supabase Dashboard, open **Authentication > URL Configuration**:
+
+- Site URL: `https://fclass-f1.vercel.app` (or the exact production domain currently serving fclass-f1).
+- Additional Redirect URLs:
+  - `https://fclass-f1.vercel.app/auth/callback`
+  - `https://fclass-f1.vercel.app/reset-password`
+  - `http://localhost:5173/auth/callback`
+  - `http://localhost:5173/reset-password`
+
+If production uses a custom domain, add the same `/auth/callback` and `/reset-password` paths for that custom domain too. Forgot-password emails redirect to `/reset-password`; signup/email-confirmation links redirect to `/auth/callback`.
 
 ## Migration
 
@@ -54,7 +67,7 @@ The realtime schema also creates `lessons`, `student_lesson_progress`, `student_
 1. Register a student at `/student-register`.
 2. Confirm the new profile is `pending`.
 3. Verify pending users see: "Tài khoản của bạn đang chờ admin duyệt."
-4. Approve the student from `/admin/students`.
-5. Log in again and confirm `/student` can open lessons.
+4. Approve the student from `/admin/approvals`.
+5. Log in again and confirm `/` opens the 27-lesson homepage only after class approval.
 
 If any private Supabase key was ever leaked, rotate it in the Supabase dashboard before deploying.

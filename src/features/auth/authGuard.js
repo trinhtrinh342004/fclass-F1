@@ -1,7 +1,7 @@
-import { getCurrentProfile, getCurrentUser } from "../../lib/supabase/auth.js";
+import { getCurrentProfile, getCurrentSession, getCurrentUser } from "../../lib/supabase/auth.js";
 import { getSupabaseConfigError, hasSupabaseConfig } from "../../lib/supabase/client.js";
 
-export { getCurrentProfile, getCurrentUser };
+export { getCurrentProfile, getCurrentSession, getCurrentUser };
 
 export const STATUS_MESSAGES = {
   pending: "Tài khoản của bạn đang chờ admin duyệt.",

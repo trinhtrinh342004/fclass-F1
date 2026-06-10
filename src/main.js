@@ -229,16 +229,17 @@ async function refreshAuthNavbar(){
   if(!user || !profile){
     nav.innerHTML = `
       <button class="nav-btn" data-nav-home>Trang chủ</button>
-      <button class="nav-btn" data-nav-login>Đăng nhập</button>
-      <button class="nav-btn" data-nav-register>Đăng ký</button>
+      <button class="nav-btn" data-nav-login>Đăng nhập / Đăng ký</button>
     `;
   }else if(profile.role === "admin" && profile.status === "approved"){
     nav.innerHTML = `
+      ${renderNavUser(profile, user)}
       <button class="nav-btn" data-nav-admin>Admin</button>
       <button class="nav-btn" data-nav-logout>Đăng xuất</button>
     `;
   }else if(profile.role === "student" && profile.status === "approved"){
     nav.innerHTML = `
+      ${renderNavUser(profile, user)}
       <button class="nav-btn" data-nav-home>Trang chủ</button>
       <button class="nav-btn" data-nav-progress>Tiến độ</button>
       <button class="nav-btn" data-nav-reset>Reset</button>
@@ -246,6 +247,7 @@ async function refreshAuthNavbar(){
     `;
   }else{
     nav.innerHTML = `
+      ${renderNavUser(profile, user)}
       <button class="nav-btn" data-nav-status>Trạng thái</button>
       <button class="nav-btn" data-nav-logout>Đăng xuất</button>
     `;
@@ -282,6 +284,11 @@ async function refreshAuthNavbar(){
     await renderAuthRoute();
     await refreshAuthNavbar();
   });
+}
+
+function renderNavUser(profile, user){
+  const displayName = profile?.full_name || user?.email || "Tài khoản";
+  return `<span class="nav-user" title="${escAttr(displayName)}">${escAttr(displayName)}</span>`;
 }
 
 // ============== HOME ==============

@@ -1,6 +1,6 @@
-import { getCurrentProfile, getCurrentUser, profileStatusLabel, requireAdmin, requireApprovedStudent, STATUS_MESSAGES } from "./authGuard.js";
+import { getCurrentProfile, getCurrentSession, getCurrentUser, profileStatusLabel, requireAdmin, requireApprovedStudent, STATUS_MESSAGES } from "./authGuard.js";
 import { getSupabaseConfigError, hasSupabaseConfig } from "../../lib/supabase/client.js";
-import { resetPasswordForEmail, signInStudent, signOut, signUpStudent, updatePassword } from "./authService.js";
+import { exchangeCodeForSession, resetPasswordForEmail, signInStudent, signOut, signUpStudent, updatePassword } from "./authService.js";
 import { getLessons } from "../lessons/lessonRepository.js";
 import { migrateLocalProgressToSupabase, remoteProgressToLocalShape } from "../progress/progressRepository.js";
 import {
@@ -37,6 +37,7 @@ const AUTH_ROUTES = new Set([
   "/student-register",
   "/student-login",
   "/forgot-password",
+  "/auth/callback",
   "/reset-password",
   "/pending-approval",
   "/rejected",
@@ -91,7 +92,8 @@ export async function renderAuthRoute(){
   if(path === "/register" || path === "/student-register") renderStudentRegister(view);
   if(path === "/login" || path === "/student-login") renderStudentLogin(view);
   if(path === "/forgot-password") renderForgotPassword(view);
-  if(path === "/reset-password") renderResetPassword(view);
+  if(path === "/auth/callback") await renderAuthCallback(view);
+  if(path === "/reset-password") await renderResetPassword(view);
   if(path === "/pending-approval") await renderAccountStatusPage(view, "pending");
   if(path === "/rejected") await renderAccountStatusPage(view, "rejected");
   if(path === "/student") await renderStudentDashboard(view);
@@ -202,7 +204,6 @@ function renderStudentLogin(view){
       <div class="auth-row">
         <a href="/student-register">Đăng ký học viên</a>
         <a href="/forgot-password">Quên mật khẩu?</a>
-        <a href="/admin">Khu vực admin</a>
       </div>
       <div class="auth-message" id="studentLoginMessage" role="status"></div>
     </form>
@@ -287,7 +288,43 @@ function renderForgotPassword(view){
   });
 }
 
-function renderResetPassword(view){
+async function renderAuthCallback(view){
+  view.innerHTML = renderShell("Đang xác thực", `<div class="auth-loading">Đang xử lý liên kết Supabase...</div>`);
+  if(!hasSupabaseConfig){
+    view.innerHTML = renderShell("Lỗi cấu hình", `<div class="auth-alert error">${escapeHtml(getSupabaseConfigError())}</div>`);
+    return;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
+  if(code){
+    const { error } = await exchangeCodeForSession(code);
+    if(error){
+      view.innerHTML = renderShell("Không thể xác thực", renderStatusCard(friendlyAuthError(error.message)));
+      attachLogoutHandler();
+      return;
+    }
+  }
+
+  await redirectAfterAuthCallback(view);
+}
+
+async function renderResetPassword(view){
+  if(hasSupabaseConfig){
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    if(code){
+      view.innerHTML = renderShell("Đang xác thực", `<div class="auth-loading">Đang xử lý link đặt lại mật khẩu...</div>`);
+      const { error } = await exchangeCodeForSession(code);
+      if(error){
+        view.innerHTML = renderShell("Không thể đặt lại mật khẩu", renderStatusCard(friendlyAuthError(error.message)));
+        attachLogoutHandler();
+        return;
+      }
+      window.history.replaceState({}, "", "/reset-password");
+    }
+  }
+
   view.innerHTML = renderShell("Đặt lại mật khẩu", `
     ${renderConfigWarning()}
     <form class="auth-card auth-form" id="resetPasswordForm">
@@ -311,6 +348,12 @@ function renderResetPassword(view){
     const submit = event.currentTarget.querySelector("button[type='submit']");
     submit.disabled = true;
     setMessage(message, "Đang cập nhật mật khẩu...", "");
+    const { session, error: sessionError } = await getCurrentSession();
+    if(sessionError || !session){
+      submit.disabled = false;
+      setMessage(message, "Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng gửi lại email quên mật khẩu.", "error");
+      return;
+    }
     const { error } = await updatePassword(password);
     submit.disabled = false;
     if(error){
@@ -324,6 +367,35 @@ function renderResetPassword(view){
       await renderAuthRoute();
     }, 900);
   });
+}
+
+async function redirectAfterAuthCallback(view){
+  const { user } = await getCurrentUser();
+  if(!user){
+    window.history.replaceState({}, "", "/student-login");
+    renderStudentLogin(view);
+    return;
+  }
+
+  const { profile, error } = await getCurrentProfile(user.id);
+  if(error || !profile){
+    window.history.replaceState({}, "", "/student");
+    await renderStudentDashboard(view);
+    return;
+  }
+
+  if(profile.role === "admin" && profile.status === "approved"){
+    window.history.replaceState({}, "", "/admin");
+    await renderAdmin(view);
+    return;
+  }
+  if(profile.status === "approved"){
+    window.location.assign("/");
+    return;
+  }
+
+  window.history.replaceState({}, "", profile.status === "rejected" || profile.status === "blocked" ? "/rejected" : "/pending-approval");
+  await renderAccountStatusPage(view, profile.status);
 }
 
 async function renderAccountStatusPage(view, expectedStatus){

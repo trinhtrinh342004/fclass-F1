@@ -2,6 +2,7 @@ export {
   getCurrentProfile,
   getCurrentSession,
   getCurrentUser,
+  exchangeCodeForSession,
   resetPasswordForEmail,
   signIn,
   signInStudent,
