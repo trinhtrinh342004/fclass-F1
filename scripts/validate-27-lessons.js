@@ -269,6 +269,48 @@ if (!lesson04) {
   }
 }
 
+const lesson26 = LESSONS.find((lesson) => lesson.id === 26);
+if (!lesson26) {
+  console.error("ERROR: Lesson 26 is missing.");
+  failed = true;
+} else {
+  const lesson26Status = typeof lesson26.status === "object" ? lesson26.status.content : lesson26.status;
+  const fillBlankCount = (lesson26.dialogueVideo?.fillConversation?.[0]?.lines || [])
+    .reduce((count, line) => count + (String(line.text || "").match(/\[\[[^\]]+\]\]/g)?.length || 0), 0);
+  const lesson26Checks = [
+    [lesson26Status === "ready", "status must be ready"],
+    [lesson26.title === "BUỔI 26: TAG QUESTIONS — CÂU HỎI ĐUÔI", "title is incorrect"],
+    [lesson26.metadata?.localContentAuthoritative === true, "local content must be authoritative"],
+    [lesson26.review?.reviewGames?.vocabulary?.length === 20, "review listening game must have 20 questions"],
+    [lesson26.review?.reviewGames?.quizBomb?.questions?.length === 20, "review Quiz Bomb must have 20 questions"],
+    [Object.keys(lesson26.vocabGroups || {}).length === 2, "flashcards must have 2 tabs"],
+    [lesson26.vocabulary?.length === 30, "flashcards must contain 30 supplied cards"],
+    [lesson26.listenPick?.questions?.length === 20, "Listening Quiz must have 20 questions"],
+    [lesson26.grammar?.structures?.length === 4, "grammar must have 4 structures"],
+    [lesson26.grammar?.commonQA?.length === 6, "Common Q&A must have 6 pairs"],
+    [lesson26.listening?.questions?.length === 20, "Nghe trả lời must have 20 questions"],
+    [lesson26.translation?.sentences?.length === 20, "Luyện dịch must have 20 questions"],
+    [lesson26.dialogueVideo?.transcript?.length === 8, "dialogue transcript must have 8 bilingual lines"],
+    [lesson26.dialogueVideo?.listenPickLine?.length === 4, "Nghe chọn thoại must have 4 questions"],
+    [fillBlankCount === 6, "dialogue cloze must have 6 blanks"],
+    [lesson26.speaking?.turns?.length === 5, "AI Speaking must have 5 prompts"],
+    [lesson26.minitest?.length === 10, "Minitest must have 10 questions"],
+    [lesson26.homeworkRich?.tasks?.length === 2, "Homework must have 2 tasks"],
+    [lesson26.video?.embedUrl === "https://www.youtube.com/embed/YTbGMGcyLPo", "intro video URL is incorrect"],
+    [lesson26.dialogueVideo?.embedUrl === "https://www.youtube.com/embed/UUUlMyFewwc", "dialogue video URL is incorrect"],
+    [lesson01RequiredSections.every((section) => lesson26.sectionFlow?.includes(section)), "lesson is missing one or more required sections"],
+    [lesson26.__architectureWarnings?.length === 0, `architecture warnings: ${(lesson26.__architectureWarnings || []).join("; ")}`],
+    [!JSON.stringify(lesson26).includes("TODO:"), "lesson still contains TODO content"],
+  ];
+
+  for (const [ok, message] of lesson26Checks) {
+    if (!ok) {
+      console.error(`ERROR: Lesson 26 ${message}.`);
+      failed = true;
+    }
+  }
+}
+
 // Check completeness of IDs (1 to 27)
 for (let i = 1; i <= 27; i++) {
   if (!seenIds.has(i)) {
