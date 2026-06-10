@@ -109,6 +109,7 @@ for (const lesson of LESSONS) {
 }
 
 const lesson01 = LESSONS.find((lesson) => lesson.id === 1);
+const lesson25 = LESSONS.find((lesson) => lesson.id === 25);
 const lesson01RequiredSections = [
   "review",
   "video",
@@ -159,6 +160,55 @@ if (!lesson01) {
   for (const [ok, message] of lesson01Checks) {
     if (!ok) {
       console.error(`ERROR: Lesson 1 ${message}.`);
+      failed = true;
+    }
+  }
+}
+
+if (!lesson25) {
+  console.error("ERROR: Lesson 25 is missing.");
+  failed = true;
+} else {
+  const lesson25Status = typeof lesson25.status === "object" ? lesson25.status.content : lesson25.status;
+  const lesson25RequiredSections = [
+    ...lesson01RequiredSections,
+    "homework_answers",
+    "common_mistakes",
+    "lesson_end",
+  ];
+  const lesson25Blanks = (lesson25.dialogueVideo?.fillConversation?.[0]?.lines || [])
+    .reduce((total, line) => total + (String(line.text || "").match(/\[\[[^\]]+\]\]/g) || []).length, 0);
+  const lesson25Checks = [
+    [lesson25Status === "ready", "status must be ready"],
+    [lesson25.title === "BUỔI 25: PAST CONTINUOUS TENSE", "title is incorrect"],
+    [lesson25.metadata?.localContentAuthoritative === true, "local content must be authoritative"],
+    [lesson25.review?.reviewGames?.vocabulary?.length === 20, "review listening game must have 20 questions"],
+    [lesson25.review?.reviewGames?.quizBomb?.questions?.length === 20, "review Quiz Bomb must have 20 questions"],
+    [Object.keys(lesson25.vocabGroups || {}).length === 4, "flashcards must have 4 tabs"],
+    [lesson25.matchingPairs?.length === 10, "matching game must have 10 supplied pairs"],
+    [lesson25.listenPick?.questions?.length === 20, "Listening Quiz must have 20 questions"],
+    [lesson25.grammar?.structures?.length === 5, "grammar must have 5 structures"],
+    [lesson25.grammar?.commonQA?.length === 4, "Common Q&A must have 4 pairs"],
+    [lesson25.listening?.questions?.length === 24, "Nghe trả lời must have 24 questions"],
+    [lesson25.translation?.sentences?.length === 30, "Luyện dịch must have 30 questions"],
+    [lesson25.dialogueVideo?.transcript?.length === 10, "dialogue transcript must have 10 bilingual lines"],
+    [lesson25.dialogueVideo?.listenPickLine?.length === 6, "Nghe chọn thoại must have 6 questions"],
+    [lesson25Blanks === 10, "dialogue cloze must have 10 blanks"],
+    [lesson25.speaking?.turns?.length === 6, "AI speaking must have 6 prompts"],
+    [lesson25.minitest?.length === 15, "Minitest must have 15 questions"],
+    [lesson25.homeworkRich?.tasks?.length === 4, "Homework must have 4 tasks"],
+    [lesson25.homeworkAnswers?.rows?.length === 10, "Homework 1 answers must have 10 rows"],
+    [lesson25.commonMistakes?.length === 10, "common mistakes must have 10 rows"],
+    [lesson25.video?.embedUrl === "DÁN_LINK_EMBED_VIDEO_Ở_ĐÂY", "intro video placeholder changed"],
+    [lesson25.dialogueVideo?.embedUrl === "DÁN_LINK_EMBED_VIDEO_HỘI_THOẠI_Ở_ĐÂY", "dialogue video placeholder changed"],
+    [lesson25RequiredSections.every((section) => lesson25.sectionFlow?.includes(section)), "lesson is missing one or more required sections"],
+    [lesson25.__architectureWarnings?.length === 0, `architecture warnings: ${(lesson25.__architectureWarnings || []).join("; ")}`],
+    [!JSON.stringify(lesson25).includes("TODO:"), "lesson still contains TODO content"],
+  ];
+
+  for (const [ok, message] of lesson25Checks) {
+    if (!ok) {
+      console.error(`ERROR: Lesson 25 ${message}.`);
       failed = true;
     }
   }
