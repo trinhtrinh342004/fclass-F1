@@ -221,8 +221,8 @@ export const TUWI_27_CURRICULUM_MAP = [
     topicVietnamese: "Quá khứ tiếp diễn",
     slug: "past-continuous-tense",
     sourceLessons: [],
-    status: "draft",
-    notes: "Chưa có nội dung cũ phù hợp.",
+    status: "ready",
+    notes: "Đã tích hợp đầy đủ nội dung Past Continuous theo kiến trúc Buổi 9; video dùng placeholder an toàn.",
   },
   {
     lessonId: 26,
