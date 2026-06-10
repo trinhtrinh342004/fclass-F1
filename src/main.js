@@ -1329,7 +1329,7 @@ function renderVocab(l){
             <div class="fc-emoji">${v.img||"📝"}</div>
             <div class="fc-vi">${v.vi}</div>
             ${v.note?`<div class="fc-ipa fc-ipa--back">${v.note}</div>`:""}
-            ${v.example?`<div class="fc-ipa fc-ipa--back">${escAttr(v.example)}</div>`:""}
+            ${v.example?`<div class="fc-example">${escAttr(v.example)}</div>`:""}
             ${v.exampleQuestion?`<div class="fc-ipa fc-ipa--back"><b>Q:</b> ${escAttr(v.exampleQuestion)}${v.exampleAnswer?`<br><b>A:</b> ${escAttr(v.exampleAnswer)}`:""}</div>`:""}
           </div>
         </div>
@@ -1363,7 +1363,7 @@ function renderVocab(l){
           <div class="fc-vi">${v.vi}</div>
           ${v.ipa?`<div class="fc-ipa fc-ipa--back">${v.ipa}</div>`:""}
           ${v.note?`<div class="fc-ipa fc-ipa--back">${escAttr(v.note)}</div>`:""}
-          ${v.example?`<div class="fc-ipa fc-ipa--back">${escAttr(v.example)}</div>`:""}
+          ${v.example?`<div class="fc-example">${escAttr(v.example)}</div>`:""}
           ${v.exampleQuestion?`<div class="fc-ipa fc-ipa--back"><b>Q:</b> ${escAttr(v.exampleQuestion)}${v.exampleAnswer?`<br><b>A:</b> ${escAttr(v.exampleAnswer)}`:""}</div>`:""}
         </div>
       </div>
