@@ -1,4 +1,4 @@
-import { getSupabaseConfigError, hasSupabaseConfig, supabase } from "../../lib/supabase/client.js";
+import { debugSupabaseAuth, getSupabaseConfigError, hasSupabaseConfig, supabase, withSupabaseTimeout } from "../../lib/supabase/client.js";
 import { LESSONS as LOCAL_LESSONS } from "./lessonRegistry.js";
 
 export const LESSON_SOURCE = {
@@ -17,10 +17,26 @@ export async function getLessons(){
     };
   }
 
-  const { data, error } = await supabase
-    .from("lessons")
-    .select("id, lesson_number, slug, title, topic_english, topic_vietnamese, description, status, content, source_lessons, updated_at")
-    .order("lesson_number", { ascending: true });
+  debugSupabaseAuth("lessons query start");
+  let data;
+  let error;
+  try{
+    const result = await withSupabaseTimeout(
+      supabase
+        .from("lessons")
+        .select("id, lesson_number, slug, title, topic_english, topic_vietnamese, description, status, content, source_lessons, updated_at")
+        .order("lesson_number", { ascending: true }),
+      "lessons.select.all",
+    );
+    data = result.data;
+    error = result.error;
+  }catch(queryError){
+    error = queryError;
+  }
+  debugSupabaseAuth("lessons query end", {
+    count: data?.length || 0,
+    error: error?.message || null,
+  });
 
   if(error){
     return {
@@ -52,11 +68,22 @@ export async function getLessonByNumber(lessonNumber){
     return getLocalLessons().find((lesson) => lesson.id === Number(lessonNumber)) || null;
   }
 
-  const { data, error } = await supabase
-    .from("lessons")
-    .select("id, lesson_number, slug, title, topic_english, topic_vietnamese, description, status, content, source_lessons, updated_at")
-    .eq("lesson_number", Number(lessonNumber))
-    .maybeSingle();
+  let data;
+  let error;
+  try{
+    const result = await withSupabaseTimeout(
+      supabase
+        .from("lessons")
+        .select("id, lesson_number, slug, title, topic_english, topic_vietnamese, description, status, content, source_lessons, updated_at")
+        .eq("lesson_number", Number(lessonNumber))
+        .maybeSingle(),
+      "lessons.select.byNumber",
+    );
+    data = result.data;
+    error = result.error;
+  }catch(queryError){
+    error = queryError;
+  }
 
   if(error || !data){
     return getLocalLessons().find((lesson) => lesson.id === Number(lessonNumber)) || null;
@@ -80,11 +107,22 @@ export async function getLessonRowIdByNumber(lessonNumber){
   if(cached) return cached.id;
 
   if(!hasSupabaseConfig || !supabase) return null;
-  const { data, error } = await supabase
-    .from("lessons")
-    .select("id, lesson_number")
-    .eq("lesson_number", normalized)
-    .maybeSingle();
+  let data;
+  let error;
+  try{
+    const result = await withSupabaseTimeout(
+      supabase
+        .from("lessons")
+        .select("id, lesson_number")
+        .eq("lesson_number", normalized)
+        .maybeSingle(),
+      "lessons.select.idByNumber",
+    );
+    data = result.data;
+    error = result.error;
+  }catch(queryError){
+    error = queryError;
+  }
 
   if(error || !data) return null;
   upsertCachedRow(data);

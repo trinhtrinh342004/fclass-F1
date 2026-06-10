@@ -1,15 +1,37 @@
-import { getSupabaseConfigError, hasSupabaseConfig, supabase } from "./client.js";
+import { debugSupabaseAuth, getSupabaseConfigError, hasSupabaseConfig, supabase, withSupabaseTimeout } from "./client.js";
 
 export async function getCurrentUser(){
   if(!hasSupabaseConfig) return { user: null, error: new Error(getSupabaseConfigError()) };
-  const { data, error } = await supabase.auth.getUser();
-  return { user: data?.user || null, error };
+  debugSupabaseAuth("getUser start");
+  try{
+    const { data, error } = await withSupabaseTimeout(supabase.auth.getUser(), "supabase.auth.getUser");
+    const normalizedError = isMissingSessionError(error) ? null : error;
+    debugSupabaseAuth("getUser end", {
+      userId: data?.user?.id || null,
+      error: normalizedError?.message || null,
+    });
+    return { user: data?.user || null, error: normalizedError };
+  }catch(error){
+    debugSupabaseAuth("getUser failed", { error: error.message });
+    return { user: null, error };
+  }
 }
 
 export async function getCurrentSession(){
   if(!hasSupabaseConfig) return { session: null, error: new Error(getSupabaseConfigError()) };
-  const { data, error } = await supabase.auth.getSession();
-  return { session: data?.session || null, error };
+  debugSupabaseAuth("getSession start");
+  try{
+    const { data, error } = await withSupabaseTimeout(supabase.auth.getSession(), "supabase.auth.getSession");
+    const normalizedError = isMissingSessionError(error) ? null : error;
+    debugSupabaseAuth("getSession end", {
+      userId: data?.session?.user?.id || null,
+      error: normalizedError?.message || null,
+    });
+    return { session: data?.session || null, error: normalizedError };
+  }catch(error){
+    debugSupabaseAuth("getSession failed", { error: error.message });
+    return { session: null, error };
+  }
 }
 
 export async function exchangeCodeForSession(code){
@@ -66,11 +88,31 @@ export async function getCurrentProfile(userId){
   const id = userId || (await getCurrentUser()).user?.id;
   if(!id) return { profile: null, error: null };
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id, full_name, phone, email, role, status, note, created_at, updated_at")
-    .eq("id", id)
-    .maybeSingle();
+  debugSupabaseAuth("profile query start", { userId: id });
+  try{
+    const { data, error } = await withSupabaseTimeout(
+      supabase
+        .from("profiles")
+        .select("id, full_name, phone, email, role, status, note, created_at, updated_at")
+        .eq("id", id)
+        .maybeSingle(),
+      "profiles.select.current",
+    );
 
-  return { profile: data || null, error };
+    debugSupabaseAuth("profile query end", {
+      userId: id,
+      role: data?.role || null,
+      status: data?.status || null,
+      error: error?.message || null,
+    });
+    return { profile: data || null, error };
+  }catch(error){
+    debugSupabaseAuth("profile query failed", { userId: id, error: error.message });
+    return { profile: null, error };
+  }
+}
+
+function isMissingSessionError(error){
+  if(!error) return false;
+  return error.name === "AuthSessionMissingError" || /auth session missing/i.test(error.message || "");
 }
