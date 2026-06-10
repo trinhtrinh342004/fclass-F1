@@ -622,6 +622,22 @@ Object.assign(SECTION_LABELS, {
   ipa_mini_test: "Mini test",
   ipa_mindmap: "Mindmap",
   ipa_homework: "Bài tập về nhà",
+  consonants1_consonant_intro: "Phụ âm là gì?",
+  consonants1_stop_intro: "Âm bật là gì?",
+  consonants1_nasal_intro: "Âm mũi là gì?",
+  consonants1_sound_table: "Bảng âm hôm nay",
+  consonants1_mouth_shapes: "Khẩu hình phụ âm",
+  consonants1_final_sound_intro: "Bật âm cuối",
+  consonants1_audio_samples: "Nghe âm mẫu",
+  consonants1_read_ipa: "Nhìn IPA đọc âm",
+  consonants1_cvc_spelling: "Đánh vần CVC words",
+  consonants1_final_sound_practice: "Final sound practice",
+  consonants1_compare_pairs: "So sánh p/b, t/d, k/g",
+  consonants1_listen_choose_final: "Nghe chọn âm cuối",
+  consonants1_sentence_reading: "Luyện đọc câu",
+  consonants1_ai_speaking: "Luyện nói AI",
+  consonants1_mini_test: "Mini test",
+  consonants1_homework: "Bài tập về nhà",
 });
 
 function renderSidebar(lesson){
@@ -696,7 +712,9 @@ function renderSection(){
   const section = STATE.sections[STATE.sectionIdx];
 
   let html="";
-  if(lesson?.module === "ipa-bootcamp" && section.startsWith("ipa_")){
+  if(section.startsWith("consonants1_")){
+    html = renderConsonants1Section(lesson, section);
+  }else if(lesson?.module === "ipa-bootcamp" && section.startsWith("ipa_")){
     html = renderIpaSection(lesson, section);
   }else switch(section){
     case "intro":       html = renderIntro(lesson); break;
@@ -1030,6 +1048,126 @@ function renderIpaGenericPractice(lesson, section){
       <p><b>Kết quả cần đạt:</b> ${escAttr(lesson.ipa?.outcome || "")}</p>
       ${renderIpaSoundCards(lesson.ipa?.sounds || [])}
     </div>`;
+}
+
+function renderConsonants1Section(lesson, section){
+  const sounds = lesson.consonants?.sounds || [];
+  const header = renderConsonants1Header(lesson, section);
+  switch(section){
+    case "consonants1_consonant_intro":
+      return `${header}
+        <div class="ipa-hero-panel">
+          <div><span class="ipa-kicker">Consonants today</span><h3>Phụ âm có điểm chặn, điểm bật hoặc điểm cản hơi</h3><p>Quan sát môi, lưỡi, răng, luồng hơi và độ rung để đọc rõ từng âm.</p></div>
+          <div class="ipa-symbol-stack">${sounds.map(sound=>`<span>${escAttr(sound.symbol)}</span>`).join("")}</div>
+        </div>
+        <div class="ipa-two-col consonants-three-col">
+          ${renderConsonantsInfoCard("Âm bật", "/p/ /b/ /t/ /d/ /k/ /g/", "Chặn hơi rất ngắn rồi bật ra.")}
+          ${renderConsonantsInfoCard("Âm mũi", "/m/ /n/ /ŋ/", "Luồng hơi đi qua mũi.")}
+          ${renderConsonantsInfoCard("Âm cuối", "cat /kæt/ · dog /dɒg/", "Không nuốt phụ âm ở cuối từ.")}
+        </div>`;
+    case "consonants1_stop_intro":
+      return `${header}<div class="consonants-flow"><b>Chặn hơi</b><span>→</span><b>Giữ rất ngắn</b><span>→</span><b>Bật hơi</b></div>
+        <div class="mg-block warm"><p><b>Ghi nhớ:</b> /p/, /t/, /k/ không rung; /b/, /d/, /g/ có rung giọng.</p></div>
+        ${renderConsonantsSoundCards(sounds.filter(sound=>sound.group === "stop"))}`;
+    case "consonants1_nasal_intro":
+      return `${header}<div class="ipa-hero-panel"><div><span class="ipa-kicker">Nasal sounds</span><h3>Hơi đi qua mũi</h3><p>/m/ dùng môi, /n/ dùng đầu lưỡi, /ŋ/ dùng phần sau lưỡi.</p></div><div class="consonants-nose-flow"><span>Miệng chặn</span><b>→</b><span>Hơi qua mũi</span></div></div>
+        <div class="consonants-warning"><b>/ŋ/ trong sing /sɪŋ/:</b> sau lưỡi nâng lên, không thêm /g/ nếu IPA không có /g/.</div>
+        ${renderConsonantsSoundCards(sounds.filter(sound=>sound.group === "nasal"))}`;
+    case "consonants1_sound_table": return `${header}${renderConsonantsSoundCards(sounds)}`;
+    case "consonants1_mouth_shapes": return `${header}${renderConsonantsMouthShapes(sounds)}`;
+    case "consonants1_final_sound_intro":
+      return `${header}<div class="consonants-warning"><b>Không nuốt âm cuối.</b> Không cần bật quá mạnh, nhưng người nghe phải nhận ra âm kết thúc.</div>${renderFinalSoundTrainer(consonantsFinalWords())}`;
+    case "consonants1_audio_samples": return `${header}${renderConsonantsAudioSamples(lesson.consonants?.audioList || [])}`;
+    case "consonants1_read_ipa": return `${header}${renderConsonantsReadingCards(sounds)}`;
+    case "consonants1_cvc_spelling": return `${header}${renderConsonantsCvcWords(lesson.consonants?.spellingWords || [])}`;
+    case "consonants1_final_sound_practice": return `${header}${renderFinalSoundTrainer(consonantsFinalWords())}${renderConsonantsFinalGame()}`;
+    case "consonants1_compare_pairs": return `${header}${renderConsonantsComparisons(lesson.consonants?.comparisons || [])}`;
+    case "consonants1_listen_choose_final": return `${header}${renderConsonantsFinalGame()}`;
+    case "consonants1_sentence_reading": return `${header}${renderConsonantsSentenceReading(sounds)}`;
+    case "consonants1_ai_speaking":
+      return `${header}<div class="ipa-ai-panel"><h3>Luyện nói AI / giáo viên sửa</h3><p>Nghe mẫu, ghi âm và kiểm tra xem em đã bật âm cuối, rung giọng và đọc /ŋ/ đúng chưa.</p>${renderConsonantsReadingCards(sounds, true)}</div>`;
+    case "consonants1_mini_test": return renderMinitest(lesson);
+    case "consonants1_homework": return renderHomework(lesson);
+    default: return renderMissingSection(section);
+  }
+}
+
+function renderConsonants1Header(lesson, section){
+  return `<div class="stage-h"><span class="stage-tag">Consonants 1</span><span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span></div>
+    <h2 class="stage-title">${escAttr(SECTION_LABELS[section] || lesson.title)}</h2><p class="stage-sub">${escAttr(lesson.subtitle || "")}</p>`;
+}
+
+function renderConsonantsInfoCard(title, symbols, text){
+  return `<article class="ipa-info-card"><h3>${escAttr(title)}</h3><div class="consonants-card-symbols">${escAttr(symbols)}</div><p>${escAttr(text)}</p></article>`;
+}
+
+function renderConsonantsSoundCards(sounds){
+  return `<div class="ipa-sound-grid">${sounds.map((sound, i)=>`
+    <article class="ipa-sound-card consonant-sound-card">
+      <div class="ipa-symbol">${escAttr(sound.symbol)}</div><div class="ipa-sound-name">${escAttr(sound.name)} · ${sound.voicing === "voiced" ? "có rung" : "không rung"}</div>
+      <h3>${escAttr(sound.keyword)} <span>${escAttr(sound.ipa)}</span></h3><p>${escAttr(sound.sentence)}</p>
+      <dl><dt>Môi</dt><dd>${escAttr(sound.lips)}</dd><dt>Lưỡi</dt><dd>${escAttr(sound.tongue)}</dd><dt>Răng</dt><dd>${escAttr(sound.teeth)}</dd><dt>Hơi</dt><dd>${escAttr(sound.air)}</dd><dt>Rung</dt><dd>${escAttr(sound.voice)}</dd></dl>
+      <div class="consonants-fix"><b>Lỗi:</b> ${escAttr(sound.commonMistake)}<br><b>Cách sửa:</b> ${escAttr(sound.fixTip)}</div>
+      <div class="ipa-card-actions"><button onclick="speakById('${regTxt(sound.keyword)}')">Nghe từ</button><button id="mic-${i}" onclick="recordById(${i}, '${regTxt(sound.keyword)}')">Đọc thử</button></div>
+      <div id="speakRes-${i}" class="dlg-result" style="display:none"></div>
+    </article>`).join("")}</div>`;
+}
+
+function renderConsonantsMouthShapes(sounds){
+  return `<div class="ipa-mouth-layout">
+    <div class="ipa-mouth-figure" aria-label="Minh họa mặt cắt miệng"><div class="mouth-head"><div class="mouth-lips"></div><div class="mouth-teeth"></div><div class="mouth-tongue"></div><div class="mouth-air"></div></div><span>Placeholder mặt cắt miệng</span><small>Dựng bằng CSS, không có broken image.</small></div>
+    <div class="ipa-mouth-list">${sounds.map(sound=>`<article class="ipa-mouth-card ${sound.symbol === "/ŋ/" ? "consonants-ng-card" : ""}"><h3>${escAttr(sound.symbol)} <span>${escAttr(sound.keyword)} ${escAttr(sound.ipa)}</span></h3>
+      <dl><dt>Môi</dt><dd>${escAttr(sound.lips)}</dd><dt>Lưỡi</dt><dd>${escAttr(sound.tongue)}</dd><dt>Răng</dt><dd>${escAttr(sound.teeth)}</dd><dt>Hơi</dt><dd>${escAttr(sound.air)}</dd><dt>Rung</dt><dd>${escAttr(sound.voice)}</dd><dt>Lỗi</dt><dd>${escAttr(sound.commonMistake)}</dd><dt>Sửa</dt><dd>${escAttr(sound.fixTip)}</dd></dl>
+      ${sound.symbol === "/ŋ/" ? `<div class="consonants-warning">Sau lưỡi nâng lên → hơi đi qua mũi. Không thêm /g/ sau /ŋ/.</div>` : ""}</article>`).join("")}</div></div>`;
+}
+
+function consonantsFinalWords(){
+  return [
+    { word:"cup", ipa:"/kʌp/", final:"/p/" }, { word:"cat", ipa:"/kæt/", final:"/t/" },
+    { word:"cab", ipa:"/kæb/", final:"/b/" }, { word:"book", ipa:"/bʊk/", final:"/k/" },
+    { word:"dog", ipa:"/dɒg/", final:"/g/" }, { word:"man", ipa:"/mæn/", final:"/n/" },
+    { word:"sing", ipa:"/sɪŋ/", final:"/ŋ/" },
+  ];
+}
+
+function renderFinalSoundTrainer(words){
+  return `<div class="ipa-game final-sound-trainer"><h3>Final Sound Trainer</h3><div class="final-sound-grid">${words.map((item, i)=>`
+    <article class="final-sound-card"><span>Word</span><h3>${escAttr(item.word)}</h3><p>${escAttr(item.ipa)}</p><div class="final-sound-split">Âm cuối: <b>${escAttr(item.final)}</b></div>
+      <div class="ipa-card-actions"><button onclick="speakById('${regTxt(item.word)}')">Nghe</button><button id="mic-${i}" onclick="recordById(${i}, '${regTxt(item.word)}')">Ghi âm</button></div><div id="speakRes-${i}" class="dlg-result" style="display:none"></div>
+    </article>`).join("")}</div></div>`;
+}
+
+function renderConsonantsAudioSamples(groups){
+  return `<div class="ipa-game"><h3>Nghe âm và từ mẫu</h3>${groups.map(group=>`<div class="ipa-game-row"><div class="ipa-chip-row"><span>${escAttr(group.symbol)}</span></div><div class="ipa-option-row">${group.words.map(word=>`<button onclick="speakById('${regTxt(word)}')">Nghe ${escAttr(word)}</button>`).join("")}</div></div>`).join("")}</div>`;
+}
+
+function renderConsonantsReadingCards(sounds, compact=false){
+  const rows = sounds.flatMap(sound=>[{ symbol:sound.symbol, word:sound.keyword, sentence:sound.ipa }, ...(!compact ? [{ symbol:sound.symbol, word:sound.sentence, sentence:`Focus ${sound.symbol}` }] : [])]);
+  return renderIpaSelfReading(rows);
+}
+
+function renderConsonantsCvcWords(words){
+  return `<div class="ipa-game"><h3>CVC = Consonant + Vowel + Consonant</h3>${words.map(word=>`<div class="ipa-game-row"><div><b class="consonants-word">${escAttr(word.word)}</b><p>${escAttr(word.ipa)} · ${escAttr(word.meaning)}</p></div><div class="ipa-chip-row">${word.split.map(sound=>`<span>${escAttr(sound)}</span>`).join("")}</div></div>`).join("")}</div>`;
+}
+
+function consonantsFinalRounds(){
+  return [
+    { audioText:"cap", answer:"/p/", options:["/p/","/t/","/b/"] }, { audioText:"cat", answer:"/t/", options:["/p/","/t/","/d/"] },
+    { audioText:"cab", answer:"/b/", options:["/p/","/b/","/g/"] }, { audioText:"back", answer:"/k/", options:["/k/","/g/","/ŋ/"] },
+    { audioText:"bag", answer:"/g/", options:["/k/","/g/","/ŋ/"] }, { audioText:"sing", answer:"/ŋ/", options:["/n/","/ŋ/","/g/"] },
+  ];
+}
+
+function renderConsonantsFinalGame(){
+  return `<div class="ipa-game"><h3>Nghe và chọn âm cuối</h3>${consonantsFinalRounds().map(round=>`<div class="ipa-game-row"><button class="ipa-listen-button" onclick="speakById('${regTxt(round.audioText)}')">Nghe từ</button><div class="ipa-option-row">${round.options.map(option=>`<button data-answer="${escAttr(round.answer)}" data-choice="${escAttr(option)}" onclick="_checkIpaChoice(this)">${escAttr(option)}</button>`).join("")}</div></div>`).join("")}</div>`;
+}
+
+function renderConsonantsComparisons(comparisons){
+  return `<div class="ipa-compare-grid">${comparisons.map(pair=>`<article class="ipa-compare-card consonants-compare-card"><h3>${escAttr(pair.title)}</h3><p>${escAttr(pair.desc)}</p><div class="consonants-pair-grid">${pair.items.map(item=>`<button onclick="speakById('${regTxt(item.keyword)}')"><b>${escAttr(item.symbol)}</b><span>${escAttr(item.keyword)} ${escAttr(item.ipa)}</span><small>${escAttr(item.detail)}</small></button>`).join("")}</div><div class="consonants-minimal-pairs">${pair.pairs.map(item=>`<span>${escAttr(item.wordA)} ${escAttr(item.ipaA)} ↔ ${escAttr(item.wordB)} ${escAttr(item.ipaB)}</span>`).join("")}</div></article>`).join("")}</div>`;
+}
+
+function renderConsonantsSentenceReading(sounds){
+  return `<div class="grammar-examples">${sounds.map(sound=>`<div class="grammar-ex"><div><div class="gex-en">${escAttr(sound.sentence)}</div><div class="gex-vi">Focus: ${escAttr(sound.symbol)} · ${escAttr(sound.keyword)} ${escAttr(sound.ipa)}</div></div><button class="gex-speak" onclick="speakById('${regTxt(sound.sentence)}')">🔊</button></div>`).join("")}</div>`;
 }
 
 function renderDots(){
