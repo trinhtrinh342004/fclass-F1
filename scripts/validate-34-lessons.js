@@ -50,7 +50,7 @@ const expectedTitles = new Map([
   [4, "Long Vowels – Nguyên âm dài"],
   [5, "Diphthongs – Nguyên âm đôi"],
   [6, "Difficult Consonants – Âm dễ sai với người Việt"],
-  [7, "Word Stress & Schwa – Trọng âm và âm /ə/"],
+  [7, "BUỔI 7: Consonants 2 – Phụ âm gió & Âm khó"],
   [8, "IPA Review – Tổng ôn IPA và đọc từ/câu"],
 ]);
 
@@ -77,6 +77,12 @@ check(lesson05?.ipa?.imageSlots?.length === 8, "Lesson 5 Diphthongs must have 8 
 check(lesson05?.ipa?.blendGame?.length === 8, "Lesson 5 Diphthongs must have 8 blend-game words.");
 check(lesson05?.ipa?.listenChooseGame?.length === 8, "Lesson 5 Diphthongs must have 8 listen-and-choose rounds.");
 check(lesson05?.ipa?.isGlideLesson === true, "Lesson 5 Diphthongs must enable the glide animation.");
+
+const lesson07 = lessonById(7);
+check(lesson07?.slug === "consonants-2-am-gio-va-am-kho-voi-nguoi-viet", "Lesson 7 must route to Consonants 2.");
+check(lesson07?.sectionFlow?.length === 18, "Lesson 7 must preserve the 18 requested Consonants 2 sections.");
+check(lesson07?.ipa?.sounds?.length === 15, "Lesson 7 must expose all 15 difficult consonant sounds.");
+check(lesson07?.ipa?.comparisons?.length === 7, "Lesson 7 must expose all 7 requested consonant comparisons.");
 
 check(!LESSONS.some((lesson) => lesson.slug === "alphabet-and-nouns"), "Old lesson 1 Alphabet and Nouns must not remain in the main route.");
 check(lessonById(9)?.slug === "singular-plural-nouns", "Lesson 9 must be old Lesson 2 Singular & Plural Nouns.");
