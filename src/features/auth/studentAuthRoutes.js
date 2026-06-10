@@ -30,6 +30,7 @@ import {
   subscribeToTable,
   unsubscribe as unsubscribeRealtime,
 } from "../../lib/supabase/realtime.js";
+import { COURSE_TOTAL_LESSONS } from "../curriculum/curriculumMap.js";
 
 const AUTH_ROUTES = new Set([
   "/register",
@@ -155,7 +156,7 @@ function renderShell(title, body, subtitle = ""){
   return `
     <section class="auth-shell">
       <div class="auth-header">
-        <span class="eyebrow auth-eyebrow">Tuwi A1 · 27 buổi</span>
+        <span class="eyebrow auth-eyebrow">Tuwi A1 · ${COURSE_TOTAL_LESSONS} buổi</span>
         <h1>${escapeHtml(title)}</h1>
         ${subtitle ? `<p>${escapeHtml(subtitle)}</p>` : ""}
       </div>
@@ -272,7 +273,7 @@ function renderStudentLogin(view){
       </div>
       <div class="auth-message" id="studentLoginMessage" role="status"></div>
     </form>
-  `, "Vào lớp TuWi A1 để tiếp tục học 27 buổi.");
+  `, `Vào lớp TuWi A1 để tiếp tục học ${COURSE_TOTAL_LESSONS} buổi.`);
 
   document.getElementById("studentLoginForm").addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -398,7 +399,7 @@ async function renderResetPassword(view){
   view.innerHTML = renderShell("Đặt lại mật khẩu", `
     ${renderConfigWarning()}
     <form class="auth-card auth-form" id="resetPasswordForm">
-      <p class="auth-form-note">Tạo mật khẩu mới để tiếp tục học 27 buổi TuWi A1.</p>
+      <p class="auth-form-note">Tạo mật khẩu mới để tiếp tục học ${COURSE_TOTAL_LESSONS} buổi TuWi A1.</p>
       <label>Mật khẩu mới<input name="password" type="password" autocomplete="new-password" required minlength="6"></label>
       <label>Xác nhận mật khẩu<input name="confirmPassword" type="password" autocomplete="new-password" required minlength="6"></label>
       <button class="btn-primary auth-submit" type="submit">Cập nhật mật khẩu</button>
@@ -606,7 +607,7 @@ async function renderStudentDashboard(view){
     </section>
     ${lessonsResult.warning ? `<div class="empty-state">${escapeHtml(lessonsResult.warning)}</div>` : ""}
     <section class="student-lessons">
-      <h2>Danh sách 27 buổi</h2>
+      <h2>Danh sách ${COURSE_TOTAL_LESSONS} buổi</h2>
       <div class="student-lesson-grid">${lessonCards}</div>
     </section>
   `);
@@ -638,7 +639,7 @@ function renderMembershipNotice(title, memberships){
 function renderClassRequestList(classes, memberships){
   const membershipByClass = new Map(memberships.map((item) => [item.class_id, item]));
   if(!classes.length){
-    return `<section class="empty-state">Bạn đã được duyệt tài khoản. Vui lòng chờ admin thêm bạn vào lớp trước khi mở 27 buổi học.</section>`;
+    return `<section class="empty-state">Bạn đã được duyệt tài khoản. Vui lòng chờ admin thêm bạn vào lớp trước khi mở ${COURSE_TOTAL_LESSONS} buổi học.</section>`;
   }
 
   return `
@@ -1209,7 +1210,7 @@ function summarizeProgress(rows, studentById){
   }
   return [...grouped.values()].map((item) => ({
     ...item,
-    percent: Math.round((item.completed / 27) * 100),
+    percent: Math.round((item.completed / COURSE_TOTAL_LESSONS) * 100),
   }));
 }
 

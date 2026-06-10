@@ -217,7 +217,7 @@ export const lesson11 = {
     hasTodoVideo: true,
     localContentAuthoritative: true,
     sourceLessonIds: [],
-    status: { content: "ready", code: "tuwi27", import: "manual" },
+    status: { content: "ready", code: "tuwi34", import: "manual" },
   },
   objectives: [
     "Dùng đúng at với giờ cụ thể, noon, night và midnight.",

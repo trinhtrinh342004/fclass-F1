@@ -31,6 +31,6 @@ if(connectionError && !connectedButNeedsSchema){
     console.warn("Chưa seed lessons vì bảng lessons chưa sẵn sàng:", lessonsCheckError.message);
     if(!migrationApplied) process.exitCode = 1;
   }else{
-    execFileSync("node", ["scripts/seed-27-lessons.mjs"], { stdio: "inherit" });
+    execFileSync("node", ["scripts/seed-34-lessons.mjs"], { stdio: "inherit" });
   }
 }

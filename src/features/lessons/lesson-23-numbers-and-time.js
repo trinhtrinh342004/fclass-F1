@@ -202,7 +202,7 @@ export const lesson23 = {
     sourceLessonIds: [],
     status: {
       content: "ready",
-      code: "tuwi27",
+      code: "tuwi34",
       import: "manual",
     },
   },

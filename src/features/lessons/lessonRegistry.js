@@ -3,9 +3,9 @@ import {
   canonicalLessonSections,
   lessonArchitectureV1,
 } from "./legacyLessonsData.js";
-import { TUWI_27_LESSONS } from "../curriculum/tuwi27Lessons.js";
+import { TUWI_34_LESSONS } from "../curriculum/tuwi27Lessons.js";
 
-export const LESSONS = TUWI_27_LESSONS;
+export const LESSONS = TUWI_34_LESSONS;
 
 const activeSourceIds = new Set(
   LESSONS.flatMap((lesson) => lesson.metadata?.sourceLessonIds || [])
