@@ -1,5 +1,6 @@
 import { lesson04LongVowels } from "../lessons/lesson-04-long-vowels.js";
 import { lesson06Consonants1 } from "../lessons/lesson-06-consonants-1.js";
+import { lesson08IpaReview } from "../lessons/lesson-08-ipa-review.js";
 import { lesson07Consonants2 } from "../lessons/lesson-07-consonants-2.js";
 
 export const IPA_BOOTCAMP_SECTION_FLOW = [
@@ -293,14 +294,18 @@ export const IPA_BOOTCAMP_LESSONS = [
     topicVietnamese: "Bật âm rõ, không nuốt âm cuối",
   },
   createConsonants2Lesson(),
-  createIpaLesson({
-    id: 8,
-    title: "IPA Review – Tổng ôn IPA và đọc từ/câu",
-    subtitle: "Tổng ôn 44 âm + đọc từ + đọc câu",
-    topic: "Tổng ôn IPA + đọc từ/câu",
-    learningItems: "44 âm + đọc 50 từ + 20 câu",
-    outcome: "Học sinh có thể nhìn IPA, nghe audio, tự luyện đọc từ mới và đọc câu ngắn.",
-  }),
+  {
+    ...lesson08IpaReview,
+    unit: "IPA Bootcamp",
+    module: "ipa-bootcamp",
+    title: "IPA Review + Word Stress – Tổng ôn IPA và trọng âm",
+    titleEn: "IPA Review + Word Stress",
+    titleVi: "Tổng ôn IPA và trọng âm",
+    topicEnglish: "IPA Review + Word Stress – Tổng ôn IPA và trọng âm",
+    topicVietnamese: "Tổng ôn ABC, spelling, IPA, âm cuối và trọng âm cơ bản",
+    slug: "ipa-review-tong-on",
+    curriculumStatus: "ready",
+  },
 ];
 
 function createIpaLesson({
