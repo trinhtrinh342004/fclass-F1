@@ -46,6 +46,8 @@ const AUTH_ROUTES = new Set([
   "/admin/approvals",
   "/admin/students",
   "/admin/classes",
+  "/admin/requests",
+  "/admin/progress",
 ]);
 const STUDENT_STATUS_FILTERS = [
   ["pending", "Chờ duyệt"],
@@ -59,8 +61,16 @@ const ADMIN_TABS = [
   ["students", "Học viên"],
   ["classes", "Lớp học"],
   ["requests", "Duyệt vào lớp"],
-  ["progress", "Tiến độ"],
+  ["progress", "Tiến độ / Báo cáo"],
 ];
+const ADMIN_TAB_PATHS = {
+  overview: "/admin",
+  approvals: "/admin/approvals",
+  students: "/admin/students",
+  classes: "/admin/classes",
+  requests: "/admin/requests",
+  progress: "/admin/progress",
+};
 
 let currentAdminFilter = "pending";
 let currentAdminTab = "overview";
@@ -78,12 +88,17 @@ export function hideAuthView(){
 
 export async function renderAuthRoute(){
   const path = normalizePath(window.location.pathname);
-  if(!AUTH_ROUTES.has(path)) return false;
+  if(!AUTH_ROUTES.has(path)){
+    document.body.classList.remove("admin-active");
+    return false;
+  }
+  document.body.classList.toggle("admin-active", path.startsWith("/admin"));
 
   clearRealtime(adminChannels);
   clearRealtime(studentChannels);
 
   const view = ensureAuthView();
+  view.classList.toggle("admin-route", path.startsWith("/admin"));
   document.getElementById("authCheckView")?.classList.remove("active");
   document.getElementById("homeView")?.classList.remove("active");
   document.getElementById("lessonView")?.classList.remove("active");
@@ -99,9 +114,7 @@ export async function renderAuthRoute(){
   if(path === "/rejected") await renderAccountStatusPage(view);
   if(path === "/student") await renderStudentDashboard(view);
   if(path.startsWith("/admin")){
-    if(path === "/admin/approvals") currentAdminTab = "approvals";
-    if(path === "/admin/students") currentAdminTab = "students";
-    if(path === "/admin/classes") currentAdminTab = "classes";
+    currentAdminTab = getAdminTabFromPath(path);
     await renderAdmin(view);
   }
 
@@ -121,6 +134,10 @@ function ensureAuthView(){
   view.className = "view auth-view";
   document.body.insertBefore(view, document.getElementById("toast"));
   return view;
+}
+
+function getAdminTabFromPath(path){
+  return Object.entries(ADMIN_TAB_PATHS).find(([, route]) => route === path)?.[0] || "overview";
 }
 
 function renderShell(title, body, subtitle = ""){
@@ -625,49 +642,119 @@ function attachClassRequestHandlers(view){
 async function renderAdmin(view){
   const guard = await requireAdmin();
   if(guard.reason === "unauthenticated"){
+    document.body.classList.remove("admin-active");
+    view.classList.remove("admin-route");
     window.history.replaceState({}, "", "/student-login");
     renderStudentLogin(view);
     return;
   }
   if(!guard.ok){
+    document.body.classList.remove("admin-active");
+    view.classList.remove("admin-route");
     view.innerHTML = renderShell("Admin TuWi A1", renderStatusCard(guard.message, { showLogin: true }));
     attachLogoutHandler();
     return;
   }
 
   const { title, subtitle } = getAdminShellCopy();
-  view.innerHTML = renderShell(title, `
-    <section class="auth-card admin-panel">
-      <div class="admin-toolbar">
-        <div class="filter-tabs">
-          ${ADMIN_TABS.map(([value, label]) => `
-            <button class="${value === currentAdminTab ? "active" : ""}" data-admin-tab="${value}">${label}</button>
-          `).join("")}
-        </div>
-        <button class="btn-ghost" id="studentLogoutBtn">Đăng xuất</button>
-      </div>
-      <div class="auth-message" id="adminMessage" role="status"></div>
-      <div id="adminContent" class="admin-list">Đang tải dữ liệu...</div>
-    </section>
-  `, subtitle);
+  const pendingResult = await listStudents("pending");
+  const pendingApprovals = pendingResult.error ? 0 : pendingResult.data?.length || 0;
+  view.innerHTML = renderAdminLayout({
+    title,
+    subtitle,
+    user: guard.user,
+    profile: guard.profile,
+    pendingApprovals,
+  });
 
   attachLogoutHandler();
-  view.querySelectorAll("[data-admin-tab]").forEach((button) => {
-    button.addEventListener("click", async () => {
-      currentAdminTab = button.dataset.adminTab;
-      const tabPaths = {
-        overview: "/admin",
-        approvals: "/admin/approvals",
-        students: "/admin/students",
-        classes: "/admin/classes",
-      };
-      const nextPath = tabPaths[currentAdminTab] || "/admin";
-      if(window.location.pathname !== nextPath) window.history.pushState({}, "", nextPath);
-      await renderAdmin(view);
-    });
-  });
+  attachAdminLayoutHandlers(view);
   await renderAdminTab(view, guard.user.id);
   attachAdminRealtime(view, guard.user.id);
+}
+
+function renderAdminLayout({ title, subtitle, user, profile, pendingApprovals }){
+  return `
+    <section class="admin-shell">
+      ${renderAdminSidebar(pendingApprovals)}
+      <div class="admin-sidebar-backdrop" data-admin-close></div>
+      <div class="admin-main">
+        ${renderAdminTopbar({ title, subtitle, user, profile })}
+        <div class="auth-message admin-message" id="adminMessage" role="status"></div>
+        <main class="admin-content" id="adminContent">Đang tải dữ liệu...</main>
+      </div>
+    </section>
+  `;
+}
+
+function renderAdminSidebar(pendingApprovals){
+  return `
+    <aside class="admin-sidebar" id="adminSidebar" aria-label="Admin menu">
+      <div class="admin-brand">
+        <span class="admin-brand-mark">T</span>
+        <span>
+          <strong>TuWi A1 Admin</strong>
+          <small>FClass A1</small>
+        </span>
+      </div>
+      <nav class="admin-nav">
+        ${ADMIN_TABS.map(([value, label]) => `
+          <button class="admin-nav-item ${value === currentAdminTab ? "active" : ""}" data-admin-tab="${value}">
+            <span>${escapeHtml(label)}</span>
+            ${value === "approvals" && pendingApprovals ? `<b>${pendingApprovals}</b>` : ""}
+          </button>
+        `).join("")}
+      </nav>
+      <div class="admin-sidebar-actions">
+        <button class="admin-nav-item secondary" data-admin-home>Trang chủ</button>
+        <button class="admin-nav-item danger" id="studentLogoutBtn">Đăng xuất</button>
+      </div>
+    </aside>
+  `;
+}
+
+function renderAdminTopbar({ title, subtitle, user, profile }){
+  const identity = profile?.full_name || user?.email || "Admin";
+  const email = user?.email || profile?.email || "";
+  return `
+    <header class="admin-topbar">
+      <button class="admin-menu-toggle" data-admin-menu aria-label="Mở menu admin">☰</button>
+      <div class="admin-page-title">
+        <h1>${escapeHtml(title)}</h1>
+        <p>${escapeHtml(subtitle)}</p>
+      </div>
+      <div class="admin-topbar-actions">
+        <button class="admin-icon-btn" data-admin-home aria-label="Trang chủ">⌂</button>
+        <div class="admin-user-chip" title="${escapeHtml(email)}">
+          <strong>${escapeHtml(identity)}</strong>
+          <span>${escapeHtml(email)}</span>
+        </div>
+      </div>
+    </header>
+  `;
+}
+
+function attachAdminLayoutHandlers(view){
+  const shell = view.querySelector(".admin-shell");
+  view.querySelector("[data-admin-menu]")?.addEventListener("click", () => {
+    view.classList.add("admin-menu-open");
+  });
+  view.querySelectorAll("[data-admin-close]").forEach((element) => {
+    element.addEventListener("click", () => view.classList.remove("admin-menu-open"));
+  });
+  view.querySelectorAll("[data-admin-home]").forEach((button) => {
+    button.addEventListener("click", () => {
+      window.location.assign("/");
+    });
+  });
+  shell?.addEventListener("click", async (event) => {
+    const tabButton = event.target.closest("[data-admin-tab]");
+    if(!tabButton) return;
+    currentAdminTab = tabButton.dataset.adminTab;
+    const nextPath = ADMIN_TAB_PATHS[currentAdminTab] || ADMIN_TAB_PATHS.overview;
+    if(window.location.pathname !== nextPath) window.history.pushState({}, "", nextPath);
+    await renderAdmin(view);
+  });
 }
 
 async function renderAdminTab(view, adminId){
@@ -694,27 +781,51 @@ function getAdminShellCopy(){
 
 async function renderAdminOverview(){
   const content = document.getElementById("adminContent");
-  const [pendingStudents, approvedStudents, rejectedStudents, pendingRequests, classesResult] = await Promise.all([
+  const [allStudents, pendingStudents, approvedStudents, pendingRequests, classesResult] = await Promise.all([
+    listStudents("all"),
     listStudents("pending"),
     listStudents("approved"),
-    listStudents("rejected"),
     listPendingClassRequests(),
     listClasses(),
   ]);
-  const errors = [pendingStudents.error, approvedStudents.error, rejectedStudents.error, pendingRequests.error, classesResult.error].filter(Boolean);
+  const errors = [allStudents.error, pendingStudents.error, approvedStudents.error, pendingRequests.error, classesResult.error].filter(Boolean);
   if(errors.length){
     content.innerHTML = `<div class="empty-state">Không tải được tổng quan. ${escapeHtml(errors[0].message)}</div>`;
     return;
   }
   const activeClasses = (classesResult.data || []).filter((klass) => klass.status === "active");
+  const approvedStudentsCount = approvedStudents.data?.length || 0;
   content.innerHTML = `
     <div class="admin-stat-grid">
-      ${renderAdminStat("Pending", pendingStudents.data?.length || 0)}
-      ${renderAdminStat("Approved", approvedStudents.data?.length || 0)}
-      ${renderAdminStat("Rejected", rejectedStudents.data?.length || 0)}
-      ${renderAdminStat("Yêu cầu vào lớp", pendingRequests.data?.length || 0)}
-      ${renderAdminStat("Lớp active", activeClasses.length)}
+      ${renderAdminStat("Tổng học viên", allStudents.data?.length || 0)}
+      ${renderAdminStat("Học viên chờ duyệt", pendingStudents.data?.length || 0)}
+      ${renderAdminStat("Học viên đã duyệt", approvedStudentsCount)}
+      ${renderAdminStat("Lớp học", activeClasses.length)}
     </div>
+    <section class="admin-quick-actions">
+      <div class="admin-section-head compact">
+        <h2>Thao tác nhanh</h2>
+        <p>Mở nhanh các khu vực quản trị đang dùng dữ liệu thật từ Supabase.</p>
+      </div>
+      <div class="admin-action-grid">
+        <button data-admin-tab="approvals">
+          <strong>Duyệt học viên</strong>
+          <span>${pendingStudents.data?.length || 0} tài khoản đang chờ</span>
+        </button>
+        <button data-admin-tab="students">
+          <strong>Xem danh sách học viên</strong>
+          <span>${approvedStudentsCount} học viên đã duyệt</span>
+        </button>
+        <button data-admin-tab="classes">
+          <strong>Xem lớp học</strong>
+          <span>${activeClasses.length} lớp đang active</span>
+        </button>
+        <button data-admin-tab="requests">
+          <strong>Duyệt vào lớp</strong>
+          <span>${pendingRequests.data?.length || 0} yêu cầu vào lớp</span>
+        </button>
+      </div>
+    </section>
   `;
 }
 
@@ -751,11 +862,11 @@ async function renderAdminApprovals(adminId){
   content.innerHTML = `
     <div class="admin-section-head">
       <h2>Duyệt học viên</h2>
-      <p>Quản lý học viên đăng ký vào lớp TuWi A1</p>
+      <p>Duyệt tài khoản học viên vào lớp TuWi A1.</p>
     </div>
     <div class="admin-table admin-table-approvals" role="table">
       <div class="admin-table-head" role="row">
-        <span>Họ tên</span><span>Email</span><span>Ngày đăng ký</span><span>Lớp</span><span>Hành động</span>
+        <span>Họ tên</span><span>Email</span><span>Ngày đăng ký</span><span>Trạng thái</span><span>Lớp</span><span>Hành động</span>
       </div>
       ${studentsResult.data.map((student) => renderApprovalRow(student, classes)).join("")}
     </div>
@@ -837,22 +948,30 @@ async function loadAdminStudents(adminId){
   const message = document.getElementById("adminMessage");
   if(!list || !message) return;
 
-  const { data, error } = await listStudents(currentAdminFilter);
-  if(error){
-    list.innerHTML = `<div class="empty-state">Không tải được danh sách học viên. ${escapeHtml(error.message)}</div>`;
+  const [studentsResult, membershipsResult] = await Promise.all([
+    listStudents(currentAdminFilter),
+    listClassMemberships(),
+  ]);
+  if(studentsResult.error){
+    list.innerHTML = `<div class="empty-state">Không tải được danh sách học viên. ${escapeHtml(studentsResult.error.message)}</div>`;
     return;
   }
+  const data = studentsResult.data || [];
   if(!data?.length){
     list.innerHTML = `<div class="empty-state">Chưa có học viên trong bộ lọc này.</div>`;
     return;
   }
+  if(membershipsResult.error){
+    setMessage(message, `Không tải được lớp học viên: ${membershipsResult.error.message}`, "warning");
+  }
+  const classByStudent = buildStudentClassMap(membershipsResult.data || []);
 
   list.innerHTML = `
     <div class="admin-table admin-table-students" role="table">
       <div class="admin-table-head" role="row">
-        <span>Họ tên</span><span>Số điện thoại</span><span>Email</span><span>Ngày đăng ký</span><span>Trạng thái</span><span>Role</span><span>Hành động</span>
+        <span>Họ tên</span><span>Email</span><span>Role</span><span>Trạng thái</span><span>Lớp</span><span>Ngày tạo</span><span>Hành động</span>
       </div>
-      ${data.map(renderStudentRow).join("")}
+      ${data.map((student) => renderStudentRow(student, classByStudent.get(student.id))).join("")}
     </div>
   `;
 
@@ -883,11 +1002,16 @@ async function loadAdminStudents(adminId){
 
 async function renderAdminClasses(view){
   const content = document.getElementById("adminContent");
-  const { data, error } = await listClasses();
-  if(error){
-    content.innerHTML = `<div class="empty-state">Không tải được lớp học. ${escapeHtml(error.message)}</div>`;
+  const [classesResult, membershipsResult] = await Promise.all([
+    listClasses(),
+    listClassMemberships(),
+  ]);
+  if(classesResult.error){
+    content.innerHTML = `<div class="empty-state">Không tải được lớp học. ${escapeHtml(classesResult.error.message)}</div>`;
     return;
   }
+  const memberCounts = buildClassMemberCounts(membershipsResult.data || []);
+  const classes = classesResult.data || [];
 
   content.innerHTML = `
     <form class="auth-form admin-class-form" id="adminClassForm">
@@ -898,9 +1022,9 @@ async function renderAdminClasses(view){
     </form>
     <div class="admin-table admin-table-classes" role="table">
       <div class="admin-table-head" role="row">
-        <span>Tên lớp</span><span>Level</span><span>Trạng thái</span><span>Mô tả</span><span>Ngày tạo</span><span>Hành động</span>
+        <span>Tên lớp</span><span>Level</span><span>Trạng thái</span><span>Học viên</span><span>Mô tả</span><span>Ngày tạo</span><span>Hành động</span>
       </div>
-      ${(data || []).map(renderClassRow).join("") || `<div class="empty-state">Chưa có lớp học.</div>`}
+      ${classes.map((klass) => renderClassRow(klass, memberCounts.get(klass.id) || 0)).join("") || `<div class="empty-state">Chưa có lớp học.</div>`}
     </div>
   `;
 
@@ -1060,7 +1184,27 @@ function attachStudentRealtime(view, userId){
   ].filter(Boolean);
 }
 
-function renderStudentRow(student){
+function buildStudentClassMap(memberships){
+  const classByStudent = new Map();
+  for(const membership of memberships){
+    const current = classByStudent.get(membership.student_id) || [];
+    const className = membership.classes?.name || "Chưa rõ lớp";
+    current.push(`${className} (${membershipStatusLabel(membership.status)})`);
+    classByStudent.set(membership.student_id, current);
+  }
+  return new Map([...classByStudent.entries()].map(([studentId, classes]) => [studentId, classes.join(", ")]));
+}
+
+function buildClassMemberCounts(memberships){
+  const counts = new Map();
+  for(const membership of memberships){
+    if(membership.status !== "approved") continue;
+    counts.set(membership.class_id, (counts.get(membership.class_id) || 0) + 1);
+  }
+  return counts;
+}
+
+function renderStudentRow(student, classLabel = "Chưa có lớp"){
   const createdAt = student.created_at ? new Date(student.created_at).toLocaleDateString("vi-VN") : "";
   let actionButtons = "";
   if(student.status === "pending"){
@@ -1080,11 +1224,11 @@ function renderStudentRow(student){
   return `
     <div class="admin-table-row" role="row">
       <span data-label="Họ tên">${escapeHtml(student.full_name || "")}</span>
-      <span data-label="Số điện thoại">${escapeHtml(student.phone || "")}</span>
       <span data-label="Email">${escapeHtml(student.email || "")}</span>
-      <span data-label="Ngày đăng ký">${escapeHtml(createdAt)}</span>
-      <span data-label="Trạng thái"><b class="status-badge status-${escapeHtml(student.status)}">${profileStatusLabel(student.status)}</b></span>
       <span data-label="Role">${escapeHtml(student.role || "")}</span>
+      <span data-label="Trạng thái"><b class="status-badge status-${escapeHtml(student.status)}">${profileStatusLabel(student.status)}</b></span>
+      <span data-label="Lớp">${escapeHtml(classLabel)}</span>
+      <span data-label="Ngày tạo">${escapeHtml(createdAt)}</span>
       <span class="admin-actions" data-label="Hành động">
         ${actionButtons}
       </span>
@@ -1099,6 +1243,7 @@ function renderApprovalRow(student, classes){
       <span data-label="Họ tên">${escapeHtml(student.full_name || "")}</span>
       <span data-label="Email">${escapeHtml(student.email || "")}</span>
       <span data-label="Ngày đăng ký">${escapeHtml(createdAt)}</span>
+      <span data-label="Trạng thái"><b class="status-badge status-${escapeHtml(student.status)}">${profileStatusLabel(student.status)}</b></span>
       <span data-label="Lớp">
         <select class="admin-select" data-approval-class>
           ${classes.map((klass) => `<option value="${escapeHtml(klass.id)}">${escapeHtml(klass.name)}</option>`).join("")}
@@ -1112,13 +1257,14 @@ function renderApprovalRow(student, classes){
   `;
 }
 
-function renderClassRow(klass){
+function renderClassRow(klass, memberCount = 0){
   const createdAt = klass.created_at ? new Date(klass.created_at).toLocaleDateString("vi-VN") : "";
   return `
     <div class="admin-table-row" role="row">
       <span data-label="Tên lớp">${escapeHtml(klass.name)}</span>
       <span data-label="Level">${escapeHtml(klass.level || "A1")}</span>
       <span data-label="Trạng thái"><b class="status-badge status-${escapeHtml(klass.status)}">${classStatusLabel(klass.status)}</b></span>
+      <span data-label="Học viên">${memberCount}</span>
       <span data-label="Mô tả">${escapeHtml(klass.description || "")}</span>
       <span data-label="Ngày tạo">${escapeHtml(createdAt)}</span>
       <span class="admin-actions" data-label="Hành động">
