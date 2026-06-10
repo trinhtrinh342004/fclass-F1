@@ -526,7 +526,10 @@ const SECTION_LABELS = {
   minitest:"Minitest",
   listen_test:"🎧 Minitest Luyện nghe",
   mindmap:"Mindmap",
-  homework:"Bài tập về nhà"
+  homework:"Bài tập về nhà",
+  homework_answers:"Đáp án bài tập về nhà",
+  common_mistakes:"Lỗi sai thường gặp",
+  lesson_end:"Kết thúc buổi học"
 };
 
 SECTION_LABELS.dialogue_video = "Video hội thoại";
@@ -634,6 +637,9 @@ function renderSection(){
     case "listen_test": html = renderListenTest(lesson); break;
     case "mindmap":     html = renderMindmap(lesson); break;
     case "homework":    html = renderHomework(lesson); break;
+    case "homework_answers": html = renderHomeworkAnswers(lesson); break;
+    case "common_mistakes": html = renderCommonMistakes(lesson); break;
+    case "lesson_end": html = renderLessonEnd(lesson); break;
     default:            html = renderMissingSection(section); break;
   }
   stage.innerHTML = html;
@@ -977,7 +983,7 @@ function resolveYouTubeVideo(video={}){
   } else {
     const isPending = [video.embedUrl, video.watchUrl, video.url, video.sourceUrl]
       .filter(Boolean)
-      .some(value => /^TODO(?:_|:)/i.test(String(value).trim()));
+      .some(value => /^(?:TODO|DÁN_LINK|DAN_LINK)(?:_|:)/i.test(String(value).trim()));
     return {
       iframeSrc: "",
       videoUrl: isPending ? "" : originalUrl,
@@ -1323,6 +1329,7 @@ function renderVocab(l){
             <div class="fc-emoji">${v.img||"📝"}</div>
             <div class="fc-vi">${v.vi}</div>
             ${v.note?`<div class="fc-ipa fc-ipa--back">${v.note}</div>`:""}
+            ${v.example?`<div class="fc-example">${escAttr(v.example)}</div>`:""}
             ${v.exampleQuestion?`<div class="fc-ipa fc-ipa--back"><b>Q:</b> ${escAttr(v.exampleQuestion)}${v.exampleAnswer?`<br><b>A:</b> ${escAttr(v.exampleAnswer)}`:""}</div>`:""}
           </div>
         </div>
@@ -1356,6 +1363,7 @@ function renderVocab(l){
           <div class="fc-vi">${v.vi}</div>
           ${v.ipa?`<div class="fc-ipa fc-ipa--back">${v.ipa}</div>`:""}
           ${v.note?`<div class="fc-ipa fc-ipa--back">${escAttr(v.note)}</div>`:""}
+          ${v.example?`<div class="fc-example">${escAttr(v.example)}</div>`:""}
           ${v.exampleQuestion?`<div class="fc-ipa fc-ipa--back"><b>Q:</b> ${escAttr(v.exampleQuestion)}${v.exampleAnswer?`<br><b>A:</b> ${escAttr(v.exampleAnswer)}`:""}</div>`:""}
         </div>
       </div>
@@ -1402,7 +1410,9 @@ window.switchVocabGroup = function(group){
 
 // --- VOCAB MATCH GAME (với Rounds & Chunking) ---
 function renderVocabMatch(l){
-  const hasGroups = l.vocabulary.some(v=>v.group) && l.vocabGroups;
+  const matchingPool = l.matchingPairs?.length ? l.matchingPairs : l.vocabulary;
+  const hasGroups = matchingPool.some(v=>v.group) && l.vocabGroups;
+  const matchLabels = l.matchLabels || { left: "English", right: "Tiếng Việt" };
   const tabsHtml = hasGroups ? `
     <div class="match-group-tabs">
       ${Object.keys(l.vocabGroups).map((gk,i)=>`
@@ -1413,8 +1423,8 @@ function renderVocabMatch(l){
   ` : "";
   return `
     <div class="stage-h"><span class="stage-tag">Minigame · Ghép từ</span><span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span></div>
-    <h2 class="stage-title">🧩 Ghép từ với nghĩa</h2>
-    <p class="stage-sub">Chọn 1 từ tiếng Anh, sau đó chọn nghĩa tiếng Việt tương ứng. Sai sẽ rung — đúng sẽ phát âm.</p>
+    <h2 class="stage-title">🧩 Ghép ${escAttr(matchLabels.left)} với ${escAttr(matchLabels.right)}</h2>
+    <p class="stage-sub">Chọn một thẻ ${escAttr(matchLabels.left)}, sau đó chọn thẻ ${escAttr(matchLabels.right)} tương ứng. Mỗi vòng tối đa 10 cặp và không lặp trước khi hết danh sách.</p>
     ${tabsHtml}
     <div class="mg-block accent">
       <div class="mg-head">
@@ -1428,7 +1438,8 @@ function renderVocabMatch(l){
 }
 
 function initMatchGame(l){
-  const firstGroup = l.matchAll ? null : (l.matchDefaultGroup || l.vocabulary.find(v=>v.group)?.group || null);
+  const matchingPool = l.matchingPairs?.length ? l.matchingPairs : l.vocabulary;
+  const firstGroup = l.matchAll ? null : (l.matchDefaultGroup || matchingPool.find(v=>v.group)?.group || null);
   STATE._matchLesson = l;
   STATE._matchGroup = firstGroup;
   _runMatchGame(l, firstGroup);
@@ -1436,7 +1447,8 @@ function initMatchGame(l){
 
 function _runMatchGame(l, group){
   STATE._matchGroup = group;
-  const pool = group && group!=="all" ? l.vocabulary.filter(v=>v.group===group) : l.vocabulary;
+  const matchingPool = l.matchingPairs?.length ? l.matchingPairs : l.vocabulary;
+  const pool = group && group!=="all" ? matchingPool.filter(v=>v.group===group) : matchingPool;
 
   // Bước 1: Shuffle toàn bộ pool 1 lần duy nhất
   const shuffledPool = shuffle([...pool]);
@@ -1474,15 +1486,16 @@ function _renderMatchRound(){
   const viList = shuffle(currentChunk.map((v,i)=>({...v, side:"vi", id:i})));
 
   const grid = document.getElementById("matchGrid");
+  const labels = STATE._matchLesson?.matchLabels || { left: "English", right: "Tiếng Việt" };
   grid.innerHTML = `
     <div class="match-col">
-      <h5>English</h5>
+      <h5>${escAttr(labels.left)}</h5>
       ${enList.map(v=>`<button class="match-item" data-side="en" data-id="${v.id}" onclick="pickMatch(this)">
         ${v.img||""} ${v.en}${v.ipa?`<span class="match-ipa">${v.ipa}</span>`:""}
       </button>`).join("")}
     </div>
     <div class="match-col">
-      <h5>Tiếng Việt</h5>
+      <h5>${escAttr(labels.right)}</h5>
       ${viList.map(v=>`<button class="match-item" data-side="vi" data-id="${v.id}" onclick="pickMatch(this)">${v.vi}</button>`).join("")}
     </div>
   `;
@@ -2180,12 +2193,14 @@ function _pickQB(chosen){
 // --- GRAMMAR ---
 function renderGrammarRichTable(table){
   if(!table?.headers?.length || !table?.rows?.length) return "";
-  return `<table class="grammar-table grammar-rich-table">
-    <thead><tr>${table.headers.map(h=>`<th>${escAttr(h)}</th>`).join("")}</tr></thead>
-    <tbody>${table.rows.map(row=>`
-      <tr>${row.map(cell=>`<td>${highlightText(escAttr(cell))}</td>`).join("")}</tr>
-    `).join("")}</tbody>
-  </table>`;
+  return `<div class="responsive-table-wrap">
+    <table class="grammar-table grammar-rich-table">
+      <thead><tr>${table.headers.map(h=>`<th>${escAttr(h)}</th>`).join("")}</tr></thead>
+      <tbody>${table.rows.map(row=>`
+        <tr>${row.map(cell=>`<td>${highlightText(escAttr(cell))}</td>`).join("")}</tr>
+      `).join("")}</tbody>
+    </table>
+  </div>`;
 }
 
 function renderGrammarRichExamples(examples=[]){
@@ -4246,6 +4261,8 @@ function linkify(text){
 function renderHomework(l){
   const lid = l.id;
   const hwState = progress.hw[lid] || [];
+  const hasFollowingSections = STATE.sectionIdx < STATE.sections.length - 1;
+  const homeworkActionLabel = hasFollowingSections ? "Tiếp tục xem đáp án →" : "✓ Hoàn thành buổi học này";
   const summaryHtml = l.summary?.length ? `
     <div class="hw2-task">
       <div class="hw2-task-head">
@@ -4273,6 +4290,7 @@ function renderHomework(l){
         <div class="hw2-task-body">
           <p class="hw2-desc">${escAttr(t.desc)}</p>
           ${t.note ? `<p class="hw2-note">${escAttr(t.note)}</p>` : ""}
+          ${t.table ? renderGrammarRichTable(t.table) : ""}
           ${t.items ? `<ol class="hw2-items">${t.items.map(x=>`<li>${escAttr(x)}</li>`).join("")}</ol>` : ""}
           ${t.showSample && t.sample ? `<div class="hw2-note hw2-sample"><b>Gợi ý:</b><br>${linkify(escAttr(t.sample))}</div>` : ""}
           ${t.showRubric && t.rubric ? `<div class="hw2-note hw2-rubric"><b>Tiêu chí:</b> ${escAttr(t.rubric)}</div>` : ""}
@@ -4300,7 +4318,7 @@ function renderHomework(l){
         </div>
         ${tasksHtml}
         ${summaryHtml}
-        <button class="hw-finish" onclick="nextSection()">✓ Hoàn thành buổi học này</button>
+        <button class="hw-finish" onclick="nextSection()">${homeworkActionLabel}</button>
       </div>
     `;
   }
@@ -4321,7 +4339,59 @@ function renderHomework(l){
         `).join("")}
       </ul>
       ${summaryHtml}
-      <button class="hw-finish" onclick="nextSection()">✓ Hoàn thành buổi học này</button>
+      <button class="hw-finish" onclick="nextSection()">${homeworkActionLabel}</button>
+    </div>
+  `;
+}
+
+function renderHomeworkAnswers(l){
+  const answers = l.homeworkAnswers;
+  if(!answers?.rows?.length) return renderMissingSection("homework_answers");
+  return `
+    <div class="stage-h"><span class="stage-tag">Homework answers</span><span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span></div>
+    <h2 class="stage-title">✅ Đáp án bài tập về nhà</h2>
+    <p class="stage-sub">Hoàn thành bài tập trước, sau đó dùng bảng này để tự kiểm tra.</p>
+    <div class="mg-block accent lesson-reference-card">
+      <div class="mg-head"><h4>${escAttr(answers.title || "Đáp án")}</h4><span class="mg-badge">${answers.rows.length} từ</span></div>
+      ${renderGrammarRichTable({ headers: answers.headers, rows: answers.rows })}
+    </div>
+  `;
+}
+
+function renderCommonMistakes(l){
+  const mistakes = l.commonMistakes?.length ? l.commonMistakes : l.grammar?.commonMistakes || [];
+  if(!mistakes.length) return renderMissingSection("common_mistakes");
+  return `
+    <div class="stage-h"><span class="stage-tag">Common mistakes</span><span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span></div>
+    <h2 class="stage-title">⚠️ Ghi chú lỗi sai thường gặp</h2>
+    <p class="stage-sub">Đối chiếu lỗi sai, câu đúng và lý do để tránh lặp lại khi nói hoặc viết.</p>
+    <div class="responsive-table-wrap">
+      <table class="grammar-table lesson-reference-table">
+        <thead><tr><th>Lỗi sai</th><th>Câu đúng</th><th>Giải thích</th></tr></thead>
+        <tbody>
+          ${mistakes.map(item=>`
+            <tr>
+              <td class="mistake-cell">${highlightText(escAttr(item.mistake || item.wrong || ""))}</td>
+              <td class="correction-cell">${highlightText(escAttr(item.correction || item.right || ""))}</td>
+              <td>${escAttr(item.explanation || "")}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderLessonEnd(l){
+  const ending = l.lessonEnd || {};
+  const items = ending.items || l.summary || [];
+  return `
+    <div class="stage-h"><span class="stage-tag">Lesson complete</span><span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span></div>
+    <h2 class="stage-title">🎓 ${escAttr(ending.title || `Kết thúc Buổi ${l.id}`)}</h2>
+    <div class="lesson-end-card">
+      <h3>${escAttr(ending.intro || "Nội dung cần nhớ")}</h3>
+      <ul>${items.map(item=>`<li>${highlightText(escAttr(item))}</li>`).join("")}</ul>
+      <button class="hw-finish" onclick="nextSection()">✓ Hoàn thành Buổi ${l.id}</button>
     </div>
   `;
 }
