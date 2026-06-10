@@ -1449,6 +1449,42 @@ body.admin-active > .topbar{
 .grammar-table th{background:var(--navy);color:#fff;font-weight:700;font-family:var(--font-display)}
 .grammar-table tr:last-child td{border-bottom:none}
 .grammar-table tr:nth-child(even) td{background:var(--bg-soft)}
+.responsive-table-wrap{
+  width:100%;
+  overflow-x:auto;
+  margin:10px 0 12px;
+  border-radius:var(--radius);
+  -webkit-overflow-scrolling:touch;
+}
+.responsive-table-wrap .grammar-table{
+  min-width:620px;
+  margin:0;
+}
+.lesson-reference-table .mistake-cell{color:var(--red);font-weight:700}
+.lesson-reference-table .correction-cell{color:var(--green);font-weight:700}
+.lesson-reference-card{overflow:hidden}
+.lesson-end-card{
+  background:linear-gradient(145deg,var(--navy),#243b78);
+  color:#fff;
+  border:2px solid var(--navy);
+  border-radius:var(--radius-lg);
+  padding:26px;
+  box-shadow:var(--shadow);
+}
+.lesson-end-card h3{
+  margin:0 0 14px;
+  color:var(--yellow);
+  font-family:var(--font-display);
+  font-size:22px;
+}
+.lesson-end-card ul{
+  margin:0;
+  padding-left:22px;
+  display:grid;
+  gap:9px;
+  line-height:1.55;
+}
+.lesson-end-card .hw-finish{max-width:420px}
 
 /* ===== LISTENING (CONTEXT STORY) ===== */
 .context-story{
@@ -2019,6 +2055,8 @@ body.admin-active > .topbar{
   .lesson-shell{padding:14px 12px;gap:14px}
   .lesson-stage{padding:18px}
   .stage-title{font-size:24px}
+  .responsive-table-wrap .grammar-table{min-width:560px}
+  .lesson-end-card{padding:20px 18px}
   .vocab-grid{grid-template-columns:repeat(2,1fr)}
   .memory-grid{grid-template-columns:repeat(3,1fr)}
   .lesson-controls{flex-direction:column}

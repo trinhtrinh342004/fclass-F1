@@ -10,12 +10,12 @@ export const TUWI_27_CURRICULUM_MAP = [
   },
   {
     lessonId: 2,
-    topicEnglish: "TOPIC2: Singular & Plural Nouns",
-    topicVietnamese: "Danh từ số ít - Danh từ số nhiều",
+    topicEnglish: "TOPIC 2 — SINGULAR & PLURAL NOUNS",
+    topicVietnamese: "Danh từ số ít & Danh từ số nhiều",
     slug: "singular-plural-nouns",
     sourceLessons: [],
-    status: "partial",
-    notes: "Cần biên soạn nội dung riêng cho danh từ số ít/số nhiều.",
+    status: "ready",
+    notes: "Nội dung Buổi 2 đã được biên soạn đầy đủ; video đang dùng placeholder an toàn.",
   },
   {
     lessonId: 3,
