@@ -1329,6 +1329,7 @@ function renderVocab(l){
             <div class="fc-emoji">${v.img||"📝"}</div>
             <div class="fc-vi">${v.vi}</div>
             ${v.note?`<div class="fc-ipa fc-ipa--back">${v.note}</div>`:""}
+            ${v.example?`<div class="fc-ipa fc-ipa--back">${escAttr(v.example)}</div>`:""}
             ${v.exampleQuestion?`<div class="fc-ipa fc-ipa--back"><b>Q:</b> ${escAttr(v.exampleQuestion)}${v.exampleAnswer?`<br><b>A:</b> ${escAttr(v.exampleAnswer)}`:""}</div>`:""}
           </div>
         </div>
@@ -1362,6 +1363,7 @@ function renderVocab(l){
           <div class="fc-vi">${v.vi}</div>
           ${v.ipa?`<div class="fc-ipa fc-ipa--back">${v.ipa}</div>`:""}
           ${v.note?`<div class="fc-ipa fc-ipa--back">${escAttr(v.note)}</div>`:""}
+          ${v.example?`<div class="fc-ipa fc-ipa--back">${escAttr(v.example)}</div>`:""}
           ${v.exampleQuestion?`<div class="fc-ipa fc-ipa--back"><b>Q:</b> ${escAttr(v.exampleQuestion)}${v.exampleAnswer?`<br><b>A:</b> ${escAttr(v.exampleAnswer)}`:""}</div>`:""}
         </div>
       </div>
@@ -4352,7 +4354,7 @@ function renderHomeworkAnswers(l){
     <h2 class="stage-title">✅ Đáp án bài tập về nhà</h2>
     <p class="stage-sub">Hoàn thành bài tập trước, sau đó dùng bảng này để tự kiểm tra.</p>
     <div class="mg-block accent lesson-reference-card">
-      <div class="mg-head"><h4>${escAttr(answers.title || "Đáp án")}</h4><span class="mg-badge">${answers.rows.length} từ</span></div>
+      <div class="mg-head"><h4>${escAttr(answers.title || "Đáp án")}</h4><span class="mg-badge">${answers.rows.length} câu</span></div>
       ${renderGrammarRichTable({ headers: answers.headers, rows: answers.rows })}
     </div>
   `;
