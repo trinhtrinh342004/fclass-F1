@@ -446,6 +446,8 @@ function renderLessonCardCount(l){
   if(l.module === "ipa-bootcamp"){
     const soundCount = l.ipa?.sounds?.length || 0;
     const testCount = l.minitest?.length || 0;
+    const practiceWordCount = Object.values(l.practiceWords || {}).flatMap(group => group.words || []).length;
+    if(practiceWordCount) return `${practiceWordCount} từ luyện · ${testCount} câu test`;
     return `${soundCount} âm IPA · ${testCount} câu test`;
   }
   return `${l.vocabulary?.length || 0} từ · ${l.minitest?.length || 0} câu test`;
@@ -622,6 +624,24 @@ Object.assign(SECTION_LABELS, {
   ipa_mini_test: "Mini test",
   ipa_mindmap: "Mindmap",
   ipa_homework: "Bài tập về nhà",
+  review8_alphabet: "Ôn bảng chữ cái",
+  review8_spelling: "Ôn spelling",
+  review8_short_vowels: "Ôn nguyên âm ngắn",
+  review8_long_vowels: "Ôn nguyên âm dài",
+  review8_diphthongs: "Ôn nguyên âm đôi",
+  review8_consonants: "Ôn phụ âm",
+  review8_final_sounds: "Âm cuối",
+  review8_schwa: "Schwa /ə/ là gì?",
+  review8_syllable: "Syllable là gì?",
+  review8_word_stress: "Word stress là gì?",
+  review8_read_50_words: "Đọc 50 từ",
+  review8_read_20_sentences: "Đọc 20 câu",
+  review8_listen_choose: "Nghe chọn âm tổng hợp",
+  review8_ipa_to_word: "Nhìn IPA chọn từ",
+  review8_recording: "Ghi âm kiểm tra",
+  review8_mini_test: "Final mini test",
+  review8_mindmap: "Mindmap tổng",
+  review8_homework: "Bài tập sau module",
 });
 
 function renderSidebar(lesson){
@@ -696,7 +716,9 @@ function renderSection(){
   const section = STATE.sections[STATE.sectionIdx];
 
   let html="";
-  if(lesson?.module === "ipa-bootcamp" && section.startsWith("ipa_")){
+  if(lesson?.module === "ipa-bootcamp" && section.startsWith("review8_")){
+    html = renderReview8Section(lesson, section);
+  }else if(lesson?.module === "ipa-bootcamp" && section.startsWith("ipa_")){
     html = renderIpaSection(lesson, section);
   }else switch(section){
     case "intro":       html = renderIntro(lesson); break;
@@ -746,6 +768,7 @@ function renderSection(){
   if(section==="translate") initTranslate(lesson);
   if(section==="listen_quiz") initListenQuiz(lesson);
   if(section==="minitest") initMinitest(lesson);
+  if(section==="review8_mini_test") initMinitest(lesson);
   if(section==="listen_test") initListenTest(lesson);
 
   renderSidebar(lesson);
@@ -834,6 +857,212 @@ function renderIpaSection(lesson, section){
       return renderIpaGenericPractice(lesson, section);
   }
 }
+
+function renderReview8Section(lesson, section){
+  const header = renderIpaHeader(lesson, section);
+  switch(section){
+    case "review8_alphabet":
+      return `${header}
+        <div class="ipa-info-card">
+          <h3>Bảng chữ cái A-Z</h3>
+          <div class="ipa-symbol-stack">${lesson.alphabet.letters.split(" ").map(letter=>`<span>${letter}</span>`).join("")}</div>
+        </div>
+        ${renderReview8Table(["Chữ", "Cách đọc", "Lỗi hay gặp"], lesson.alphabet.trickLetters.map(item=>[item.letter, item.ipa, item.mistake]))}
+        ${renderReview8QuizRows(lesson.alphabet.quiz)}`;
+    case "review8_spelling":
+      return `${header}
+        <div class="ipa-info-card">
+          <h3>How do you spell your name?</h3>
+          <p>Nhập tên để tự tách thành từng chữ cái.</p>
+          <div class="mt-write-row">
+            <input class="mt-input" placeholder="Ví dụ: Lan" oninput="_spellReviewName(this)">
+            <strong id="review8SpellingOutput" class="ipa-example-line">L-A-N</strong>
+          </div>
+        </div>
+        ${renderReview8Table(["Từ", "Spelling", "Nghĩa"], lesson.spelling.spellWords.map(item=>[item.word, item.spelling, item.meaning]))}`;
+    case "review8_short_vowels":
+      return `${header}<p class="stage-sub">Âm ngắn cần đọc gọn, rõ và không kéo dài.</p>${renderReview8VowelCards(lesson.shortVowels, 100)}`;
+    case "review8_long_vowels":
+      return `${header}<div class="ipa-info-card"><h3>Dấu /ː/ nghĩa là kéo dài âm hơn.</h3></div>${renderReview8VowelCards(lesson.longVowels, 200)}`;
+    case "review8_diphthongs":
+      return `${header}<div class="ipa-info-card"><h3>Nguyên âm đôi = âm trượt từ âm đầu sang âm sau.</h3></div>
+        <div class="ipa-sound-grid">${lesson.diphthongs.map(item=>`
+          <article class="ipa-sound-card">
+            <div class="ipa-symbol">${escAttr(item.symbol)}</div>
+            <div class="ipa-sound-name">${escAttr(item.name)}</div>
+            <h3>${escAttr(item.word)}</h3>
+            <p>${escAttr(item.slide)}</p>
+            <div class="ipa-card-actions">
+              <button onclick="speakById('${regTxt(item.word)}')">Nghe mẫu</button>
+              <button id="mic-${300 + lesson.diphthongs.indexOf(item)}" onclick="recordById(${300 + lesson.diphthongs.indexOf(item)}, '${regTxt(item.word)}')">Ghi âm</button>
+            </div>
+            <div id="speakRes-${300 + lesson.diphthongs.indexOf(item)}" class="dlg-result" style="display:none"></div>
+          </article>`).join("")}
+        </div>`;
+    case "review8_consonants":
+      return `${header}
+        <div class="ipa-info-card">
+          <h3>Bản đồ tổng 44 âm IPA cơ bản</h3>
+          <p>Nguyên âm ngắn, nguyên âm dài, nguyên âm đôi và các phụ âm nền tảng.</p>
+          ${renderReview8SoundGroup("Short vowels", lesson.shortVowels.map(item=>item.symbol))}
+          ${renderReview8SoundGroup("Long vowels", lesson.longVowels.map(item=>item.symbol))}
+          ${renderReview8SoundGroup("Diphthongs", lesson.diphthongs.map(item=>item.symbol))}
+          ${renderReview8SoundGroup("Schwa", [lesson.schwa.symbol])}
+          ${renderReview8SoundGroup("Stop sounds", lesson.consonants.stops)}
+          ${renderReview8SoundGroup("Nasal sounds", lesson.consonants.nasals)}
+          ${renderReview8SoundGroup("Âm gió và âm khó", lesson.consonants.fricatives)}
+        </div>
+        ${renderReview8Table(["Cặp âm", "Điểm cần nhớ"], lesson.consonants.pairs.map(item=>[`${item.a} vs ${item.b}`, item.note]))}`;
+    case "review8_final_sounds":
+      return `${header}<div class="ipa-info-card"><h3>Không nuốt âm cuối. Final sound phải nghe được.</h3></div>
+        ${renderReview8QuizRows(lesson.finalSounds.map(item=>({
+          audioText: item.word,
+          q: `Âm cuối của "${item.word}" ${item.ipa} là:`,
+          options: lesson.finalSounds.map(sound=>sound.final).filter((value, index, all)=>all.indexOf(value)===index),
+          answer: lesson.finalSounds.map(sound=>sound.final).filter((value, index, all)=>all.indexOf(value)===index).indexOf(item.final),
+        })))}
+        ${renderReview8ReadingItems(lesson.finalSounds.map(item=>({ text:item.word, detail:`${item.ipa} · Final sound: ${item.final}` })), 400)}`;
+    case "review8_schwa":
+      return `${header}<div class="ipa-hero-panel"><div><span class="ipa-kicker">Schwa</span><h3>${escAttr(lesson.schwa.symbol)}</h3><p>${escAttr(lesson.schwa.description)}</p></div></div>
+        ${renderReview8Table(["Từ", "IPA", "Schwa"], lesson.schwa.examples.map(item=>[item.word, item.ipa, item.note]))}`;
+    case "review8_syllable":
+      return `${header}<div class="ipa-info-card"><h3>Syllable nghĩa là âm tiết</h3><p>${escAttr(lesson.syllable.description)}</p></div>
+        ${renderReview8QuizRows(lesson.syllable.examples.map(item=>({
+          audioText: item.word,
+          q: `"${item.word}" có bao nhiêu âm tiết?`,
+          options: ["1", "2", "3", "4"],
+          answer: item.syllableCount - 1,
+        })))}`;
+    case "review8_word_stress":
+      return `${header}<div class="ipa-info-card"><h3>${escAttr(lesson.wordStress.description)}</h3><p>${escAttr(lesson.wordStress.ipaNote)}</p></div>
+        <div class="ipa-sound-grid">${lesson.wordStress.examples.map(item=>`
+          <article class="ipa-sound-card">
+            <div class="ipa-symbol">${escAttr(item.ipa)}</div>
+            <h3>${item.syllables.map((part, index)=>index===item.stressIndex?`<mark>${escAttr(part)}</mark>`:escAttr(part)).join(" - ")}</h3>
+            <p>${escAttr(item.meaning)} · ${escAttr(item.note)}</p>
+            <div class="ipa-card-actions">
+              <button onclick="speakById('${regTxt(item.word)}')">Nghe mẫu</button>
+              <button id="mic-${500 + lesson.wordStress.examples.indexOf(item)}" onclick="recordById(${500 + lesson.wordStress.examples.indexOf(item)}, '${regTxt(item.word)}')">Ghi âm</button>
+            </div>
+            <div id="speakRes-${500 + lesson.wordStress.examples.indexOf(item)}" class="dlg-result" style="display:none"></div>
+          </article>`).join("")}
+        </div>`;
+    case "review8_read_50_words":
+      return `${header}${Object.values(lesson.practiceWords).map((group, groupIndex)=>`
+        <div class="ipa-info-card">
+          <h3>${escAttr(group.label)}</h3>
+          ${renderReview8ReadingItems(group.words.map(item=>({ text:item.word, detail:item.ipa })), groupIndex * 100)}
+        </div>`).join("")}`;
+    case "review8_read_20_sentences":
+      return `${header}${renderReview8ReadingItems(lesson.practiceSentences.map(item=>({
+        text: item.sentence,
+        detail: `Focus: ${item.focus} ${item.focusIpa}${item.finalSound ? ` · Final sound: ${item.finalSound}` : ""}`,
+      })), 600)}`;
+    case "review8_listen_choose":
+      return `${header}${renderReview8QuizRows(lesson.listenChooseGame.flatMap(part=>part.questions))}`;
+    case "review8_ipa_to_word":
+      return `${header}${renderReview8QuizRows(lesson.ipaToWordGame.map(item=>({
+        q: `${item.ipa} là từ nào?`,
+        options: item.options,
+        answer: item.answer,
+        audioText: item.options[item.answer],
+      })))}`;
+    case "review8_recording":
+      return `${header}
+        <div class="ipa-ai-panel">
+          <h3>Final recording: 10 từ + 5 câu</h3>
+          <p>Nghe mẫu, ghi âm và đọc lại. Giáo viên đánh giá theo 6 nhóm kỹ năng bên dưới.</p>
+          ${renderReview8SoundGroup("Rubric đánh giá", lesson.finalRecording.rubric.map(item=>item.replaceAll("_", " ")))}
+        </div>
+        <h3>10 từ kiểm tra</h3>${renderReview8ReadingItems(lesson.finalRecording.words.map(text=>({text, detail:"Final recording word"})), 800)}
+        <h3>5 câu kiểm tra</h3>${renderReview8ReadingItems(lesson.finalRecording.sentences.map(text=>({text, detail:"Final recording sentence"})), 900)}
+        ${renderReview8ResultGuide(lesson)}`;
+    case "review8_mini_test":
+      return `${renderMinitest(lesson)}${renderReview8ResultGuide(lesson)}`;
+    case "review8_mindmap":
+      return renderMindmap(lesson);
+    case "review8_homework":
+      return renderHomework(lesson);
+    default:
+      return renderMissingSection(section);
+  }
+}
+
+function renderReview8SoundGroup(label, sounds){
+  return `<div class="ipa-info-card"><h3>${escAttr(label)}</h3><div class="ipa-chip-row">${sounds.map(sound=>`<span>${escAttr(sound)}</span>`).join("")}</div></div>`;
+}
+
+function renderReview8VowelCards(items, offset){
+  return `<div class="ipa-sound-grid">${items.map((item, index)=>`
+    <article class="ipa-sound-card">
+      <div class="ipa-symbol">${escAttr(item.symbol)}</div>
+      <div class="ipa-sound-name">${escAttr(item.name)}</div>
+      <h3>${escAttr(item.word)} <small>${escAttr(item.ipa)}</small></h3>
+      <p>${escAttr(item.mistake || (item.shortPair ? `So sánh với ${item.shortPair} ${item.shortWord || ""}` : ""))}</p>
+      <div class="ipa-card-actions">
+        <button onclick="speakById('${regTxt(item.word)}')">Nghe mẫu</button>
+        <button id="mic-${offset + index}" onclick="recordById(${offset + index}, '${regTxt(item.word)}')">Ghi âm</button>
+      </div>
+      <div id="speakRes-${offset + index}" class="dlg-result" style="display:none"></div>
+    </article>`).join("")}</div>`;
+}
+
+function renderReview8Table(headers, rows){
+  return `<div class="responsive-table-wrap"><table class="grammar-table lesson-reference-table">
+    <thead><tr>${headers.map(header=>`<th>${escAttr(header)}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(row=>`<tr>${row.map(cell=>`<td>${escAttr(cell ?? "")}</td>`).join("")}</tr>`).join("")}</tbody>
+  </table></div>`;
+}
+
+function renderReview8QuizRows(questions){
+  return `<div class="ipa-game">${questions.map((question, index)=>{
+    const answer = question.options[question.answer];
+    return `<div class="ipa-game-row">
+      <div>
+        <b>Câu ${index + 1}: ${escAttr(question.q || question.question)}</b>
+        ${question.audioText ? `<button class="ipa-listen-button" onclick="speakById('${regTxt(question.audioText)}')">Nghe mẫu</button>` : ""}
+      </div>
+      <div class="ipa-option-row">${question.options.map(option=>`
+        <button data-answer="${escAttr(answer)}" data-choice="${escAttr(option)}" onclick="_checkIpaChoice(this)">${escAttr(option)}</button>
+      `).join("")}</div>
+    </div>`;
+  }).join("")}</div>`;
+}
+
+function renderReview8ReadingItems(items, offset=0){
+  return `<div class="ipa-reading-list">${items.map((item, index)=>`
+    <div class="ipa-reading-card">
+      <b>${index + 1}</b>
+      <span><strong>${escAttr(item.text)}</strong><br>${escAttr(item.detail || "")}</span>
+      <div class="ipa-card-actions">
+        <button onclick="speakById('${regTxt(item.text)}')">Nghe</button>
+        <button id="mic-${offset + index}" onclick="recordById(${offset + index}, '${regTxt(item.text)}')">Ghi âm</button>
+      </div>
+      <div id="speakRes-${offset + index}" class="dlg-result" style="display:none"></div>
+    </div>`).join("")}</div>`;
+}
+
+function renderReview8ResultGuide(lesson){
+  return `<div class="ipa-info-card">
+    <h3>Kết quả cuối module</h3>
+    <p>Sau bài kiểm tra, đối chiếu điểm để xác định âm làm tốt và nhóm cần luyện lại.</p>
+    ${renderReview8Table(["Điểm", "Kết quả", "Hướng luyện"], lesson.scoring.levels.map(level=>[
+      `${level.min}-${level.max}`,
+      level.label,
+      level.message,
+    ]))}
+  </div>`;
+}
+
+window._spellReviewName = function(input){
+  const output = document.getElementById("review8SpellingOutput");
+  if(!output) return;
+  output.textContent = String(input.value || "")
+    .toUpperCase()
+    .replace(/[^A-Z]/g, "")
+    .split("")
+    .join("-") || "L-A-N";
+};
 
 function renderIpaHeader(lesson, section){
   return `
