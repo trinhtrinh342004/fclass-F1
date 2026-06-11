@@ -3600,17 +3600,29 @@ body.admin-active > .topbar{
 .alphabet-video-card video{display:block;width:100%;max-height:520px;border-radius:12px;background:var(--navy)}
 .alphabet-video-placeholder{display:none;border:2px dashed var(--line-strong);border-radius:12px;background:var(--bg-soft);padding:36px 18px;text-align:center;color:var(--navy);font-weight:800}
 .alphabet-video-placeholder.visible{display:block}
-.alphabet-ag-activity{min-height:390px}
+.alphabet-ag-activity{min-height:0}
 .alphabet-ag-overview,.alphabet-ag-learning-card{position:relative;display:grid;gap:26px;justify-items:center;overflow:hidden;border:1.5px solid var(--line);border-radius:22px;background:linear-gradient(145deg,#fffdf3,#fff);padding:30px 24px;box-shadow:var(--shadow-sm)}
 .alphabet-ag-card-row{display:grid;width:100%;grid-template-columns:repeat(7,minmax(82px,1fr));gap:12px}
 .alphabet-ag-mini-card{display:grid;min-height:170px;gap:6px;place-items:center;border:2px solid #f0d75b;border-radius:18px;background:#fff;padding:12px 8px;text-align:center;box-shadow:0 5px 0 rgba(23,37,84,.14)}
 .alphabet-ag-mini-card>div{display:flex;gap:5px;align-items:baseline;color:var(--navy);font-family:var(--font-display)}.alphabet-ag-mini-card b{font-size:46px}.alphabet-ag-mini-card span{font-size:27px;font-weight:900}.alphabet-ag-mini-card i{font-size:48px;font-style:normal;line-height:1}.alphabet-ag-mini-card small{color:var(--navy);font-size:14px;font-weight:850}
 .alphabet-ag-start,.alphabet-ag-actions button{border:0;border-radius:14px;background:var(--navy);color:#fff;padding:14px 26px;font-size:18px;font-weight:900;box-shadow:0 5px 0 #0f1d4c}.alphabet-ag-start{min-width:220px;font-size:21px}
-.alphabet-ag-learning-card{min-height:500px;align-content:center}
-.alphabet-ag-step{display:grid;justify-items:center;gap:10px;text-align:center}.alphabet-ag-main-letter{display:flex;align-items:baseline;gap:18px;color:var(--navy);font-family:var(--font-display);font-size:clamp(140px,24vw,230px);font-weight:900;line-height:.9}.alphabet-ag-main-letter span{font-size:.55em;color:var(--blue)}
-.alphabet-ag-focus-icon{font-size:clamp(90px,16vw,145px);line-height:1}.alphabet-ag-step>strong{color:var(--navy);font-family:var(--font-display);font-size:clamp(42px,8vw,70px)}.alphabet-ag-step>p{margin:0;color:var(--ink-mute);font-size:clamp(20px,3vw,28px);font-weight:850}
-.alphabet-ag-praise{border-radius:999px;background:var(--yellow);padding:9px 22px;color:var(--navy);font-size:clamp(20px,3vw,30px);font-weight:950}
-.alphabet-ag-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}.alphabet-ag-speech-fallback{min-height:22px;color:var(--red);font-weight:800}
+.alphabet-ag-learning-card{min-height:min(470px,62vh);max-height:68vh;align-content:center;gap:16px;padding:20px 24px;overflow-y:auto}
+.alphabet-ag-step{display:grid;justify-items:center;gap:8px;text-align:center}
+.alphabet-ag-letter-row,.alphabet-ag-word-row{display:flex;align-items:center;justify-content:center;gap:14px}
+.alphabet-ag-main-letter{display:flex;align-items:baseline;gap:12px;color:var(--navy);font-family:var(--font-display);line-height:.9}
+.alphabet-ag-main-letter button,.alphabet-ag-focus-icon,.alphabet-ag-word{border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;transition:transform .16s ease,filter .16s ease}
+.alphabet-ag-main-letter button{padding:0;color:var(--navy);font-size:clamp(86px,13vw,150px);font-weight:900;line-height:.9}
+.alphabet-ag-main-letter button+button{color:var(--blue);font-size:clamp(54px,8vw,92px)}
+.alphabet-ag-focus-icon{padding:0;font-size:clamp(70px,10vw,112px);line-height:1}
+.alphabet-ag-word{padding:0;color:var(--navy);font-family:var(--font-display);font-size:clamp(34px,5vw,58px);font-weight:900}
+.alphabet-ag-main-letter button:hover,.alphabet-ag-focus-icon:hover,.alphabet-ag-word:hover{filter:brightness(1.08);transform:scale(1.05)}
+.alphabet-ag-main-letter button:active,.alphabet-ag-focus-icon:active,.alphabet-ag-word:active{transform:scale(.96)}
+.alphabet-ag-main-letter button:focus-visible,.alphabet-ag-focus-icon:focus-visible,.alphabet-ag-word:focus-visible,.alphabet-ag-speaker:focus-visible{outline:4px solid var(--yellow);outline-offset:4px;border-radius:12px}
+.alphabet-ag-step>p{margin:0;color:var(--ink-mute);font-size:clamp(18px,2.4vw,25px);font-weight:850}
+.alphabet-ag-speaker{display:grid;width:50px;height:50px;flex:0 0 50px;place-items:center;border:0;border-radius:50%;background:var(--yellow);color:var(--navy);cursor:pointer;box-shadow:0 4px 0 #d3aa00;transition:transform .16s ease}
+.alphabet-ag-speaker:hover{transform:translateY(-2px)}.alphabet-ag-speaker:active{transform:translateY(2px);box-shadow:0 2px 0 #d3aa00}.alphabet-ag-speaker svg{width:27px;height:27px;fill:currentColor}.alphabet-ag-speaker svg path+path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.alphabet-ag-praise{border-radius:999px;background:var(--yellow);padding:8px 20px;color:var(--navy);font-size:clamp(19px,2.5vw,27px);font-weight:950}
+.alphabet-ag-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}.alphabet-ag-actions:empty{display:none}.alphabet-ag-actions button{padding:11px 22px;font-size:17px}.alphabet-ag-speech-fallback{min-height:20px;color:var(--red);font-weight:800}
 .alphabet-ag-confetti{pointer-events:none;position:absolute;inset:0;overflow:hidden}.alphabet-ag-confetti i{position:absolute;top:-18px;left:var(--x);width:10px;height:18px;border-radius:3px;opacity:0;transform:rotate(0)}.alphabet-ag-confetti.active i{animation:alphabetAgConfetti 1.5s ease-out var(--delay) forwards}.alphabet-ag-confetti.large i{width:13px;height:22px}
 @keyframes alphabetAgConfetti{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(540px) rotate(var(--spin))}}
 .alphabet-group-card{display:grid;gap:24px;justify-items:center;padding:36px 24px;background:linear-gradient(135deg,#fff,#fffbeb)}
@@ -3650,8 +3662,9 @@ body.admin-active > .topbar{
 .alphabet-split-answer{min-height:44px;border-radius:10px;background:var(--yellow-soft);padding:10px 14px;color:var(--navy);font-size:20px;font-weight:900}.alphabet-quick-card,.alphabet-challenge-card{display:grid;gap:22px;justify-items:center;border:1.5px solid var(--line);border-radius:18px;background:#fff;padding:30px;box-shadow:var(--shadow-sm)}.alphabet-quick-letter{width:min(280px,70vw);height:min(280px,70vw);display:grid;place-items:center;border:4px solid var(--navy);border-radius:28px;background:var(--yellow);color:var(--navy);font-family:var(--font-display);font-size:clamp(100px,24vw,190px);font-weight:900;box-shadow:0 10px 0 var(--navy)}.alphabet-challenge-card>strong{color:var(--navy);font-family:var(--font-display);font-size:clamp(48px,10vw,84px)}.alphabet-challenge-icon{min-height:120px;font-size:100px}
 .alphabet-starfall-card{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.6fr);gap:18px;align-items:center}.alphabet-starfall-card iframe{width:100%;min-height:470px;border:1.5px solid var(--line);border-radius:12px}.alphabet-starfall-card strong{color:var(--navy);font-size:18px}.alphabet-starfall-card p{color:var(--ink-mute);font-weight:700}.alphabet-starfall-card a{display:inline-block;border-radius:10px;background:var(--navy);color:#fff;padding:12px 16px;font-weight:850;text-decoration:none}
 @media (max-width:900px){.alphabet-ag-card-row{grid-template-columns:repeat(4,1fr)}}
-@media (max-width:760px){.alphabet-ag-overview,.alphabet-ag-learning-card{padding:22px 14px}.alphabet-ag-card-row{grid-template-columns:repeat(3,1fr)}.alphabet-ag-mini-card{min-height:145px}.alphabet-ag-mini-card b{font-size:38px}.alphabet-ag-mini-card i{font-size:42px}.alphabet-ag-actions button{flex:1;min-width:145px}.alphabet-group-letters button{width:62px;height:62px;border-radius:13px;font-size:32px}.alphabet-starfall-card{grid-template-columns:1fr}.alphabet-starfall-card iframe{min-height:340px}.alphabet-letter-grid{grid-template-columns:1fr 1fr}.alphabet-letter-card{min-height:330px;padding:14px}.alphabet-letter-pair{font-size:42px}.alphabet-letter-icon{font-size:54px}.alphabet-card-actions button{width:100%}}
-@media (max-width:520px){.alphabet-ag-card-row{grid-template-columns:repeat(2,1fr)}.alphabet-ag-main-letter{font-size:120px}.alphabet-letter-grid{grid-template-columns:1fr}.alphabet-action-row button{width:100%}}
+@media (max-height:800px) and (min-width:761px){.alphabet-ag-learning-card{min-height:410px;max-height:60vh;padding:14px 20px}.alphabet-ag-main-letter button{font-size:clamp(76px,10vw,118px)}.alphabet-ag-main-letter button+button{font-size:clamp(48px,6vw,72px)}.alphabet-ag-focus-icon{font-size:clamp(62px,8vw,88px)}.alphabet-ag-word{font-size:clamp(32px,4vw,46px)}}
+@media (max-width:760px){.alphabet-ag-overview,.alphabet-ag-learning-card{padding:18px 14px}.alphabet-ag-learning-card{min-height:420px;max-height:none}.alphabet-ag-card-row{grid-template-columns:repeat(3,1fr)}.alphabet-ag-mini-card{min-height:145px}.alphabet-ag-mini-card b{font-size:38px}.alphabet-ag-mini-card i{font-size:42px}.alphabet-ag-actions button{flex:1;min-width:145px}.alphabet-group-letters button{width:62px;height:62px;border-radius:13px;font-size:32px}.alphabet-starfall-card{grid-template-columns:1fr}.alphabet-starfall-card iframe{min-height:340px}.alphabet-letter-grid{grid-template-columns:1fr 1fr}.alphabet-letter-card{min-height:330px;padding:14px}.alphabet-letter-pair{font-size:42px}.alphabet-letter-icon{font-size:54px}.alphabet-card-actions button{width:100%}}
+@media (max-width:520px){.alphabet-ag-card-row{grid-template-columns:repeat(2,1fr)}.alphabet-ag-main-letter button{font-size:88px}.alphabet-ag-main-letter button+button{font-size:54px}.alphabet-ag-letter-row,.alphabet-ag-word-row{gap:9px}.alphabet-ag-speaker{width:44px;height:44px;flex-basis:44px}.alphabet-letter-grid{grid-template-columns:1fr}.alphabet-action-row button{width:100%}}
 
 /* ===== BUOI 2: NGUYEN AM DON 1 ===== */
 .vowel2-overview{display:grid;gap:24px;padding:26px;border-radius:22px;background:linear-gradient(145deg,#fffaf0,#fff)}
@@ -3763,5 +3776,160 @@ body.admin-active > .topbar{
   0% { opacity: 0.2; }
   100% { opacity: 1; }
 }
+
+/* Redesigned Vowel 2 section 02 (Long /i:/) */
+.vowel2-practice-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  align-items: start;
+  margin-top: 20px;
+}
+@media (max-width: 768px) {
+  .vowel2-practice-layout {
+    grid-template-columns: 1fr;
+  }
+}
+.vowel2-practice-left {
+  position: sticky;
+  top: 90px;
+  display: grid;
+  gap: 16px;
+  background: #fffaf0;
+  border: 1.5px solid #eadfce;
+  border-radius: 20px;
+  padding: 20px;
+  justify-items: center;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.vowel2-practice-left .ipa-title {
+  font-size: 54px;
+  color: var(--navy);
+  font-family: var(--font-display);
+  margin: 0;
+  line-height: 1;
+}
+.vowel2-practice-left .ipa-label {
+  color: #f97316;
+  font-size: 16px;
+  font-weight: 900;
+}
+.vowel2-practice-left .ipa-desc {
+  font-size: 14px;
+  color: var(--ink-soft);
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.4;
+}
+.vowel2-practice-left .vowel2-mouth-position-svg {
+  max-width: 200px;
+}
+.vowel2-practice-right {
+  display: flex;
+  flex-direction: column;
+}
+.vowel2-practice-right .vowel2-word-card {
+  min-height: 250px;
+  padding: 24px;
+  font-size: 18px;
+}
+.vowel2-practice-right .vowel2-word-card > span {
+  font-size: 56px;
+}
+.vowel2-practice-right .vowel2-word-card > b {
+  font-size: 36px;
+}
+.vowel2-practice-right .vowel2-word-card small {
+  font-size: 18px;
+}
+.vowel2-practice-right .vowel2-word-card p {
+  font-size: 16px;
+}
+.vowel2-start-practice-btn {
+  display: block;
+  margin: 24px auto 0;
+  padding: 14px 32px;
+  font-size: 18px;
+  font-weight: 900;
+  border-radius: 12px;
+  background: var(--navy) !important;
+  color: #fff !important;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #0f1d4c;
+  transition: all 0.15s ease-in-out;
+}
+.vowel2-start-practice-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #0f1d4c;
+  background: var(--navy-2) !important;
+}
+.vowel2-start-practice-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #0f1d4c;
+}
+.vowel2-nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  gap: 12px;
+}
+.vowel2-nav-btn {
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 850;
+  border-radius: 10px;
+  border: 2px solid var(--navy);
+  background: #fff;
+  color: var(--navy);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.vowel2-nav-btn:hover:not(:disabled) {
+  background: var(--navy);
+  color: #fff;
+}
+.vowel2-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: var(--line-strong);
+  color: var(--ink-soft);
+}
+.vowel2-next-btn {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+.vowel2-next-btn:hover {
+  background: var(--navy-2);
+  border-color: var(--navy-2);
+}
+.word-indicator {
+  display: inline-block;
+  background: #ffe0b2;
+  color: #e65100;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.vowel2-mouth-position-svg {
+  width: 100%;
+  filter: drop-shadow(0 4px 6px rgba(23,37,84,0.08));
+}
+.vowel2-listen-pair {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+}
+.vowel2-listen-pair svg {
+  width: 18px;
+  height: 18px;
+}
+
 
 

@@ -13,6 +13,11 @@ import { getCurrentProfile, getCurrentUser, signOut } from "./lib/supabase/auth.
 import { subscribeToMyProgress, unsubscribe as unsubscribeProgressRealtime } from "./features/progress/progressRealtime.js";
 import { requireApprovedStudent } from "./features/auth/authGuard.js";
 import { requireApprovedClassMembership } from "./features/student/studentRepository.js";
+import {
+  getBestEnglishVoice as selectBestEnglishVoice,
+  speakEnglish as speakEnglishWithSharedUtility,
+  stopSpeaking,
+} from "./utils/speech.js";
 
 /* ============================================================
   GATEWAY A1 — APP LOGIC & MINIGAMES (revamped)
@@ -1173,8 +1178,7 @@ function showAlphabetAgPhase(activity, state){
 
   if(state === "uppercase"){
     activity.innerHTML = renderAlphabetAgLearningCard(item, state, `
-      <button onclick="_alphabetAgReplay(this)">Nghe lại</button>
-      <button onclick="_alphabetAgShowLowercase(this)">Hiện chữ thường</button>
+      <button type="button" onclick="_alphabetAgShowLowercase(this)">Hiện chữ thường</button>
     `);
     alphabetAgSpeak(item.uppercase, activity);
     return;
@@ -1182,8 +1186,7 @@ function showAlphabetAgPhase(activity, state){
 
   if(state === "lowercase"){
     activity.innerHTML = renderAlphabetAgLearningCard(item, state, `
-      <button onclick="_alphabetAgReplay(this)">Nghe lại</button>
-      <button onclick="_alphabetAgShowIcon(this)">Hiện biểu tượng</button>
+      <button type="button" onclick="_alphabetAgShowIcon(this)">Hiện biểu tượng</button>
     `);
     alphabetAgSpeak(item.uppercase, activity);
     return;
@@ -1191,9 +1194,7 @@ function showAlphabetAgPhase(activity, state){
 
   const completedGroup = index === items.length - 1;
   if(state === "icon"){
-    activity.innerHTML = renderAlphabetAgLearningCard(item, state, `
-      <button onclick="_alphabetAgReplay(this)">Nghe lại</button>
-    `);
+    activity.innerHTML = renderAlphabetAgLearningCard(item, state, "");
     alphabetAgSpeak(item.word, activity);
     setTimeout(()=>{
       if(activity.isConnected && activity.dataset.state === "icon"){
@@ -1204,13 +1205,20 @@ function showAlphabetAgPhase(activity, state){
   }
 
   activity.innerHTML = renderAlphabetAgLearningCard(item, "icon", `
-    <button onclick="_alphabetAgReplay(this)">Nghe lại</button>
-    <button onclick="${completedGroup ? "_alphabetAgRestart(this)" : "_alphabetAgNext(this)"}">
+    <button type="button" onclick="${completedGroup ? "_alphabetAgRestart(this)" : "_alphabetAgNext(this)"}">
       ${completedGroup ? "Học lại nhóm A–G" : "Từ tiếp theo"}
     </button>
   `, completedGroup);
-  alphabetAgSpeak("Good job!", activity, false);
   launchAlphabetAgConfetti(activity, completedGroup);
+}
+
+function renderAlphabetAgSpeakerButton(){
+  return `<button class="alphabet-ag-speaker" type="button" onclick="_alphabetAgReplay(this)" aria-label="Nghe lại" title="Nghe lại">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 9v6h4l5 4V5L8 9H4Z"></path>
+      <path d="M16 9.5c1.3 1.3 1.3 3.7 0 5M18.5 7c2.7 2.7 2.7 7.3 0 10"></path>
+    </svg>
+  </button>`;
 }
 
 function renderAlphabetAgLearningCard(item, state, actions, completedGroup=false){
@@ -1218,9 +1226,19 @@ function renderAlphabetAgLearningCard(item, state, actions, completedGroup=false
   const showIcon = state === "icon";
   return `<div class="alphabet-ag-learning-card">
     <div class="alphabet-ag-step" aria-live="polite">
-      <div class="alphabet-ag-main-letter">${escAttr(item.uppercase)}${showLowercase ? `<span>${escAttr(item.lowercase)}</span>` : ""}</div>
-      ${showIcon ? `<div class="alphabet-ag-focus-icon">${item.icon}</div>
-        <strong>${escAttr(item.word)}</strong><p>${escAttr(item.chant)}</p>
+      <div class="alphabet-ag-letter-row">
+        <div class="alphabet-ag-main-letter">
+          <button type="button" onclick="_alphabetAgSpeakLetter(this)" aria-label="Nghe chữ ${escAttr(item.uppercase)}">${escAttr(item.uppercase)}</button>
+          ${showLowercase ? `<button type="button" onclick="_alphabetAgSpeakLetter(this)" aria-label="Nghe chữ ${escAttr(item.lowercase)}">${escAttr(item.lowercase)}</button>` : ""}
+        </div>
+        ${showIcon ? "" : renderAlphabetAgSpeakerButton()}
+      </div>
+      ${showIcon ? `<button class="alphabet-ag-focus-icon" type="button" onclick="_alphabetAgSpeakWord(this)" aria-label="Nghe từ ${escAttr(item.word)}">${item.icon}</button>
+        <div class="alphabet-ag-word-row">
+          <button class="alphabet-ag-word" type="button" onclick="_alphabetAgSpeakWord(this)">${escAttr(item.word)}</button>
+          ${renderAlphabetAgSpeakerButton()}
+        </div>
+        <p>${escAttr(item.chant)}</p>
         <div class="alphabet-ag-praise">${completedGroup ? "Hoàn thành nhóm chữ A–G!" : "Giỏi lắm!"}</div>` : ""}
     </div>
     <div class="alphabet-ag-actions">${actions}</div>
@@ -1248,6 +1266,18 @@ function _alphabetAgReplay(button){
       ? item.chant
       : item.uppercase;
   alphabetAgSpeak(replayText, activity);
+}
+
+function _alphabetAgSpeakLetter(button){
+  const activity = button.closest(".alphabet-ag-activity");
+  const item = getAlphabetAgItems()[Number(activity.dataset.index || 0)];
+  if(item) alphabetAgSpeak(item.uppercase, activity);
+}
+
+function _alphabetAgSpeakWord(button){
+  const activity = button.closest(".alphabet-ag-activity");
+  const item = getAlphabetAgItems()[Number(activity.dataset.index || 0)];
+  if(item) alphabetAgSpeak(item.word, activity);
 }
 
 function _alphabetAgNext(button){
@@ -1531,6 +1561,14 @@ function renderVowel2Section(lesson, section){
   const data = lesson.vowelLesson;
   const header = renderVowel2Header(lesson, section);
   const groups = Object.fromEntries(data.wordGroups.map(group => [group.symbol, group]));
+
+  if (section !== window.vowel2LastSection) {
+    window.vowel2LastSection = section;
+    if (section === "vowel2_long_i") {
+      window.vowel2LongIState = { step: 1, wordIndex: 0 };
+    }
+  }
+
   switch(section){
     case "vowel2_overview":
       return `${header}
@@ -1542,8 +1580,74 @@ function renderVowel2Section(lesson, section){
             </button>`).join("")}
           </div>
         </div>`;
-    case "vowel2_long_i":
-      return `${header}${renderVowel2SoundGroup(groups["/iː/"], 2000)}`;
+    case "vowel2_long_i": {
+      const group = groups["/iː/"];
+      if (window.vowel2LongIState.step === 1) {
+        return `${header}
+          <div class="vowel2-sound-group">
+            <div class="vowel2-sound-intro">
+              <div>
+                <b>${escAttr(group.symbol)}</b>
+                <span>${escAttr(group.label)}</span>
+                <p>${escAttr(group.guide)}</p>
+                <button class="vowel2-speaker-btn" onclick="speakById('${regTxt("ee")}')" title="Nghe âm ${group.symbol}" aria-label="Nghe âm ${group.symbol}">${SPEAKER_ICON_SVG}</button>
+              </div>
+              ${renderVowel2MouthPositionSvg()}
+            </div>
+            <button class="vowel2-start-practice-btn" onclick="window.vowel2LongIStartPractice()">Bắt đầu phát âm</button>
+          </div>`;
+      } else if (window.vowel2LongIState.step === 2) {
+        const word = group.words[window.vowel2LongIState.wordIndex];
+        const id = 2000 + window.vowel2LongIState.wordIndex;
+        return `${header}
+          <div class="vowel2-practice-layout">
+            <div class="vowel2-practice-left">
+              <h3 class="ipa-title">${escAttr(group.symbol)}</h3>
+              <span class="ipa-label">${escAttr(group.label)}</span>
+              <p class="ipa-desc">${escAttr(group.guide)}</p>
+              <button class="vowel2-speaker-btn" onclick="speakById('${regTxt("ee")}')" title="Nghe lại âm ${group.symbol}" aria-label="Nghe lại âm ${group.symbol}">${SPEAKER_ICON_SVG}</button>
+              ${renderVowel2MouthPositionSvg()}
+            </div>
+            <div class="vowel2-practice-right">
+              <span class="word-indicator">Từ ${window.vowel2LongIState.wordIndex + 1}/5</span>
+              <article class="vowel2-word-card">
+                <span>${escAttr(word.icon)}</span>
+                <b>${highlightWord(word.word, word.focus)}</b>
+                <small>${escAttr(word.ipa)}</small>
+                <p>${escAttr(word.meaning)}</p>
+                <div>
+                  <button class="vowel2-speaker-btn vowel2-speaker-btn-sm" onclick="speakById('${regTxt(word.word)}')" title="Nghe từ ${word.word}" aria-label="Nghe từ ${word.word}">${SPEAKER_ICON_SVG}</button>
+                  <button id="mic-${id}" onclick="recordById(${id}, '${regTxt(word.word)}')">Đọc</button>
+                </div>
+                <div id="speakRes-${id}" class="dlg-result" style="display:none"></div>
+                <div class="vowel2-teacher-tip">Cho học sinh nghe &rarr; nhắc lại &rarr; bấm Đọc</div>
+              </article>
+              <div class="vowel2-nav-row">
+                <button class="vowel2-nav-btn" onclick="window.vowel2LongIPrevWord()" ${window.vowel2LongIState.wordIndex === 0 ? "disabled" : ""}>Từ trước</button>
+                ${window.vowel2LongIState.wordIndex < 4 
+                  ? `<button class="vowel2-nav-btn vowel2-next-btn" onclick="window.vowel2LongINextWord()">Từ tiếp theo</button>`
+                  : `<button class="vowel2-nav-btn vowel2-next-btn" onclick="window.vowel2LongIGoToVideo()">Tiếp theo</button>`
+                }
+              </div>
+            </div>
+          </div>`;
+      } else {
+        return `${header}
+          <div class="video-intro-card" style="margin-top: 20px;">
+            <div class="video-intro-header">
+              <span class="video-intro-icon">🎬</span>
+              <span class="video-intro-badge">VIDEO HƯỚNG DẪN</span>
+            </div>
+            <h3 class="video-intro-title">Video hướng dẫn âm ${escAttr(group.symbol)}</h3>
+            <div class="video-pending-box" style="margin-top: 15px; border: 2px dashed var(--line-strong); border-radius: 12px; background: var(--bg-soft); padding: 44px 18px; text-align: center; font-weight: 800; color: var(--navy);">
+              <span>Video hướng dẫn sẽ được cập nhật</span>
+            </div>
+            <div class="vowel2-nav-row" style="margin-top: 24px;">
+              <button class="vowel2-nav-btn" onclick="window.vowel2LongIBackToPractice()">Từ trước</button>
+            </div>
+          </div>`;
+      }
+    }
     case "vowel2_short_i":
       return `${header}${renderVowel2SoundGroup(groups["/ɪ/"], 2100)}`;
     case "vowel2_compare_i":
@@ -1655,6 +1759,48 @@ function renderVowel2MouthSvg(shape){
   </svg>`;
 }
 
+function renderVowel2MouthPositionSvg(){
+  return `<svg viewBox="0 0 300 300" class="vowel2-mouth-position-svg" role="img" aria-label="Khẩu hình miệng phát âm /iː/">
+    <!-- profile outline -->
+    <path d="M 50,20 Q 80,40 70,80 Q 60,95 85,102" fill="none" stroke="#172554" stroke-width="3" stroke-linecap="round"/>
+    <!-- upper lip -->
+    <path d="M 85,102 Q 100,105 98,115 Q 94,124 88,124" fill="none" stroke="#172554" stroke-width="3" stroke-linecap="round"/>
+    <!-- lower lip -->
+    <path d="M 88,138 Q 96,138 98,145 Q 100,155 85,160 Q 75,162 82,185 Q 90,205 80,230" fill="none" stroke="#172554" stroke-width="3" stroke-linecap="round"/>
+    
+    <!-- Vocal tract roof (palate) -->
+    <path d="M 108,120 Q 140,110 180,125 T 220,180" fill="none" stroke="#172554" stroke-width="3" stroke-linecap="round"/>
+    <!-- Vocal tract floor (throat) -->
+    <path d="M 104,142 Q 130,170 170,185 T 210,240" fill="none" stroke="#172554" stroke-width="3" stroke-linecap="round"/>
+    
+    <!-- Teeth -->
+    <rect x="100" y="117" width="6" height="10" rx="1" fill="#fff" stroke="#172554" stroke-width="2"/>
+    <rect x="99" y="135" width="6" height="10" rx="1" fill="#fff" stroke="#172554" stroke-width="2"/>
+    
+    <!-- Tongue (filled shape) - raised high and front -->
+    <path d="M 110,165 Q 120,132 150,130 Q 185,128 185,175 Q 185,190 160,195 Q 135,195 110,165 Z" fill="#ef633f" stroke="#172554" stroke-width="3"/>
+    
+    <!-- Labels and Arrows -->
+    <!-- Pointer to lips: spread / relaxed -->
+    <line x1="88" y1="120" x2="140" y2="70" stroke="#1d4ed8" stroke-width="2" stroke-dasharray="3 3"/>
+    <circle cx="88" cy="120" r="3" fill="#1d4ed8"/>
+    <text x="145" y="66" fill="#1d4ed8" font-size="14" font-weight="800" font-family="sans-serif">spread / relaxed</text>
+    
+    <!-- Pointer to jaw/teeth: close -->
+    <g stroke="#1d4ed8" stroke-width="2">
+      <line x1="75" y1="114" x2="75" y2="144"/>
+      <polygon points="75,110 71,116 79,116" fill="#1d4ed8"/>
+      <polygon points="75,148 71,142 79,142" fill="#1d4ed8"/>
+    </g>
+    <text x="35" y="134" fill="#1d4ed8" font-size="15" font-weight="800" font-family="sans-serif">close</text>
+    
+    <!-- Pointer to tongue: front -->
+    <line x1="145" y1="145" x2="190" y2="210" stroke="#1d4ed8" stroke-width="2" stroke-dasharray="3 3"/>
+    <circle cx="145" cy="145" r="3" fill="#1d4ed8"/>
+    <text x="195" y="214" fill="#1d4ed8" font-size="15" font-weight="800" font-family="sans-serif">front</text>
+  </svg>`;
+}
+
 function highlightWord(word, focus){
   const focuses = Array.isArray(focus) ? [...focus] : [focus];
   let cursor = 0;
@@ -1729,6 +1875,40 @@ function renderVowel2MiniTest(questions){
 }
 
 let vowel2GameState = { index: 0, score: 0 };
+
+window.vowel2LongIState = { step: 1, wordIndex: 0 };
+window.vowel2LastSection = "";
+
+window.vowel2LongIStartPractice = function() {
+  window.vowel2LongIState.step = 2;
+  window.vowel2LongIState.wordIndex = 0;
+  renderSection();
+};
+
+window.vowel2LongIPrevWord = function() {
+  if (window.vowel2LongIState.wordIndex > 0) {
+    window.vowel2LongIState.wordIndex--;
+    renderSection();
+  }
+};
+
+window.vowel2LongINextWord = function() {
+  if (window.vowel2LongIState.wordIndex < 4) {
+    window.vowel2LongIState.wordIndex++;
+    renderSection();
+  }
+};
+
+window.vowel2LongIGoToVideo = function() {
+  window.vowel2LongIState.step = 3;
+  renderSection();
+};
+
+window.vowel2LongIBackToPractice = function() {
+  window.vowel2LongIState.step = 2;
+  window.vowel2LongIState.wordIndex = 4;
+  renderSection();
+};
 
 window.showVowel2Tab = function(tab){
   document.querySelectorAll(".vowel2-tab-panel").forEach(panel => panel.classList.toggle("active", panel.id === `vowel2Tab-${tab}`));
@@ -6241,33 +6421,12 @@ function upsertHomeworkProgress(lid){
 
 // ============== TTS / Speech ==============
 let voicesCache = [];
-let voiceReadyResolvers = [];
 function loadVoices(){
   voicesCache = speechSynthesis.getVoices();
-  if(voicesCache.length && voiceReadyResolvers.length){
-    const resolvers = voiceReadyResolvers.splice(0);
-    resolvers.forEach(resolve => resolve());
-  }
 }
 if("speechSynthesis" in window){
   loadVoices();
   speechSynthesis.onvoiceschanged = loadVoices;
-}
-
-function waitForSpeechVoices(timeout = 300){
-  if(!("speechSynthesis" in window)) return Promise.resolve();
-  const voices = speechSynthesis.getVoices();
-  if(voices.length || voicesCache.length) return Promise.resolve();
-  return new Promise(resolve => {
-    let done = false;
-    const finish = () => {
-      if(done) return;
-      done = true;
-      resolve();
-    };
-    voiceReadyResolvers.push(finish);
-    setTimeout(finish, timeout);
-  });
 }
 
 let activeUtterance = null;
@@ -6277,11 +6436,7 @@ let lastSpeakTime = 0;
 let lastSpeakText = "";
 
 function stopCurrentSpeech() {
-  if ("speechSynthesis" in window) {
-    if (speechSynthesis.speaking || speechSynthesis.pending) {
-      speechSynthesis.cancel();
-    }
-  }
+  stopSpeaking();
   if (activeAudioFile) {
     try {
       activeAudioFile.pause();
@@ -6309,65 +6464,7 @@ function stopYouTubeVideos() {
 }
 
 function getBestEnglishVoice() {
-  if (!("speechSynthesis" in window)) return null;
-  let voices = speechSynthesis.getVoices();
-  if (!voices || voices.length === 0) {
-    voices = voicesCache;
-  } else {
-    voicesCache = voices;
-  }
-  
-  if (!voices || voices.length === 0) return null;
-  
-  // Filter for English voices (en-US or en-GB)
-  const enUSGBVoices = voices.filter(v => {
-    const l = (v.lang || "").toLowerCase();
-    return l.startsWith("en-us") || l.startsWith("en-gb");
-  });
-  
-  const anyEnVoices = voices.filter(v => (v.lang || "").toLowerCase().startsWith("en"));
-  
-  // Priority patterns in order
-  const priorityPatterns = [
-    /Google US English/i,
-    /Microsoft Jenny/i,
-    /Microsoft Aria/i,
-    /Samantha/i,
-    /Daniel/i,
-    /Karen/i,
-    /Serena/i,
-    /Google UK English/i
-  ];
-  
-  // 1. Try to find priority voices in en-US/en-GB
-  for (const pattern of priorityPatterns) {
-    const found = enUSGBVoices.find(v => pattern.test(v.name));
-    if (found) return found;
-  }
-  
-  // 2. Try to find priority voices in any English voice
-  for (const pattern of priorityPatterns) {
-    const found = anyEnVoices.find(v => pattern.test(v.name));
-    if (found) return found;
-  }
-  
-  // 3. Try to find online natural / natural / neural voices
-  const naturalPattern = /online natural|natural|neural|premium/i;
-  let found = enUSGBVoices.find(v => naturalPattern.test(v.name)) || anyEnVoices.find(v => naturalPattern.test(v.name));
-  if (found) return found;
-  
-  // 4. Try other common quality voices
-  const standardPattern = /aria|jenny|ava|emma|michelle|monica|natasha/i;
-  found = enUSGBVoices.find(v => standardPattern.test(v.name)) || anyEnVoices.find(v => standardPattern.test(v.name));
-  if (found) return found;
-  
-  // 5. Fallback to first en-US/en-GB voice
-  if (enUSGBVoices.length > 0) return enUSGBVoices[0];
-  
-  // 6. Fallback to any English voice
-  if (anyEnVoices.length > 0) return anyEnVoices[0];
-  
-  return null;
+  return selectBestEnglishVoice();
 }
 
 function normalizeSpeechText(text) {
@@ -6548,36 +6645,12 @@ function playTTS(text, options = {}, targetBtn = null) {
     return;
   }
 
-  if (!options.voicesWaited && !speechSynthesis.getVoices().length && !voicesCache.length) {
-    waitForSpeechVoices().then(() => playTTS(text, { ...options, voicesWaited: true }, targetBtn));
-    return;
-  }
-  
-  const u = new SpeechSynthesisUtterance(speechText);
   const lang = options.lang || "en-US";
-  u.lang = lang;
-  
   let defaultRate = 0.88;
   if (options.isWord) {
     defaultRate = 0.82;
   }
-  u.rate = options.rate !== undefined ? options.rate : defaultRate;
-  u.pitch = options.pitch !== undefined ? options.pitch : 1.0;
-  u.volume = options.volume !== undefined ? options.volume : 1.0;
-  
-  const voice = getBestEnglishVoice();
-  if (voice) {
-    u.voice = voice;
-  }
-  
-  u.onstart = () => {
-    if (targetBtn) {
-      targetBtn.classList.remove('loading');
-      targetBtn.classList.add('playing');
-    }
-    if (options.onstart) options.onstart();
-  };
-  
+
   const cleanup = () => {
     if (targetBtn) {
       targetBtn.classList.remove('playing', 'loading');
@@ -6585,18 +6658,29 @@ function playTTS(text, options = {}, targetBtn = null) {
     }
   };
   
-  u.onend = () => {
-    cleanup();
-    if (options.onend) options.onend();
-  };
-  
-  u.onerror = (err) => {
-    cleanup();
-    if (options.onerror) options.onerror(err);
-  };
-  
-  activeUtterance = u;
-  speechSynthesis.speak(u);
+  speakEnglishWithSharedUtility(speechText, {
+    lang,
+    rate: options.rate !== undefined ? options.rate : defaultRate,
+    pitch: options.pitch !== undefined ? options.pitch : 1,
+    volume: options.volume !== undefined ? options.volume : 1,
+    onstart: () => {
+      if (targetBtn) {
+        targetBtn.classList.remove('loading');
+        targetBtn.classList.add('playing');
+      }
+      if (options.onstart) options.onstart();
+    },
+    onend: () => {
+      cleanup();
+      if (options.onend) options.onend();
+    },
+    onerror: (err) => {
+      cleanup();
+      if (options.onerror) options.onerror(err);
+    },
+  }).then((utterance) => {
+    activeUtterance = utterance;
+  });
 }
 
 function speak(text, rate=0.9, onend, lang="en-US") {
@@ -6783,6 +6867,7 @@ Object.assign(window, {
   _checkIpaChoice,
   _alphabetSelect, _alphabetCheck, _alphabetInstantCheck, _alphabetNextRound,
   _alphabetAgStart, _alphabetAgShowLowercase, _alphabetAgShowIcon, _alphabetAgReplay,
+  _alphabetAgSpeakLetter, _alphabetAgSpeakWord,
   _alphabetAgNext, _alphabetAgRestart,
   _alphabetReadEach, _alphabetToggleGroup, _alphabetQuickNext, _alphabetSpeakQuick,
   _alphabetToggleSplit, _alphabetChallengeNext, _alphabetToggleChallengeIcon, _alphabetCompleteChallenge,
