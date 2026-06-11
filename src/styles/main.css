@@ -3757,8 +3757,83 @@ body.admin-active > .topbar{
 .vowel2-game-card{display:grid;gap:18px;justify-items:center;border-radius:22px;background:#fffaf0;padding:28px;text-align:center}.vowel2-game-card>div:first-child{display:flex;width:100%;justify-content:space-between;color:var(--navy);font-weight:900}.vowel2-game-card h3{margin:0;color:var(--navy);font-size:30px}.vowel2-game-card p{margin:0}.vowel2-game-listen{border:0;border-radius:50%;background:#f59e0b;width:120px;height:120px;color:var(--navy);font-size:18px;font-weight:900}.vowel2-game-sounds{display:grid;width:100%;grid-template-columns:repeat(3,1fr);gap:10px}.vowel2-game-sounds button{border:2px solid var(--navy);border-radius:14px;background:#fff;padding:16px;color:var(--navy);font-size:28px;font-weight:900}.vowel2-game-sounds button.correct{background:var(--green-soft);border-color:var(--green);color:var(--green)}.vowel2-game-sounds button.wrong{background:var(--red-soft);border-color:var(--red);color:var(--red)}.vowel2-game-feedback{min-height:28px;color:var(--navy);font-weight:850}
 .vowel2-recording>p{color:var(--ink-mute);font-weight:700}.vowel2-record-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.vowel2-record-grid article{display:grid;gap:8px;border:1.5px solid #eadfce;border-radius:14px;padding:14px}.vowel2-record-grid b{font-size:24px;color:var(--navy)}.vowel2-record-grid span{color:var(--ink-mute);font-size:12px;font-weight:800}
 .vowel2-test-list{display:grid;gap:12px}.vowel2-test-list article{display:grid;gap:10px;border:1.5px solid #eadfce;border-radius:14px;padding:15px}.vowel2-test-list article>div{display:flex;gap:8px;flex-wrap:wrap}.vowel2-test-list button[data-choice]{background:#fff;color:var(--navy);border:1.5px solid var(--navy)}.vowel2-test-list button.selected{background:#fff1c2}.vowel2-test-list article.correct{border-color:var(--green);background:var(--green-soft)}.vowel2-test-list article.wrong{border-color:var(--red);background:var(--red-soft)}.vowel2-submit-test{margin-top:16px;background:#f59e0b!important;color:var(--navy)!important}.vowel2-test-result{display:grid;gap:4px;margin-top:14px;border-radius:12px;background:#fff7df;padding:15px;color:var(--navy)}
+.vowel2-step-shell,.vowel2-summary-card{display:grid;width:min(100%,820px);gap:16px;margin-inline:auto}
+.vowel2-step-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--navy);font-weight:900}
+.vowel2-step-meta strong{border-radius:999px;background:#fff1c2;padding:8px 16px}
+.vowel2-step-meta span{color:var(--ink-mute)}
+.vowel2-step-dots{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.vowel2-step-dots span{width:13px;height:13px;border-radius:50%;background:#d8e0ec;box-shadow:inset 0 0 0 1px #c3cedd;transition:transform .2s,background .2s}
+.vowel2-step-dots span.active{transform:scale(1.3);box-shadow:0 0 0 3px rgba(23,37,84,.12)}
+.vowel2-step-dots span.correct,.vowel2-step-dots span.pass{background:var(--green);box-shadow:none}
+.vowel2-step-dots span.retry,.vowel2-step-dots span.practice,.vowel2-step-dots span.wrong{background:#f97316;box-shadow:none}
+.vowel2-step-card,.vowel2-recording-card{display:grid;min-height:470px;align-content:center;justify-items:center;gap:20px;border:2px solid #eadfce;border-radius:24px;background:linear-gradient(145deg,#fffaf0,#fff);padding:30px;box-shadow:var(--shadow-sm);transition:border-color .2s,transform .2s}
+.vowel2-step-shell.is-correct .vowel2-step-card,.vowel2-recording-card.is-pass{border-color:var(--green);animation:vowel2StepSuccess .35s ease}
+.vowel2-step-shell.is-wrong .vowel2-step-card,.vowel2-recording-card.is-practice{border-color:#f97316}
+.vowel2-step-card h3,.vowel2-recording-card h3{margin:0;color:var(--navy);font-size:clamp(28px,4vw,36px)}
+.vowel2-step-instruction{margin:0;color:var(--ink-mute);font-weight:750;text-align:center}
+.vowel2-audio-orb{display:grid;width:126px;height:126px;place-items:center;border:0;border-radius:50%;background:#f59e0b;color:var(--navy);font-size:17px;font-weight:950;box-shadow:0 10px 24px rgba(245,158,11,.25);cursor:pointer}
+.vowel2-audio-orb svg{width:34px;height:34px}
+.vowel2-revealed-word{border-radius:14px;background:#fff;padding:10px 18px;color:var(--ink-mute);font-weight:800;box-shadow:inset 0 0 0 1px #eadfce}
+.vowel2-revealed-word strong{color:var(--navy);font-size:24px}
+.vowel2-answer-grid{display:grid;width:100%;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.vowel2-answer-grid button{min-height:52px;border:2px solid var(--navy);border-radius:14px;background:#fff;color:var(--navy);font-size:18px;font-weight:900;cursor:pointer;transition:transform .18s,background .18s,border-color .18s}
+.vowel2-answer-grid button:hover:not(:disabled){transform:translateY(-2px)}
+.vowel2-answer-grid button.correct{border-color:var(--green);background:var(--green-soft);color:var(--green)}
+.vowel2-answer-grid button.wrong{border-color:#f97316;background:#fff1e8;color:#c2410c}
+.vowel2-answer-grid button:disabled{cursor:default;opacity:1}
+.vowel2-sound-options{grid-template-columns:repeat(3,1fr)}
+.vowel2-sound-options button{font-size:27px}
+.vowel2-step-feedback{display:grid;width:100%;min-height:58px;align-content:center;gap:4px;border-radius:14px;padding:12px 16px;font-weight:800;text-align:center}
+.vowel2-step-feedback.success{background:var(--green-soft);color:var(--green)}
+.vowel2-step-feedback.warning{background:#fff1e8;color:#c2410c}
+.vowel2-step-feedback.neutral{background:#f4f6fa;color:var(--ink-mute)}
+.vowel2-step-feedback span{font-weight:700}
+.vowel2-step-next,.vowel2-primary-action,.vowel2-warning-action{border:0;border-radius:12px;background:var(--navy);padding:12px 20px;color:#fff;font-weight:900;cursor:pointer}
+.vowel2-step-next:disabled,.vowel2-summary-actions button:disabled{cursor:not-allowed;opacity:.35}
+.vowel2-test-question{margin:0;color:var(--navy);font-size:clamp(23px,3vw,30px);text-align:center}
+.vowel2-mini-audio,.vowel2-listen-sample{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:12px;background:#f59e0b;padding:11px 18px;color:var(--navy);font-weight:900;cursor:pointer}
+.vowel2-mini-audio svg,.vowel2-listen-sample svg{width:21px;height:21px}
+.vowel2-recording-card header{display:grid;justify-items:center;gap:4px;text-align:center}
+.vowel2-recording-card header>span{color:var(--ink-mute);font-size:14px;font-weight:900;text-transform:uppercase}
+.vowel2-recording-card header h3{font-size:clamp(46px,7vw,68px)}
+.vowel2-recording-card header b{color:#f97316;font-size:25px}
+.vowel2-word-details{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.vowel2-word-details span{border-radius:999px;background:#fff;padding:8px 14px;color:var(--ink-mute);font-weight:750;box-shadow:inset 0 0 0 1px #eadfce}
+.vowel2-word-details strong{color:var(--navy)}
+.vowel2-ai-note{margin:0;color:var(--ink-mute);font-size:14px;font-weight:750;text-align:center}
+.vowel2-mic-message{border-radius:12px;background:#fff1e8;padding:11px 15px;color:#c2410c;font-weight:800;text-align:center}
+.vowel2-record-controls,.vowel2-teacher-controls,.vowel2-summary-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.vowel2-record-controls button,.vowel2-teacher-controls button{border:2px solid var(--navy);border-radius:12px;background:var(--navy);padding:11px 15px;color:#fff;font-weight:900;cursor:pointer}
+.vowel2-record-controls button.danger{border-color:#dc2626;background:#dc2626}
+.vowel2-record-controls button.secondary{background:#fff;color:var(--navy)}
+.vowel2-record-controls button:disabled,.vowel2-teacher-controls button:disabled{cursor:not-allowed;opacity:.35}
+.vowel2-teacher-controls{align-items:center;border-top:1px solid #eadfce;padding-top:16px}
+.vowel2-teacher-controls span{width:100%;color:var(--ink-mute);font-size:13px;font-weight:900;text-align:center;text-transform:uppercase}
+.vowel2-teacher-controls button.pass{border-color:var(--green);background:#fff;color:var(--green)}
+.vowel2-teacher-controls button.practice{border-color:#f97316;background:#fff;color:#c2410c}
+.vowel2-teacher-controls button.pass.selected{background:var(--green);color:#fff}
+.vowel2-teacher-controls button.practice.selected{background:#f97316;color:#fff}
+.vowel2-summary-card{justify-items:center;border:2px solid #eadfce;border-radius:24px;background:linear-gradient(145deg,#fffaf0,#fff);padding:38px;text-align:center;box-shadow:var(--shadow-sm)}
+.vowel2-summary-icon{display:grid;width:74px;height:74px;place-items:center;border-radius:50%;background:var(--green-soft);color:var(--green);font-size:40px;font-weight:950}
+.vowel2-summary-card h3{margin:0;color:var(--navy);font-size:30px}
+.vowel2-summary-card p{margin:0;color:var(--ink-mute)}
+.vowel2-summary-counts{display:grid;width:min(100%,430px);grid-template-columns:1fr 1fr;gap:12px}
+.vowel2-summary-counts article{display:grid;gap:4px;border-radius:16px;background:#fff;padding:18px;box-shadow:inset 0 0 0 1px #eadfce}
+.vowel2-summary-counts strong,.vowel2-summary-score{color:var(--navy);font-size:38px;font-weight:950}
+.vowel2-summary-counts span{color:var(--ink-mute);font-weight:850}
+.vowel2-warning-action{border:2px solid #f97316;background:#fff;color:#c2410c}
+@keyframes vowel2StepSuccess{50%{transform:scale(1.01)}}
 @media(max-width:900px){.vowel2-two-groups{grid-template-columns:1fr}.vowel2-mouth-grid,.vowel2-record-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:620px){.vowel2-sound-hero,.vowel2-mouth-grid,.vowel2-record-grid{grid-template-columns:1fr 1fr}.vowel2-sound-intro{grid-template-columns:1fr}.vowel2-comparison article{padding:14px 8px;gap:7px}.vowel2-comparison article button{font-size:11px;padding:7px}.vowel2-listen-pair{position:static;grid-column:1/-1}.vowel2-sentences article{grid-template-columns:auto 1fr}.vowel2-sentences button{grid-column:2}.vowel2-tab-buttons{grid-template-columns:1fr}.vowel2-game-sounds{grid-template-columns:repeat(2,1fr)}.vowel2-sentence-meta{align-items:flex-start;flex-direction:column}.vowel2-sentence-card{min-height:420px;padding:22px 14px}.vowel2-sentence-actions button,.vowel2-sentence-marking button,.vowel2-sentence-summary-actions button{width:100%}.vowel2-sentence-summary{padding:28px 16px}}
+@media(max-width:620px){
+  .vowel2-step-meta{align-items:flex-start;flex-direction:column}
+  .vowel2-step-card,.vowel2-recording-card{min-height:440px;padding:24px 14px}
+  .vowel2-sound-options{grid-template-columns:repeat(2,1fr)}
+  .vowel2-answer-grid:not(.vowel2-sound-options){grid-template-columns:1fr}
+  .vowel2-record-controls,.vowel2-teacher-controls,.vowel2-summary-actions{width:100%;flex-direction:column}
+  .vowel2-record-controls button,.vowel2-teacher-controls button,.vowel2-summary-actions button,.vowel2-step-next{width:100%}
+  .vowel2-summary-card{padding:28px 16px}
+}
 @media(max-width:620px){.vowel2-focus-pair{grid-template-columns:1fr;gap:5px;padding:18px 14px}.vowel2-focus-pair>i{font-size:38px;line-height:.8}.vowel2-focus-word-text{padding:3px!important;font-size:48px}.vowel2-focus-ipa{font-size:21px}.vowel2-focus-word small{font-size:14px}.vowel2-focus-icon{font-size:46px}.vowel2-focus-listen-pair{font-size:13px}.vowel2-focus-nav{grid-template-columns:1fr}}
 
 /* === VOWEL2 SPEAKER BUTTONS === */
