@@ -112,7 +112,7 @@ for (const [key, groupTitle, completedMessage, length, first, last] of expectedA
 }
 check(lesson01?.alphabetFoundation?.vowels?.length === 5, "Lesson 1 must have 5 vowel cards.");
 check(lesson01?.alphabetFoundation?.listenChoose?.length === 26, "Lesson 1 listen-and-choose game must cover A-Z.");
-check(lesson01?.alphabetFoundation?.practiceWords?.length === 9, "Lesson 1 single-question word games must have 9 practice words.");
+check(lesson01?.alphabetFoundation?.practiceWords?.length === 26, "Lesson 1 single-question word games must have 26 practice words.");
 check(arrayEquals(Object.values(lesson01?.sectionLabels || {}), [
   "Video bài hát bảng chữ cái",
   "Nhóm chữ A–G",
