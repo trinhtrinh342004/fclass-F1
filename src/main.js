@@ -1588,6 +1588,7 @@ function renderVowel2Section(lesson, section){
   if (section !== window.vowel2LastSection) {
     window.vowel2LastSection = section;
     window.vowel2SingleSoundState = {};
+    window.vowel2SingleSoundPhase = {};
   }
 
   switch(section){
@@ -1596,7 +1597,7 @@ function renderVowel2Section(lesson, section){
         <div class="vowel2-overview">
           <p>Hôm nay mình học 6 nguyên âm đơn thường gặp.</p>
           <div class="vowel2-sound-hero">${data.sounds.map((sound, index)=>`
-            <button onclick="speakById('${regTxt(groups[sound].words[0].word)}')">
+            <button onclick="_vowel2SpeakSound('${escAttr(sound)}')">
               <span>${escAttr(groups[sound].words[0].icon)}</span><b>${escAttr(sound)}</b>
             </button>`).join("")}
           </div>
@@ -1631,8 +1632,8 @@ function renderVowel2Section(lesson, section){
         <div class="vowel2-teacher-tip">Giáo viên nhắc: /ə/ đọc nhẹ như lướt qua. /ʌ/ đọc rõ hơn.</div>`;
     case "vowel2_mouth_grid":
       return `${header}<div class="vowel2-mouth-grid">${data.wordGroups.map(group=>`
-        <article><b>${escAttr(group.symbol)}</b>${renderVowel2MouthSvg(group.mouth)}<p>${escAttr(group.guide)}</p>
-        <button class="vowel2-speaker-btn" onclick="speakById('${regTxt(group.words[0].word)}')" title="Nghe âm mẫu" aria-label="Nghe âm mẫu">${SPEAKER_ICON_SVG}</button></article>`).join("")}</div>`;
+        <article><b>${escAttr(group.symbol)}</b>${renderPronunciationMouthMedia(getPronunciationMedia(2, group.sectionKey), true)}<p>${escAttr(group.guide)}</p>
+        <button class="vowel2-speaker-btn" onclick="_vowel2SpeakSound('${escAttr(group.symbol)}')" title="Nghe âm ${escAttr(group.symbol)}" aria-label="Nghe âm ${escAttr(group.symbol)}">${SPEAKER_ICON_SVG}</button></article>`).join("")}</div>`;
     case "vowel2_word_practice":
       return `${header}<div class="vowel2-practice-groups">${data.wordGroups.map((group, groupIndex)=>`
         <article><header><b>${escAttr(group.symbol)}</b><span>${escAttr(group.label)}</span>
@@ -1662,6 +1663,15 @@ function renderVowel2Header(lesson, section){
     <h2 class="stage-title">${escAttr(lesson.sectionLabels[section])}</h2>`;
 }
 
+const VOWEL2_SOUND_SPEECH_TEXT = {
+  "/iː/": "ee",
+  "/ɪ/": "ih",
+  "/e/": "eh",
+  "/æ/": "aa",
+  "/ə/": "uh",
+  "/ʌ/": "uh",
+};
+
 function renderVowel2SoundSwitcher(section, groups, offset){
   window.vowel2SelectedSound = window.vowel2SelectedSound || {};
   const selectedSymbol = window.vowel2SelectedSound[section] || groups[0]?.symbol;
@@ -1676,28 +1686,61 @@ function renderVowel2SoundSwitcher(section, groups, offset){
 function renderVowel2SingleSoundLesson(group, offset){
   const stateKey = group.practiceKey || group.symbol;
   window.vowel2SingleSoundState = window.vowel2SingleSoundState || {};
+  window.vowel2SingleSoundPhase = window.vowel2SingleSoundPhase || {};
+  const phase = window.vowel2SingleSoundPhase[stateKey] || "intro";
   const wordIndex = Math.min(window.vowel2SingleSoundState[stateKey] || 0, group.words.length - 1);
   window.vowel2SingleSoundState[stateKey] = wordIndex;
   const word = group.words[wordIndex];
   const media = getPronunciationMedia(2, group.sectionKey);
-  const hasKnownMouthImage = group.sectionKey === "i-long";
+  if (phase === "intro") {
+    return `<section class="vowel2-sound-intro-card">
+      <div class="vowel2-sound-intro-copy">
+        <span class="vowel2-step-label">Bước 1</span>
+        <h3>${escAttr(group.symbol)}</h3>
+        <b>${escAttr(group.label)}</b>
+        <p>${escAttr(group.guide)}</p>
+        <button class="vowel2-speaker-btn" onclick="_vowel2SpeakSound('${escAttr(group.symbol)}')" title="Nghe âm ${escAttr(group.symbol)}" aria-label="Nghe âm ${escAttr(group.symbol)}">${SPEAKER_ICON_SVG}</button>
+      </div>
+      ${renderPronunciationMouthMedia(media, false)}
+      <button class="vowel2-start-practice-btn" onclick="_vowel2StartSingleSound('${escAttr(stateKey)}')">Bắt đầu phát âm</button>
+    </section>`;
+  }
+
+  if (phase === "video") {
+    return `<section class="vowel2-practice-layout vowel2-video-layout" data-sound="${escAttr(group.symbol)}">
+      <div class="vowel2-practice-left">
+        <span class="vowel2-step-label">Bước 3</span>
+        <h3 class="ipa-title">${escAttr(group.symbol)}</h3>
+        <p class="ipa-desc">${escAttr(group.guide)}</p>
+        <button class="vowel2-speaker-btn" onclick="_vowel2SpeakSound('${escAttr(group.symbol)}')" title="Nghe âm ${escAttr(group.symbol)}" aria-label="Nghe âm ${escAttr(group.symbol)}">${SPEAKER_ICON_SVG}</button>
+        ${renderPronunciationMouthMedia(media, true)}
+      </div>
+      <div class="vowel2-practice-right">
+        <span class="word-indicator">VIDEO HƯỚNG DẪN</span>
+        ${renderPronunciationGuideVideo(media)}
+        <div class="vowel2-nav-row">
+          <button class="vowel2-nav-btn" onclick="_vowel2BackToLastWord('${escAttr(stateKey)}', ${group.words.length})">Từ trước</button>
+          <button class="vowel2-nav-btn vowel2-next-btn" onclick="_vowel2StartSingleSound('${escAttr(stateKey)}')">Luyện lại từ</button>
+        </div>
+      </div>
+    </section>`;
+  }
+
   return `<section class="vowel2-practice-layout" data-sound="${escAttr(group.symbol)}">
     <div class="vowel2-practice-left">
+      <span class="vowel2-step-label">Bước 2</span>
       <h3 class="ipa-title">${escAttr(group.symbol)}</h3>
       <span class="ipa-label">${escAttr(group.label)}</span>
       <p class="ipa-desc">${escAttr(group.guide)}</p>
-      <button class="vowel2-speaker-btn" onclick="speakById('${regTxt(group.soundText || word.word)}')" title="Nghe âm ${escAttr(group.symbol)}" aria-label="Nghe âm ${escAttr(group.symbol)}">${SPEAKER_ICON_SVG}</button>
-      ${renderPronunciationMouthMedia(media, true, {
-        placeholderOnly: !hasKnownMouthImage,
-        textFallback: !hasKnownMouthImage,
-      })}
+      <button class="vowel2-speaker-btn" onclick="_vowel2SpeakSound('${escAttr(group.symbol)}')" title="Nghe âm ${escAttr(group.symbol)}" aria-label="Nghe âm ${escAttr(group.symbol)}">${SPEAKER_ICON_SVG}</button>
+      ${renderPronunciationMouthMedia(media, true)}
     </div>
     <div class="vowel2-practice-right">
-      <span class="word-indicator">TỪ ${wordIndex + 1}/${group.words.length}</span>
+      <span class="word-indicator">Từ ${wordIndex + 1}/${group.words.length}</span>
       ${renderSoundWordPracticeCard(word, offset + wordIndex)}
       <div class="vowel2-nav-row">
         <button class="vowel2-nav-btn" onclick="_vowel2PrevSingleWord('${escAttr(stateKey)}')" ${wordIndex === 0 ? "disabled" : ""}>Từ trước</button>
-        <button class="vowel2-nav-btn vowel2-next-btn" onclick="_vowel2NextSingleWord('${escAttr(stateKey)}', ${group.words.length})" ${wordIndex === group.words.length - 1 ? "disabled" : ""}>Từ tiếp theo</button>
+        <button class="vowel2-nav-btn vowel2-next-btn" onclick="_vowel2NextSingleWord('${escAttr(stateKey)}', ${group.words.length})">${wordIndex === group.words.length - 1 ? "Xem video hướng dẫn" : "Từ tiếp theo"}</button>
       </div>
     </div>
   </section>`;
@@ -1805,18 +1848,27 @@ function renderVowel2MouthPositionSvg(){
   </svg>`;
 }
 
+function renderPronunciationMouthImage({ src, alt, fallback, compact = false } = {}){
+  if (!src) {
+    return `<div class="pronunciation-mouth-media${compact ? " compact" : ""}">${fallback}</div>`;
+  }
+  return `<div class="pronunciation-mouth-media${compact ? " compact" : ""}">
+    <img src="${escAttr(src)}" alt="${escAttr(alt || "Khẩu hình phát âm")}" hidden onload="_pronunciationImageLoaded(this)" onerror="_pronunciationImageFailed(this)">
+    ${fallback}
+  </div>`;
+}
 function renderPronunciationMouthMedia(media, compact = false, options = {}){
   const sound = media?.sound || "";
   const image = media?.mouthImage || "";
   const placeholder = `<div class="pronunciation-mouth-placeholder">Chưa có hình khẩu hình</div>`;
   const fallback = options.textFallback ? placeholder : `<div class="pronunciation-mouth-fallback">${renderVowel2MouthPositionSvg()}</div>`;
-  if (options.placeholderOnly || !image) {
-    return `<div class="pronunciation-mouth-media${compact ? " compact" : ""}">${fallback}</div>`;
-  }
-  return `<div class="pronunciation-mouth-media${compact ? " compact" : ""}">
-    ${image ? `<img src="${escAttr(image)}" alt="Khẩu hình miệng phát âm ${escAttr(sound)}" hidden onload="_pronunciationImageLoaded(this)" onerror="_pronunciationImageFailed(this)">` : ""}
-    ${fallback}
-  </div>`;
+  if (options.placeholderOnly) return `<div class="pronunciation-mouth-media${compact ? " compact" : ""}">${fallback}</div>`;
+  return renderPronunciationMouthImage({
+    src: image,
+    alt: `Khẩu hình miệng phát âm ${sound}`,
+    fallback,
+    compact,
+  });
 }
 
 function renderPronunciationGuideVideo(media){
@@ -1926,25 +1978,53 @@ function renderVowel2MiniTest(questions){
 let vowel2GameState = { index: 0, score: 0 };
 
 window.vowel2SingleSoundState = {};
+window.vowel2SingleSoundPhase = {};
 window.vowel2SelectedSound = {};
 window.vowel2LastSection = "";
 
+window._vowel2SpeakSound = function(symbol) {
+  const speechText = VOWEL2_SOUND_SPEECH_TEXT[symbol] || symbol;
+  speak(speechText, 0.68, null, "en-US");
+};
 window._vowel2SetSingleSound = function(section, symbol) {
   const lesson = LESSONS.find(item => item.id === STATE.lessonId);
   const group = lesson?.vowelLesson?.wordGroups?.find(item => item.symbol === symbol);
   window.vowel2SelectedSound[section] = symbol;
-  if (group) window.vowel2SingleSoundState[group.practiceKey || group.symbol] = 0;
+  if (group) {
+    const stateKey = group.practiceKey || group.symbol;
+    window.vowel2SingleSoundState[stateKey] = 0;
+    window.vowel2SingleSoundPhase[stateKey] = "intro";
+  }
+  renderSection();
+};
+
+window._vowel2StartSingleSound = function(stateKey) {
+  window.vowel2SingleSoundState[stateKey] = 0;
+  window.vowel2SingleSoundPhase[stateKey] = "words";
   renderSection();
 };
 
 window._vowel2PrevSingleWord = function(stateKey) {
+  window.vowel2SingleSoundPhase[stateKey] = "words";
   window.vowel2SingleSoundState[stateKey] = Math.max(0, (window.vowel2SingleSoundState[stateKey] || 0) - 1);
   renderSection();
 };
 
 window._vowel2NextSingleWord = function(stateKey, total) {
   const current = window.vowel2SingleSoundState[stateKey] || 0;
+  if (current >= total - 1) {
+    window.vowel2SingleSoundPhase[stateKey] = "video";
+    renderSection();
+    return;
+  }
+  window.vowel2SingleSoundPhase[stateKey] = "words";
   window.vowel2SingleSoundState[stateKey] = Math.min(total - 1, current + 1);
+  renderSection();
+};
+
+window._vowel2BackToLastWord = function(stateKey, total) {
+  window.vowel2SingleSoundState[stateKey] = Math.max(0, total - 1);
+  window.vowel2SingleSoundPhase[stateKey] = "words";
   renderSection();
 };
 
