@@ -183,6 +183,59 @@ const SENTENCES = [
   ["The sun is up.", ["sun", "up"]],
 ].map(([text, focusWords]) => ({ text, focusWords }));
 
+const CONFUSING_SENTENCES = [
+  ["I see a sheep.", ["see", "sheep"], [
+    ["see", "/siː/", "dễ nhầm với sit /sɪt/"],
+    ["sheep", "/ʃiːp/", "dễ nhầm với ship /ʃɪp/"],
+  ]],
+  ["Sit on the seat.", ["Sit", "seat"], [
+    ["sit", "/sɪt/", "dễ nhầm với seat /siːt/"],
+  ]],
+  ["The ship is big.", ["ship"], [
+    ["ship", "/ʃɪp/", "dễ nhầm với sheep /ʃiːp/"],
+  ]],
+  ["My feet fit.", ["feet", "fit"], [
+    ["feet", "/fiːt/", "dễ nhầm với fit /fɪt/"],
+  ]],
+  ["The bed is bad.", ["bed", "bad"], [
+    ["bed", "/bed/", "dễ nhầm với bad /bæd/"],
+  ]],
+  ["I have a red bag.", ["red", "bag"], [
+    ["red", "/red/", "là âm /e/"],
+    ["bag", "/bæg/", "là âm /æ/"],
+  ]],
+  ["The pen is in the bag.", ["pen", "bag"], [
+    ["pen", "/pen/", "dễ nhầm với pan /pæn/"],
+    ["bag", "/bæg/", "có âm /æ/"],
+  ]],
+  ["The cat is on the bed.", ["cat", "bed"], [
+    ["cat", "/kæt/", "là âm /æ/"],
+    ["bed", "/bed/", "là âm /e/"],
+  ]],
+  ["My teacher has a cup.", ["teacher", "cup"], [
+    ["teacher", "/ˈtiːtʃər/", "có âm /ə/"],
+    ["cup", "/kʌp/", "có âm /ʌ/"],
+  ]],
+  ["The banana is on the sofa.", ["banana", "sofa"], [
+    ["banana", "/bəˈnænə/", "có âm /ə/"],
+    ["sofa", "/ˈsoʊfə/", "có âm /ə/"],
+  ]],
+  ["The sun is up.", ["sun", "up"], [
+    ["sun", "/sʌn/", "có âm /ʌ/"],
+    ["up", "/ʌp/", "có âm /ʌ/"],
+  ]],
+  ["I think about my mother.", ["about", "mother"], [
+    ["about", "/əˈbaʊt/", "có âm /ə/"],
+    ["mother", "/ˈmʌðər/", "có âm /ʌ/ và /ə/"],
+  ]],
+].map(([sentence, highlightWords, trap], id) => ({
+  id,
+  sentence,
+  highlightWords,
+  audioText: sentence,
+  trap: trap.map(([word, ipa, confusion]) => ({ word, ipa, confusion })),
+}));
+
 const LISTEN_GAME = [
   ["sheep", "/iː/"], ["ship", "/ɪ/"], ["bed", "/e/"], ["bad", "/æ/"], ["sofa", "/ə/"],
   ["cup", "/ʌ/"], ["seat", "/iː/"], ["sit", "/ɪ/"], ["pen", "/e/"], ["pan", "/æ/"],
@@ -217,7 +270,7 @@ export const lesson02SpellingLetterSounds = {
     vowel2_sound_schwa: "Âm /ə/",
     vowel2_sound_uh: "Âm /ʌ/",
     vowel2_compare_schwa_caret: "So sánh /ə/ và /ʌ/",
-    vowel2_word_practice: "Từ vựng luyện đọc",
+    vowel2_word_practice: "Câu dễ đọc sai",
     vowel2_pairs_sentences: "Minimal pairs + Đọc câu",
     vowel2_game_record_test: "Game + Ghi âm AI + Mini test",
   },
@@ -233,6 +286,7 @@ export const lesson02SpellingLetterSounds = {
     comparisonPairs: COMPARISON_PAIRS,
     comparisonPairsE: COMPARISON_PAIRS_E,
     comparisonPairsSchwa: COMPARISON_PAIRS_SCHWA,
+    confusingSentences: CONFUSING_SENTENCES,
     sentences: SENTENCES,
     listenGame: LISTEN_GAME,
     recordingWords: ["sheep", "ship", "seat", "sit", "feet", "fit", "bed", "bad", "pen", "pan", "cup", "cap"],
