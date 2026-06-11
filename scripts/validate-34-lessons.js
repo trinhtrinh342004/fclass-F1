@@ -104,6 +104,14 @@ const alphabetRenderer = mainSource.slice(
   mainSource.indexOf("function renderAlphabetSection"),
   mainSource.indexOf("function renderSpellingSection")
 );
+const alphabetAgRenderer = mainSource.slice(
+  mainSource.indexOf("function renderAlphabetGroupAG"),
+  mainSource.indexOf("function _alphabetReadEach")
+);
+const alphabetAgFlowRenderer = mainSource.slice(
+  mainSource.indexOf("function _alphabetAgStart"),
+  mainSource.indexOf("function _alphabetReadEach")
+);
 const forbiddenAlphabetUi = [
   "Letter Cards",
   "Vowel Letters",
@@ -155,7 +163,22 @@ check([
   "Hiện biểu tượng",
   "Từ tiếp theo",
   "Học lại nhóm A–G",
-].every((label) => alphabetRenderer.includes(label)), "Lesson 1 A-G activity must contain all requested Vietnamese controls.");
+].every((label) => alphabetAgRenderer.includes(label)), "Lesson 1 A-G activity must contain all requested Vietnamese controls.");
+check(
+  alphabetAgFlowRenderer.includes('class="alphabet-ag-speaker"')
+    && alphabetAgFlowRenderer.includes('aria-label="Nghe lại"')
+    && !alphabetAgFlowRenderer.includes('>Nghe lại</button>'),
+  "Lesson 1 A-G replay control must use an accessible speaker icon without visible replay text."
+);
+check(
+  alphabetAgFlowRenderer.includes("_alphabetAgSpeakLetter")
+    && alphabetAgFlowRenderer.includes("_alphabetAgSpeakWord"),
+  "Lesson 1 A-G letters, words, and icons must be directly clickable for pronunciation."
+);
+check(
+  !alphabetAgFlowRenderer.includes('alphabetAgSpeak("Good job!"'),
+  "Lesson 1 A-G completion must not speak the English praise phrase."
+);
 check([
   "\"idle\"",
   "\"uppercase\"",
@@ -163,7 +186,7 @@ check([
   "\"icon\"",
   "\"completedLetter\"",
   "\"completedGroup\"",
-].every((state) => alphabetRenderer.includes(state)), "Lesson 1 A-G activity must preserve its learning states.");
+].every((state) => alphabetAgRenderer.includes(state)), "Lesson 1 A-G activity must preserve its learning states.");
 
 const lesson02 = lessonById(2);
 check(lesson02?.slug === "nguyen-am-don-1", "Lesson 2 must route to Monophthongs 1.");
