@@ -64,12 +64,12 @@ const lesson01 = lessonById(1);
 check(lesson01?.title === "Buổi 1: Bảng chữ cái A–Z", "Lesson 1 must use the Vietnamese Alphabet A–Z title.");
 check(lesson01?.track === "alphabet-foundation", "Lesson 1 must use the dedicated Alphabet Foundation renderer.");
 check(lesson01?.metadata?.localContentAuthoritative === true, "Lesson 1 local Alphabet content must override stale Supabase content.");
-check(lesson01?.sectionFlow?.length === 17, "Lesson 1 Alphabet sidebar must have exactly 17 sections after removing four games.");
+check(lesson01?.sectionFlow?.length === 15, "Lesson 1 Alphabet sidebar must have exactly 15 sections after removing six games.");
 check(lesson01?.sectionFlow?.every((section) => section.startsWith("alphabet_")), "Lesson 1 must use dedicated alphabet sections.");
 check(
-  ["alphabet_case_match", "alphabet_icon_match", "alphabet_spell_words", "alphabet_build_word"]
+  ["alphabet_case_match", "alphabet_icon_match", "alphabet_spell_words", "alphabet_build_word", "alphabet_teacher_challenge", "alphabet_starfall"]
     .every((section) => !lesson01?.sectionFlow?.includes(section)),
-  "Lesson 1 flow must not contain the four removed games."
+  "Lesson 1 flow must not contain the six removed games."
 );
 check(lesson01?.alphabetFoundation?.letters?.length === 26, "Lesson 1 must have 26 alphabet letter cards.");
 check(
@@ -128,8 +128,6 @@ check(arrayEquals(Object.values(lesson01?.sectionLabels || {}), [
   "Đánh vần tên của em",
   "Tách chữ trong từ",
   "Nhìn biểu tượng đọc từ",
-  "Thử thách đọc theo giáo viên",
-  "Chơi game bảng chữ cái",
   "Video thư giãn cuối buổi",
 ]), "Lesson 1 sidebar labels must match the requested Vietnamese labels.");
 
@@ -184,10 +182,6 @@ check([
   "Chọn lại nhé",
   "Tạo chữ cái",
   "Từ tiếp theo",
-  "Hiện icon",
-  "Ẩn icon",
-  "Hoàn thành",
-  "Mở game bảng chữ cái",
 ].every((label) => alphabetRenderer.includes(label)), "Lesson 1 renderer must contain the requested Vietnamese controls.");
 const alphabetFlashcardRenderer = mainSource.slice(
   mainSource.indexOf("function renderAlphabetFlashcardSection"),
