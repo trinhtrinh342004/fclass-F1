@@ -35,6 +35,7 @@ const alphabetFlashcardState = {
   openLetters: new Set(),
 };
 let vowel2SentenceGameState = null;
+const alphabetSingleGameStates = new Map();
 
 const STORAGE_KEY = "gateway_a1_progress_v2";
 const IPA34_PROGRESS_MIGRATED_KEY = "gateway_a1_progress_v2_ipa34_migrated";
@@ -713,18 +714,12 @@ Object.assign(SECTION_LABELS, {
   alphabet_cards: "Thẻ học chữ cái",
   alphabet_vowels: "Nguyên âm A E I O U",
   alphabet_listen_choose: "Nghe và chọn chữ",
-  alphabet_case_match: "Ghép chữ hoa - chữ thường",
-  alphabet_icon_match: "Ghép chữ với biểu tượng",
   alphabet_image_guess: "Nhìn hình đoán chữ",
   alphabet_missing: "Điền chữ còn thiếu",
   alphabet_quick_read: "Đọc nhanh chữ cái",
   alphabet_spell_name: "Đánh vần tên của em",
-  alphabet_spell_words: "Đánh vần từ đơn giản",
   alphabet_split_word: "Tách chữ trong từ",
-  alphabet_build_word: "Ghép chữ thành từ",
   alphabet_icon_read: "Nhìn biểu tượng đọc từ",
-  alphabet_teacher_challenge: "Thử thách đọc theo giáo viên",
-  alphabet_starfall: "Chơi game bảng chữ cái",
   alphabet_chill: "Video thư giãn cuối buổi",
 });
 
@@ -954,42 +949,13 @@ function renderAlphabetSection(lesson, section){
           <article class="alphabet-vowel-card"><b>${escAttr(item.letter)}</b><span>${item.icon}</span><strong>${escAttr(item.word)}</strong>
           <button onclick="speakById('${regTxt(`${item.letter}. ${item.word}`)}')">Nghe</button></article>`).join("")}</div>`;
     case "alphabet_listen_choose":
-      return `${header}<p class="alphabet-instruction">Nghe âm thanh và chọn chữ cái đúng.</p>
-        <div class="alphabet-game-list">${(alphabet.listenChoose || []).map((round, i)=>renderAlphabetChoiceRound(round, i, "listen")).join("")}</div>`;
-    case "alphabet_case_match":
-      return `${header}<p class="alphabet-instruction">Nối chữ hoa với chữ thường đúng.</p>
-        <div class="alphabet-match-grid">${(alphabet.casePairs || []).map((letter, i, pairs)=>`
-          <article class="alphabet-game-card"><div class="alphabet-game-prompt">${letter} → ?</div>
-          <div class="alphabet-choice-row">${[letter, pairs[(i+1)%pairs.length], pairs[(i+2)%pairs.length]].map(choice=>choice.toLowerCase()).map(choice=>`
-            <button data-answer="${letter.toLowerCase()}" data-choice="${choice}" onclick="_alphabetInstantCheck(this)">${choice}</button>`).join("")}</div>
-          <div class="alphabet-feedback" aria-live="polite"></div></article>`).join("")}</div>`;
-    case "alphabet_icon_match":
-      return `${header}<p class="alphabet-instruction">Chọn biểu tượng đúng với chữ cái.</p>
-        <div class="alphabet-match-grid">${(alphabet.iconPairs || []).map((item, i, items)=>`
-          <article class="alphabet-game-card"><div class="alphabet-game-prompt">${item.letter} → ?</div>
-          <div class="alphabet-choice-row">${[item, items[(i+1)%items.length], items[(i+2)%items.length]].map(choice=>`
-            <button data-answer="${item.word}" data-choice="${choice.word}" onclick="_alphabetInstantCheck(this)">${choice.icon} ${escAttr(choice.word)}</button>`).join("")}</div>
-          <div class="alphabet-feedback" aria-live="polite"></div></article>`).join("")}</div>`;
+      return `${header}${renderAlphabetSingleGame(section, alphabet)}`;
     case "alphabet_image_guess":
-      return `${header}<p class="alphabet-instruction">Nhìn biểu tượng và chọn chữ cái đầu tiên.</p>
-        <div class="alphabet-match-grid">${(alphabet.imageGuess || []).map(round=>`
-          <article class="alphabet-game-card"><div class="alphabet-guess-icon">${round.icon}</div>
-          <div class="alphabet-choice-row">${round.options.map(choice=>`
-            <button data-answer="${round.answer}" data-choice="${choice}" onclick="_alphabetInstantCheck(this)">${choice}</button>`).join("")}</div>
-          <div class="alphabet-feedback" aria-live="polite"></div></article>`).join("")}</div>`;
+      return `${header}${renderAlphabetSingleGame(section, alphabet)}`;
     case "alphabet_missing":
-      return `${header}<p class="alphabet-instruction">Chọn chữ còn thiếu trong dãy.</p>
-        <div class="alphabet-game-list">${(alphabet.missingLetters || []).map((round, i)=>renderAlphabetChoiceRound(round, i, "missing")).join("")}</div>`;
+      return `${header}${renderAlphabetSingleGame(section, alphabet)}`;
     case "alphabet_quick_read":
-      return `${header}<p class="alphabet-instruction">Đọc thật nhanh chữ cái đang hiện.</p>
-        <div class="alphabet-quick-card" data-letters="${escAttr((alphabet.quickReadLetters || []).join(""))}" data-index="0">
-          <div class="alphabet-quick-letter">A</div>
-          <div class="alphabet-action-row">
-            <button onclick="_alphabetQuickNext(this, false)">Chữ tiếp theo</button>
-            <button onclick="_alphabetQuickNext(this, true)">Chữ ngẫu nhiên</button>
-            <button onclick="_alphabetSpeakQuick(this)">Nghe chữ cái</button>
-          </div>
-        </div>`;
+      return `${header}${renderAlphabetSingleGame(section, alphabet)}`;
     case "alphabet_spell_name":
       return `${header}<p class="alphabet-instruction">Nhập tên của em, sau đó đọc từng chữ cái.</p>
         <div class="alphabet-name-card">
@@ -1001,32 +967,11 @@ function renderAlphabetSection(lesson, section){
           </div>
           <div id="alphabetNameLetters" class="alphabet-name-letters"></div>
         </div>`;
-    case "alphabet_spell_words":
-      return `${header}<p class="alphabet-instruction">Nhìn từ và chọn từng chữ cái theo đúng thứ tự.</p>
-        <div class="alphabet-word-grid">${(alphabet.simpleWords || []).map(renderAlphabetWordGame).join("")}</div>`;
     case "alphabet_split_word":
-      return `${header}<p class="alphabet-instruction">Đọc từ, sau đó tách thành từng chữ cái.</p>
-        <div class="alphabet-word-grid">${(alphabet.simpleWords || []).map(word=>renderAlphabetSplitWord(word, alphabet.letters || [])).join("")}</div>`;
-    case "alphabet_build_word":
-      return `${header}<p class="alphabet-instruction">Chọn chữ cái theo đúng thứ tự để ghép thành từ.</p>
-        <div class="alphabet-word-grid">${(alphabet.simpleWords || []).map(word=>renderAlphabetWordGame(word, alphabet.letters || [])).join("")}</div>`;
+      return `${header}${renderAlphabetSingleGame(section, alphabet)}`;
     case "alphabet_icon_read":
-      return `${header}<p class="alphabet-instruction">Nhìn biểu tượng và chọn chữ còn thiếu.</p>
-        <div class="alphabet-match-grid">${(alphabet.iconRead || []).map(round=>`
-          <article class="alphabet-game-card"><div class="alphabet-guess-icon">${round.icon}</div><div class="alphabet-game-prompt">${escAttr(round.prompt)}</div>
-          <div class="alphabet-choice-row">${round.options.map(choice=>`
-            <button data-answer="${round.answer}" data-choice="${choice}" onclick="_alphabetInstantCheck(this)">${choice}</button>`).join("")}</div>
-          <div class="alphabet-feedback" aria-live="polite"></div></article>`).join("")}</div>`;
-    case "alphabet_teacher_challenge":
-      return `${header}<p class="alphabet-instruction">Đọc theo giáo viên từng từ.</p>
-        ${renderAlphabetTeacherChallenge(alphabet.teacherChallenge || [], alphabet.letters || [])}`;
-    case "alphabet_starfall":
-      return `${header}<p class="alphabet-instruction">Bấm để chơi game luyện bảng chữ cái.</p>
-        <div class="alphabet-starfall-card">
-          <iframe src="${escAttr(alphabet.starfallUrl || "")}" title="Game luyện bảng chữ cái"></iframe>
-          <div><strong>Không thể hiển thị game trực tiếp.</strong><p>Hãy bấm nút bên dưới để mở game.</p>
-          <a href="${escAttr(alphabet.starfallUrl || "")}" target="_blank" rel="noopener noreferrer">Mở game bảng chữ cái</a></div>
-        </div>`;
+      return `${header}${renderAlphabetSingleGame(section, alphabet)}`;
+
     case "alphabet_chill":
       return `${header}<p class="alphabet-instruction">Nghe lại bảng chữ cái và hát theo.</p>
         <div class="alphabet-video-card">
@@ -1174,6 +1119,297 @@ function _alphabetResetFlashcard(event, button){
   alphabetFlashcardState.openLetters.delete(card.dataset.letter);
   card.classList.remove("is-open");
   card.setAttribute("aria-expanded", "false");
+}
+
+function shuffleAlphabetItems(items=[]){
+  const result = [...items];
+  for(let i=result.length-1;i>0;i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function alphabetChoiceOptions(answer, pool){
+  return shuffleAlphabetItems([
+    answer,
+    ...shuffleAlphabetItems(pool.filter(item=>item !== answer)).slice(0, 2),
+  ]);
+}
+
+function createAlphabetSingleGameState(section, alphabet){
+  const letters = alphabet.letters || [];
+  const letterPool = letters.map(item=>item.letter);
+  const words = alphabet.practiceWords || letters.filter(item=>[
+    "apple", "ball", "cat", "dog", "egg", "fish", "ink", "orange", "umbrella",
+  ].includes(item.word));
+  let mode = "choice";
+  let noun = "Câu";
+  let items = [];
+
+  if(section === "alphabet_listen_choose"){
+    items = (alphabet.listenChoose || letters.map(({ letter })=>({ audio: letter, answer: letter }))).map(item=>({
+      answer: item.answer,
+      audio: item.audio || item.answer,
+      options: alphabetChoiceOptions(item.answer, letterPool),
+    }));
+  }else if(section === "alphabet_image_guess"){
+    items = words.map(item=>({
+      ...item,
+      answer: item.letter,
+      audio: item.word,
+      options: alphabetChoiceOptions(item.letter, letterPool),
+    }));
+  }else if(section === "alphabet_missing"){
+    items = words.map(item=>({
+      ...item,
+      answer: item.letter,
+      audio: item.word,
+      prompt: `_${item.word.slice(1)}`,
+      options: alphabetChoiceOptions(item.letter, letterPool),
+    }));
+  }else if(section === "alphabet_quick_read"){
+    mode = "read";
+    noun = "Chữ";
+    items = (alphabet.quickReadLetters || letterPool).map(letter=>({ letter, audio: letter }));
+  }else if(section === "alphabet_split_word"){
+    mode = "split";
+    noun = "Từ";
+    items = words.map(item=>({ ...item, audio: item.word, choices: shuffleAlphabetItems(item.word.toUpperCase().split("")) }));
+  }else if(section === "alphabet_icon_read"){
+    mode = "readWord";
+    noun = "Từ";
+    items = words.map(item=>({ ...item, audio: item.word }));
+  }
+
+  return {
+    section,
+    mode,
+    noun,
+    items: shuffleAlphabetItems(items),
+    index: 0,
+    statuses: Array(items.length).fill("pending"),
+    score: 0,
+    feedback: "",
+    wrongChoice: "",
+    selectedLetters: [],
+    selectedChoiceIndexes: [],
+    revealed: false,
+    showWord: false,
+  };
+}
+
+function renderAlphabetSingleGame(section, alphabet){
+  const state = createAlphabetSingleGameState(section, alphabet);
+  alphabetSingleGameStates.set(section, state);
+  setTimeout(()=>_alphabetSingleScheduleAudio(section), 420);
+  return `<div class="alphabet-single-host" data-game="${section}">${renderAlphabetSingleGameShell(state)}</div>`;
+}
+
+function renderAlphabetSingleGameShell(state){
+  const item = state.items[state.index];
+  if(!item) return `<div class="alphabet-single-shell"><p>Chưa có dữ liệu trò chơi.</p></div>`;
+  const complete = state.statuses.every(status=>status === "correct");
+  const dotLabel = state.statuses.map((status, index)=>`<span class="${status}" title="${state.noun} ${index + 1}"></span>`).join("");
+  return `<section class="alphabet-single-shell ${state.feedback === "correct" ? "is-correct" : state.feedback === "wrong" ? "is-wrong" : ""}">
+    <div class="alphabet-single-meta">
+      <strong>${state.noun} ${state.index + 1}/${state.items.length}</strong>
+      ${state.mode === "choice" ? `<strong>Đúng ${state.score}/${state.items.length}</strong>` : ""}
+    </div>
+    <div class="alphabet-single-dots" aria-label="Tiến độ">${dotLabel}</div>
+    <div class="alphabet-single-card">
+      ${renderAlphabetSinglePrompt(state, item)}
+      ${renderAlphabetSingleInteraction(state, item)}
+      <div class="alphabet-single-feedback" aria-live="polite">${renderAlphabetSingleFeedback(state, item)}</div>
+      <div class="alphabet-single-actions">
+        <button type="button" class="alphabet-secondary-button" onclick="_alphabetSingleSpeak('${state.section}')">🔊 ${state.mode === "read" || state.section === "alphabet_listen_choose" ? "Nghe lại" : "Nghe từ"}</button>
+        ${renderAlphabetSingleNextButton(state, complete)}
+      </div>
+    </div>
+  </section>`;
+}
+
+function renderAlphabetSinglePrompt(state, item){
+  if(state.section === "alphabet_listen_choose"){
+    return `<button type="button" class="alphabet-single-speaker" onclick="_alphabetSingleSpeak('${state.section}')" aria-label="Nghe chữ cái">🔊</button>
+      <h3>Em nghe thấy chữ cái nào?</h3>`;
+  }
+  if(state.section === "alphabet_quick_read"){
+    return `<div class="alphabet-single-letter">${escAttr(item.letter)}</div><h3>Đọc to chữ cái này</h3>`;
+  }
+  if(state.section === "alphabet_split_word"){
+    return `<div class="alphabet-single-icon">${item.icon}</div><h3 class="alphabet-single-word">${escAttr(item.word)}</h3>
+      <p>Bấm các chữ theo đúng thứ tự.</p>`;
+  }
+  if(state.section === "alphabet_icon_read"){
+    return `<div class="alphabet-single-icon">${item.icon}</div>
+      <h3 class="alphabet-single-word ${state.showWord ? "" : "alphabet-hidden"}">${escAttr(item.word)}</h3>
+      <p>${state.showWord ? "Đọc to từ này." : "Nhìn hình và đọc từ."}</p>`;
+  }
+  return `<div class="alphabet-single-icon">${item.icon}</div>
+    ${state.section === "alphabet_missing" ? `<h3 class="alphabet-single-missing">${escAttr(item.prompt)}</h3>` : "<h3>Chọn chữ cái đầu tiên</h3>"}
+    ${state.statuses[state.index] === "correct" ? `<div class="alphabet-single-reveal">${escAttr(item.word)}</div>` : ""}`;
+}
+
+function renderAlphabetSingleInteraction(state, item){
+  if(state.mode === "choice"){
+    return `<div class="alphabet-single-choices">${item.options.map(choice=>`
+      <button type="button" class="${state.wrongChoice === choice ? "wrong" : ""}" onclick="_alphabetSingleChoose('${state.section}','${choice}')">${choice}</button>`).join("")}</div>`;
+  }
+  if(state.mode === "read"){
+    return `<button type="button" class="alphabet-primary-button" onclick="_alphabetSingleMarkRead('${state.section}')">Em đã đọc</button>`;
+  }
+  if(state.mode === "readWord"){
+    return `<div class="alphabet-single-inline-actions">
+      <button type="button" class="alphabet-secondary-button" onclick="_alphabetSingleShowWord('${state.section}')">Hiện từ</button>
+      <button type="button" class="alphabet-primary-button" onclick="_alphabetSingleMarkRead('${state.section}')">Em đã đọc</button>
+    </div>`;
+  }
+  const answerSlots = item.word.split("").map((_, index)=>`<button type="button" onclick="_alphabetSingleRemoveLetter('${state.section}',${index})">${state.selectedLetters[index] || "_"}</button>`).join("");
+  return `<div class="alphabet-single-slots">${answerSlots}</div>
+    <div class="alphabet-single-letter-bank">${item.choices.map((letter, index)=>`
+      <button type="button" ${state.selectedChoiceIndexes.includes(index) ? "disabled" : ""} onclick="_alphabetSingleAddLetter('${state.section}',${index})">${letter}</button>`).join("")}</div>
+    <div class="alphabet-single-inline-actions">
+      <button type="button" class="alphabet-primary-button" onclick="_alphabetSingleCheckSplit('${state.section}')">Kiểm tra</button>
+      <button type="button" class="alphabet-secondary-button" onclick="_alphabetSingleReveal('${state.section}')">Hiện đáp án</button>
+    </div>`;
+}
+
+function renderAlphabetSingleFeedback(state, item){
+  if(state.feedback === "correct") return `Đúng rồi! ${state.mode === "choice" && item.word ? `<b>${escAttr(item.word)}</b>` : ""}`;
+  if(state.feedback === "wrong") return "Chọn lại nhé";
+  if(state.feedback === "read") return "Đã đánh dấu em đã đọc.";
+  if(state.feedback === "revealed") return `Đáp án: ${escAttr(item.word.toUpperCase().split("").join(" - "))}`;
+  return "";
+}
+
+function renderAlphabetSingleNextButton(state, complete){
+  const canNext = state.statuses[state.index] === "correct" || state.revealed;
+  if(!canNext) return "";
+  if(complete || state.index === state.items.length - 1){
+    return `<button type="button" class="alphabet-primary-button" onclick="_alphabetSingleRestart('${state.section}')">Chơi lại</button>`;
+  }
+  return `<button type="button" class="alphabet-primary-button" onclick="_alphabetSingleNext('${state.section}')">${state.noun} tiếp theo</button>`;
+}
+
+function _alphabetSingleRender(section){
+  const host = document.querySelector(`.alphabet-single-host[data-game="${section}"]`);
+  const state = alphabetSingleGameStates.get(section);
+  if(host && state) host.innerHTML = renderAlphabetSingleGameShell(state);
+}
+
+function _alphabetSingleScheduleAudio(section){
+  if(section === "alphabet_listen_choose" && document.querySelector(`.alphabet-single-host[data-game="${section}"]`)){
+    _alphabetSingleSpeak(section);
+  }
+}
+
+function playEnglishAudio(text, options={}){
+  stopCurrentSpeech();
+  speakEnglish(text, { lang: "en-US", rate: options.rate ?? 0.9, pitch: 1, isWord: true, ...options });
+}
+
+function _alphabetSingleSpeak(section){
+  const state = alphabetSingleGameStates.get(section);
+  const item = state?.items[state.index];
+  if(item?.audio) playEnglishAudio(item.audio);
+}
+
+function _alphabetSingleChoose(section, choice){
+  const state = alphabetSingleGameStates.get(section);
+  const item = state?.items[state.index];
+  if(!item || state.statuses[state.index] === "correct") return;
+  if(choice === item.answer){
+    state.statuses[state.index] = "correct";
+    state.score += 1;
+    state.feedback = "correct";
+    state.wrongChoice = "";
+    playCorrect();
+  }else{
+    state.statuses[state.index] = "wrong";
+    state.feedback = "wrong";
+    state.wrongChoice = choice;
+    playWrong();
+  }
+  _alphabetSingleRender(section);
+}
+
+function _alphabetSingleMarkRead(section){
+  const state = alphabetSingleGameStates.get(section);
+  if(!state) return;
+  state.statuses[state.index] = "correct";
+  state.feedback = "read";
+  _alphabetSingleRender(section);
+}
+
+function _alphabetSingleShowWord(section){
+  const state = alphabetSingleGameStates.get(section);
+  if(!state) return;
+  state.showWord = true;
+  _alphabetSingleRender(section);
+}
+
+function _alphabetSingleAddLetter(section, choiceIndex){
+  const state = alphabetSingleGameStates.get(section);
+  const item = state?.items[state.index];
+  if(!item || state.selectedLetters.length >= item.word.length) return;
+  state.selectedLetters.push(item.choices[choiceIndex]);
+  state.selectedChoiceIndexes.push(choiceIndex);
+  state.feedback = "";
+  _alphabetSingleRender(section);
+}
+
+function _alphabetSingleRemoveLetter(section, index){
+  const state = alphabetSingleGameStates.get(section);
+  if(!state || index >= state.selectedLetters.length) return;
+  state.selectedLetters.splice(index, 1);
+  state.selectedChoiceIndexes.splice(index, 1);
+  state.feedback = "";
+  _alphabetSingleRender(section);
+}
+
+function _alphabetSingleCheckSplit(section){
+  const state = alphabetSingleGameStates.get(section);
+  const item = state?.items[state.index];
+  if(!item) return;
+  const correct = state.selectedLetters.join("") === item.word.toUpperCase();
+  state.statuses[state.index] = correct ? "correct" : "wrong";
+  state.feedback = correct ? "correct" : "wrong";
+  if(correct) playCorrect(); else playWrong();
+  _alphabetSingleRender(section);
+}
+
+function _alphabetSingleReveal(section){
+  const state = alphabetSingleGameStates.get(section);
+  const item = state?.items[state.index];
+  if(!item) return;
+  state.selectedLetters = item.word.toUpperCase().split("");
+  state.selectedChoiceIndexes = item.choices.map((_, index)=>index);
+  state.revealed = true;
+  state.feedback = "revealed";
+  _alphabetSingleRender(section);
+}
+
+function _alphabetSingleNext(section){
+  const state = alphabetSingleGameStates.get(section);
+  if(!state || state.index >= state.items.length - 1) return;
+  state.index += 1;
+  state.feedback = "";
+  state.wrongChoice = "";
+  state.selectedLetters = [];
+  state.selectedChoiceIndexes = [];
+  state.revealed = false;
+  state.showWord = false;
+  _alphabetSingleRender(section);
+  setTimeout(()=>_alphabetSingleScheduleAudio(section), 350);
+}
+
+function _alphabetSingleRestart(section){
+  const lesson = LESSONS.find(item=>item.id === STATE.lessonId);
+  const state = createAlphabetSingleGameState(section, lesson?.alphabetFoundation || {});
+  alphabetSingleGameStates.set(section, state);
+  _alphabetSingleRender(section);
+  setTimeout(()=>_alphabetSingleScheduleAudio(section), 420);
 }
 
 function renderAlphabetWordGame(word, letters=[]){
@@ -7332,6 +7568,9 @@ Object.assign(window, {
   _alphabetBuildName, _alphabetSpeakName, _alphabetResetName, _alphabetVideoError,
   _vowel2SentencePlay, _vowel2SentenceRead, _vowel2SentenceReveal, _vowel2SentenceMark,
   _vowel2SentenceNext, _vowel2SentenceRetry, _vowel2SentenceRestart,
+  playEnglishAudio, _alphabetSingleSpeak, _alphabetSingleChoose, _alphabetSingleMarkRead,
+  _alphabetSingleShowWord, _alphabetSingleAddLetter, _alphabetSingleRemoveLetter,
+  _alphabetSingleCheckSplit, _alphabetSingleReveal, _alphabetSingleNext, _alphabetSingleRestart,
   // Game interactive functions
   initQuizBomb, _pickQB,
   initThisOrThat, _pickTOT, _checkTOTBonus,
