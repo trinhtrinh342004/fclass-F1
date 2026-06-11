@@ -951,10 +951,8 @@ function renderAlphabetSection(lesson, section){
           <div id="alphabetNameLetters" class="alphabet-name-letters"></div>
         </div>`;
     case "alphabet_spell_words":
-      return `${header}<p class="alphabet-instruction">Nhìn từ và đọc từng chữ cái.</p>
-        <div class="alphabet-word-grid">${(alphabet.simpleWords || []).map(word=>`
-          <article class="alphabet-word-card"><strong>${escAttr(word)}</strong><span>${word.toUpperCase().split("").join(" - ")}</span>
-          <button onclick="speakById('${regTxt(word.toUpperCase().split("").join(" "))}')">Nghe từng chữ</button></article>`).join("")}</div>`;
+      return `${header}<p class="alphabet-instruction">Nhìn từ và chọn từng chữ cái theo đúng thứ tự.</p>
+        <div class="alphabet-word-grid">${(alphabet.simpleWords || []).map(renderAlphabetWordGame).join("")}</div>`;
     case "alphabet_starfall":
       return `${header}<p class="alphabet-instruction">Bấm để chơi game luyện bảng chữ cái.</p>
         <div class="alphabet-starfall-card">
@@ -988,6 +986,7 @@ function renderAlphabetGroup(letters){
 function renderAlphabetLetterCard(item){
   return `<article class="alphabet-letter-card">
     <div class="alphabet-letter-pair">${item.letter} <span>${item.lower}</span></div>
+    <div class="alphabet-pronunciation">${escAttr(item.pronunciation || "")}</div>
     <div class="alphabet-letter-icon">${item.icon}</div><strong>${escAttr(item.word)}</strong><p>${escAttr(item.reading)}</p>
     <div class="alphabet-card-actions">
       <button onclick="speakById('${regTxt(item.letter)}')">Nghe chữ cái</button>
@@ -995,6 +994,31 @@ function renderAlphabetLetterCard(item){
       <button onclick="speakById('${regTxt(item.reading)}')">Đọc theo</button>
     </div>
   </article>`;
+}
+
+function renderAlphabetWordGame(word){
+  const choices = getAlphabetWordChoices(word);
+  return `<article class="alphabet-word-card alphabet-word-game" data-word="${escAttr(word.toUpperCase())}">
+    <strong>${escAttr(word)}</strong>
+    <div class="alphabet-word-answer" aria-label="Các chữ cái đã chọn"></div>
+    <div class="alphabet-word-choices">${choices.map(letter=>`
+      <button onclick="_alphabetAddWordLetter(this, '${letter}')">${letter}</button>`).join("")}</div>
+    <div class="alphabet-word-actions">
+      <button onclick="speakById('${regTxt(word.toUpperCase().split("").join(" "))}')">Nghe từng chữ</button>
+      <button onclick="_alphabetCheckWord(this)">Kiểm tra</button>
+      <button onclick="_alphabetResetWord(this)">Làm lại</button>
+    </div>
+    <div class="alphabet-feedback" aria-live="polite"></div>
+  </article>`;
+}
+
+function getAlphabetWordChoices(word){
+  const letters = [...new Set(word.toUpperCase().split(""))];
+  for(const extra of "ABCDEFGHIJKLMNOPQRSTUVWXYZ"){
+    if(letters.length >= Math.max(6, new Set(word).size + 2)) break;
+    if(!letters.includes(extra)) letters.push(extra);
+  }
+  return letters;
 }
 
 function renderAlphabetChoiceRound(round, i, kind){
@@ -1037,6 +1061,32 @@ function _alphabetInstantCheck(button){
 
 function _alphabetNextRound(button){
   button.closest(".alphabet-game-card")?.nextElementSibling?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function _alphabetAddWordLetter(button, letter){
+  const game = button.closest(".alphabet-word-game");
+  const answer = game.querySelector(".alphabet-word-answer");
+  if(answer.children.length >= game.dataset.word.length) return;
+  answer.insertAdjacentHTML("beforeend", `<button onclick="_alphabetRemoveWordLetter(this)">${letter}</button>`);
+  game.querySelector(".alphabet-feedback").textContent = "";
+}
+
+function _alphabetRemoveWordLetter(button){
+  button.remove();
+}
+
+function _alphabetCheckWord(button){
+  const game = button.closest(".alphabet-word-game");
+  const chosen = [...game.querySelectorAll(".alphabet-word-answer button")].map(item=>item.textContent).join("");
+  const correct = chosen === game.dataset.word;
+  game.querySelector(".alphabet-feedback").textContent = correct ? "Đúng rồi!" : "Chưa đúng, thử lại nhé!";
+  if(correct) playCorrect(); else playWrong();
+}
+
+function _alphabetResetWord(button){
+  const game = button.closest(".alphabet-word-game");
+  game.querySelector(".alphabet-word-answer").innerHTML = "";
+  game.querySelector(".alphabet-feedback").textContent = "";
 }
 
 function _alphabetBuildName(){
@@ -6187,6 +6237,7 @@ Object.assign(window, {
   getBestEnglishVoice, speakEnglish, normalizeSpeechText, stopCurrentSpeech,
   _checkIpaChoice,
   _alphabetSelect, _alphabetCheck, _alphabetInstantCheck, _alphabetNextRound,
+  _alphabetAddWordLetter, _alphabetRemoveWordLetter, _alphabetCheckWord, _alphabetResetWord,
   _alphabetBuildName, _alphabetSpeakName, _alphabetResetName, _alphabetVideoError,
   // Game interactive functions
   initQuizBomb, _pickQB,

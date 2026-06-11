@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
 import { LESSONS } from "../src/features/lessons/lessonRegistry.js";
 import { COURSE_TOTAL_LESSONS, TUWI_34_CURRICULUM_MAP } from "../src/features/curriculum/curriculumMap.js";
 
@@ -65,6 +66,7 @@ check(lesson01?.track === "alphabet-foundation", "Lesson 1 must use the dedicate
 check(lesson01?.sectionFlow?.length === 15, "Lesson 1 Alphabet sidebar must have exactly 15 sections.");
 check(lesson01?.sectionFlow?.every((section) => section.startsWith("alphabet_")), "Lesson 1 must use dedicated alphabet sections.");
 check(lesson01?.alphabetFoundation?.letters?.length === 26, "Lesson 1 must have 26 alphabet letter cards.");
+check(lesson01?.alphabetFoundation?.letters?.every((item) => item.pronunciation && item.reading), "Lesson 1 letter cards must include pronunciation and reading text.");
 check(lesson01?.alphabetFoundation?.vowels?.length === 5, "Lesson 1 must have 5 vowel cards.");
 check(lesson01?.alphabetFoundation?.simpleWords?.length === 10, "Lesson 1 must have 10 simple spelling words.");
 check(arrayEquals(Object.values(lesson01?.sectionLabels || {}), [
@@ -84,6 +86,45 @@ check(arrayEquals(Object.values(lesson01?.sectionLabels || {}), [
   "Chơi game bảng chữ cái",
   "Video thư giãn cuối buổi",
 ]), "Lesson 1 sidebar labels must match the requested Vietnamese labels.");
+
+const mainSource = readFileSync(new URL("../src/main.js", import.meta.url), "utf8");
+const alphabetRenderer = mainSource.slice(
+  mainSource.indexOf("function renderAlphabetSection"),
+  mainSource.indexOf("function renderSpellingSection")
+);
+const forbiddenAlphabetUi = [
+  "Letter Cards",
+  "Vowel Letters",
+  "Listen & Choose",
+  "Uppercase / Lowercase",
+  "Letter + Icon",
+  "Missing Letter",
+  "Spell My Name",
+  "Spell Simple Words",
+  "Starfall Game",
+  "Chill Time",
+  "Play letter",
+  "Play word",
+  "Repeat",
+  "Open Alphabet Game",
+  "Upload alphabet",
+];
+check(
+  forbiddenAlphabetUi.every((label) => !alphabetRenderer.includes(label)),
+  "Lesson 1 renderer must not contain forbidden English UI labels."
+);
+check([
+  "Nghe chữ cái",
+  "Nghe từ vựng",
+  "Đọc theo",
+  "Nghe lại",
+  "Kiểm tra",
+  "Câu tiếp theo",
+  "Tạo chữ cái",
+  "Nghe từng chữ",
+  "Làm lại",
+  "Mở game bảng chữ cái",
+].every((label) => alphabetRenderer.includes(label)), "Lesson 1 renderer must contain the requested Vietnamese controls.");
 
 const lesson02 = lessonById(2);
 check(lesson02?.slug === "spelling-letter-sounds", "Lesson 2 must route to Spelling & Letter Sounds.");
