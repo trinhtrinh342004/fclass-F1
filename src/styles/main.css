@@ -3669,3 +3669,85 @@ body.admin-active > .topbar{
 @media(max-width:900px){.vowel2-two-groups{grid-template-columns:1fr}.vowel2-mouth-grid,.vowel2-record-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:620px){.vowel2-sound-hero,.vowel2-mouth-grid,.vowel2-record-grid{grid-template-columns:1fr 1fr}.vowel2-sound-intro{grid-template-columns:1fr}.vowel2-comparison article{padding:14px 8px;gap:7px}.vowel2-comparison article button{font-size:11px;padding:7px}.vowel2-listen-pair{position:static;grid-column:1/-1}.vowel2-sentences article{grid-template-columns:auto 1fr}.vowel2-sentences button{grid-column:2}.vowel2-tab-buttons{grid-template-columns:1fr}.vowel2-game-sounds{grid-template-columns:repeat(2,1fr)}}
 
+/* === VOWEL2 SPEAKER BUTTONS === */
+.vowel2-speaker-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--navy) !important;
+  color: #fff !important;
+  border: none !important;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #0f1d4c !important;
+  transition: all 0.15s ease-in-out;
+  padding: 0 !important;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.vowel2-speaker-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #0f1d4c !important;
+  background: var(--navy-2) !important;
+}
+.vowel2-speaker-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #0f1d4c !important;
+}
+.vowel2-speaker-btn-sm {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  box-shadow: 0 3px 0 #0f1d4c !important;
+}
+.vowel2-speaker-btn-sm:hover {
+  box-shadow: 0 4px 0 #0f1d4c !important;
+}
+.vowel2-speaker-btn-sm:active {
+  box-shadow: 0 1px 0 #0f1d4c !important;
+}
+
+/* Playing / Loading states */
+.vowel2-speaker-btn.playing {
+  background: #22c55e !important;
+  color: #fff !important;
+  box-shadow: 0 4px 0 #15803d !important;
+}
+.vowel2-speaker-btn.playing:hover {
+  background: #16a34a !important;
+  box-shadow: 0 6px 0 #15803d !important;
+}
+.vowel2-speaker-btn.playing:active {
+  box-shadow: 0 2px 0 #15803d !important;
+}
+.vowel2-speaker-btn.loading {
+  background: var(--yellow-2) !important;
+  color: var(--navy) !important;
+  box-shadow: 0 4px 0 #b45309 !important;
+  opacity: 0.8;
+  animation: pulse 1s infinite alternate;
+}
+
+/* Sound wave animations */
+.vowel2-speaker-btn .sound-wave {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+.vowel2-speaker-btn:hover .sound-wave {
+  opacity: 1;
+}
+.vowel2-speaker-btn.playing .sound-wave-1 {
+  animation: vowel2WavePulse 0.6s infinite alternate;
+}
+.vowel2-speaker-btn.playing .sound-wave-2 {
+  animation: vowel2WavePulse 0.6s infinite alternate 0.2s;
+}
+
+@keyframes vowel2WavePulse {
+  0% { opacity: 0.2; }
+  100% { opacity: 1; }
+}
+
+

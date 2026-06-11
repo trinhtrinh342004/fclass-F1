@@ -1377,6 +1377,12 @@ window._speakLesson2Name = function(){
   speak(String(output?.textContent || "L-A-N").replaceAll("-", " "), 0.8);
 };
 
+const SPEAKER_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="speaker-icon">
+  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+  <path d="M15.54 8.46a5 5 0 0 1 0 7.07" class="sound-wave sound-wave-1"></path>
+  <path d="M19.07 4.93a10 10 0 0 1 0 14.14" class="sound-wave sound-wave-2"></path>
+</svg>`;
+
 function renderVowel2Section(lesson, section){
   const data = lesson.vowelLesson;
   const header = renderVowel2Header(lesson, section);
@@ -1429,7 +1435,7 @@ function renderVowel2Section(lesson, section){
     case "vowel2_mouth_grid":
       return `${header}<div class="vowel2-mouth-grid">${data.wordGroups.map(group=>`
         <article><b>${escAttr(group.symbol)}</b>${renderVowel2MouthSvg(group.mouth)}<p>${escAttr(group.guide)}</p>
-        <button onclick="speakById('${regTxt(group.words[0].word)}')">Nghe mẫu</button></article>`).join("")}</div>`;
+        <button class="vowel2-speaker-btn" onclick="speakById('${regTxt(group.words[0].word)}')" title="Nghe âm mẫu" aria-label="Nghe âm mẫu">${SPEAKER_ICON_SVG}</button></article>`).join("")}</div>`;
     case "vowel2_word_practice":
       return `${header}<div class="vowel2-practice-groups">${data.wordGroups.map((group, groupIndex)=>`
         <article><header><b>${escAttr(group.symbol)}</b><span>${escAttr(group.label)}</span>
@@ -1462,7 +1468,7 @@ function renderVowel2Header(lesson, section){
 function renderVowel2SoundGroup(group, offset){
   return `<section class="vowel2-sound-group">
     <div class="vowel2-sound-intro"><div><b>${escAttr(group.symbol)}</b><span>${escAttr(group.label)}</span>
-      <p>${escAttr(group.guide)}</p><button onclick="speakById('${regTxt(group.words[0].word)}')">Nghe âm mẫu</button></div>
+      <p>${escAttr(group.guide)}</p><button class="vowel2-speaker-btn" onclick="speakById('${regTxt(group.words[0].word)}')" title="Nghe âm mẫu" aria-label="Nghe âm mẫu">${SPEAKER_ICON_SVG}</button></div>
       ${renderVowel2MouthSvg(group.mouth)}</div>
     <div class="vowel2-word-grid">${group.words.map((word,index)=>renderVowel2WordCard(word, offset + index)).join("")}</div>
   </section>`;
@@ -1471,7 +1477,7 @@ function renderVowel2SoundGroup(group, offset){
 function renderVowel2WordCard(item, id){
   return `<article class="vowel2-word-card"><span>${escAttr(item.icon)}</span>
     <b>${highlightWord(item.word, item.focus)}</b><small>${escAttr(item.ipa)}</small><p>${escAttr(item.meaning)}</p>
-    <div><button onclick="speakById('${regTxt(item.word)}')">Nghe</button>
+    <div><button class="vowel2-speaker-btn vowel2-speaker-btn-sm" onclick="speakById('${regTxt(item.word)}')" title="Nghe âm mẫu" aria-label="Nghe âm mẫu">${SPEAKER_ICON_SVG}</button>
     <button id="mic-${id}" onclick="recordById(${id}, '${regTxt(item.word)}')">Đọc</button></div>
     <div id="speakRes-${id}" class="dlg-result" style="display:none"></div></article>`;
 }
@@ -1481,11 +1487,11 @@ function renderVowel2Comparison(pairs, leftSymbol, rightSymbol, tip){
     <div class="vowel2-comparison-head"><b>${escAttr(leftSymbol)}</b><i>≠</i><b>${escAttr(rightSymbol)}</b></div>
     ${pairs.map(pair=>`<article>
       <div><b>${highlightWord(pair.left, pair.leftFocus)}</b><span>${escAttr(pair.leftIpa)}</span><small>(${escAttr(pair.leftMeaning)})</small>
-        <button onclick="speakById('${regTxt(pair.left)}')">Nghe bên trái</button></div>
+        <button class="vowel2-speaker-btn vowel2-speaker-btn-sm" onclick="speakById('${regTxt(pair.left)}')" title="Nghe bên trái" aria-label="Nghe bên trái">${SPEAKER_ICON_SVG}</button></div>
       <i>≠</i>
       <div><b>${highlightWord(pair.right, pair.rightFocus)}</b><span>${escAttr(pair.rightIpa)}</span><small>(${escAttr(pair.rightMeaning)})</small>
-        <button onclick="speakById('${regTxt(pair.right)}')">Nghe bên phải</button></div>
-      <button class="vowel2-listen-pair" onclick="speakById('${regTxt(`${pair.left}. ${pair.right}`)}')">Nghe cả cặp</button>
+        <button class="vowel2-speaker-btn vowel2-speaker-btn-sm" onclick="speakById('${regTxt(pair.right)}')" title="Nghe bên phải" aria-label="Nghe bên phải">${SPEAKER_ICON_SVG}</button></div>
+      <button class="vowel2-listen-pair" onclick="speakById('${regTxt(`${pair.left}. ${pair.right}`)}')">${SPEAKER_ICON_SVG} Nghe cả cặp</button>
     </article>`).join("")}
     <div class="vowel2-teacher-tip">${escAttr(tip)}</div>
   </div>`;
@@ -1559,7 +1565,7 @@ function renderVowel2Recording(words){
   return `<div class="vowel2-recording"><h3>Ghi âm AI / Giáo viên chấm</h3>
     <p>Nghe mẫu, bấm ghi âm và nghe lại. AI feedback sẽ được bật sau; hiện tại giáo viên có thể chấm trực tiếp.</p>
     <div class="vowel2-record-grid">${words.map((word,index)=>`
-      <article><b>${escAttr(word)}</b><button onclick="speakById('${regTxt(word)}')">Nghe mẫu</button>
+      <article><b>${escAttr(word)}</b><button class="vowel2-speaker-btn vowel2-speaker-btn-sm" onclick="speakById('${regTxt(word)}')" title="Nghe âm mẫu" aria-label="Nghe âm mẫu">${SPEAKER_ICON_SVG}</button>
       <button id="mic-vowel2record${index}" onclick="recordById('vowel2record${index}', '${regTxt(word)}')">Bấm ghi âm</button>
       <span>Giáo viên chấm</span><div id="speakRes-vowel2record${index}" class="dlg-result" style="display:none"></div></article>`).join("")}</div>
   </div>`;
