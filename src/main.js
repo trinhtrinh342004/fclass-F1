@@ -2677,46 +2677,82 @@ function renderVowel2SentenceGame(sentences){
     vowel2SentenceGameState = createVowel2SentenceGameState(sentences);
   }
   const state = vowel2SentenceGameState;
-  if (!state.items.length) return `<div class="vowel2-sentence-game"><p>Chưa có dữ liệu câu luyện đọc.</p></div>`;
-  if (state.completed) return renderVowel2SentenceSummary(state);
+  if (!state.items.length) {
+    return `<div class="vowel2-sentence-game"><p>Chưa có dữ liệu câu luyện đọc.</p></div>`;
+  }
+  if (state.completed) {
+    return renderVowel2SentenceSummary(state);
+  }
 
   const item = state.items[state.index];
   const status = state.statuses[state.index];
-  const canContinue = status !== "idle";
-  return `<section class="vowel2-sentence-game ${vowel2SentenceGameSource === "advancedTrapSentences" ? "is-advanced" : ""} ${status === "good" ? "is-good" : status === "practice" ? "is-practice" : ""}">
-    <div class="vowel2-sentence-meta">
-      <strong>Câu ${state.index + 1}/${state.items.length}</strong>
-      <span>${state.hasRead ? "Học sinh đã đọc" : "Nghe mẫu rồi đọc to"}</span>
-    </div>
-    <div class="vowel2-sentence-dots" aria-label="Trạng thái các câu">
-      ${state.statuses.map((dotStatus, index)=>`<span class="${dotStatus} ${index === state.index ? "current" : ""}" title="Câu ${index + 1}: ${dotStatus === "good" ? "Đọc tốt" : dotStatus === "practice" ? "Cần luyện lại" : "Chưa làm"}"></span>`).join("")}
-    </div>
-    <article class="vowel2-sentence-card">
-      <p class="vowel2-sentence-text">${highlightSentence(item.sentence, item.highlightWords)}</p>
-      <div class="vowel2-sentence-actions">
-        <button class="vowel2-sentence-listen" onclick="_vowel2SentencePlay()">${SPEAKER_ICON_SVG} Nghe mẫu</button>
-        <button class="vowel2-sentence-read ${state.hasRead ? "active" : ""}" onclick="_vowel2SentenceRead()">Em đã đọc</button>
-        <button class="vowel2-sentence-trap-toggle" onclick="_vowel2SentenceReveal()">${state.revealedTrap ? "Ẩn bẫy âm" : "Hiện bẫy âm"}</button>
+  const total = state.items.length;
+  const progressPercent = Math.round(((state.index) / total) * 100);
+
+  const showScoring = state.hasRead || state.revealedTrap || status !== "idle";
+  const showNext = status !== "idle";
+
+  const highlightedSentence = highlightSentence(item.sentence, item.highlightWords);
+
+  return `
+    <div class="vowel2-sentence-game-wrapper" style="width: min(100%, 820px); margin-inline: auto;">
+      <div class="vowel2-sentence-meta" style="display: flex; justify-content: space-between; align-items: center; color: var(--navy); font-weight: 800;">
+        <strong>Câu ${state.index + 1}/${total}</strong>
       </div>
-      ${state.revealedTrap ? renderVowel2SentenceTraps(item.trap) : ""}
-      <div class="vowel2-sentence-marking" aria-label="Giáo viên chấm nhanh">
-        <span>Giáo viên chấm:</span>
-        <button class="good ${status === "good" ? "selected" : ""}" onclick="_vowel2SentenceMark('good')">Đọc tốt</button>
-        <button class="practice ${status === "practice" ? "selected" : ""}" onclick="_vowel2SentenceMark('practice')">Cần luyện lại</button>
+      
+      <div class="compact-progress-container">
+        <div class="compact-progress-fill" style="width: ${progressPercent}%;"></div>
       </div>
-      <button class="vowel2-sentence-next" onclick="_vowel2SentenceNext()" ${canContinue ? "" : "disabled"}>
-        ${state.index === state.items.length - 1 ? "Xem tổng kết" : "Câu tiếp theo"}
-      </button>
-    </article>
-  </section>`;
+
+      <div class="lesson2-compact-card">
+        <p class="vowel2-sentence-text" style="font-size: clamp(28px, 4.5vw, 48px); margin: 24px 0;">${highlightedSentence}</p>
+        
+        <div class="lesson2-button-row">
+          <button class="lesson2-btn lesson2-btn-orange" onclick="_vowel2SentencePlay()">
+            ${SPEAKER_ICON_SVG} Nghe mẫu
+          </button>
+          <button class="lesson2-btn lesson2-btn-navy ${state.hasRead ? "active" : ""}" onclick="_vowel2SentenceRead()">
+            Em đã đọc
+          </button>
+          <button class="lesson2-btn lesson2-btn-gray" onclick="_vowel2SentenceReveal()">
+            ${state.revealedTrap ? "Ẩn bẫy âm" : "Hiện bẫy âm"}
+          </button>
+        </div>
+
+        ${state.revealedTrap ? renderVowel2SentenceTraps(item.trap) : ""}
+
+        ${showScoring ? `
+          <div class="vowel2-sentence-marking" style="margin-top: 20px; border-top: 1px solid #eadfce; padding-top: 16px;">
+            <span style="display: block; margin-bottom: 10px; font-size: 13px; font-weight: 800; color: var(--ink-mute); text-transform: uppercase;">Giáo viên chấm nhanh:</span>
+            <div class="lesson2-button-row">
+              <button class="lesson2-btn lesson2-btn-green ${status === "good" ? "selected" : ""}" onclick="_vowel2SentenceMark('good')" style="min-width: 120px;">
+                Đọc tốt
+              </button>
+              <button class="lesson2-btn lesson2-btn-red ${status === "practice" ? "selected" : ""}" onclick="_vowel2SentenceMark('practice')" style="min-width: 120px;">
+                Cần luyện lại
+              </button>
+            </div>
+          </div>
+        ` : ""}
+
+        ${showNext ? `
+          <div class="lesson2-button-row" style="margin-top: 20px;">
+            <button class="lesson2-btn lesson2-btn-navy" onclick="_vowel2SentenceNext()" style="min-width: 180px; font-size: 16px; padding: 12px 24px;">
+              ${state.index === total - 1 ? "Xem tổng kết" : "Câu tiếp theo"}
+            </button>
+          </div>
+        ` : ""}
+      </div>
+    </div>
+  `;
 }
 
 function renderVowel2SentenceTraps(traps){
-  return `<div class="vowel2-sentence-traps">
-    ${traps.map(trap=>`<article>
-      <strong>${escAttr(trap.word)}</strong>
-      <span>${escAttr(trap.ipa)}</span>
-      <small>${escAttr(trap.confusion)}</small>
+  return `<div class="vowel2-sentence-traps" style="margin-top: 20px; text-align: center;">
+    ${traps.map(trap=>`<article style="display: inline-flex; align-items: center; gap: 8px; background: #fff7df; border: 1.5px solid #f2dec0; border-radius: 10px; padding: 6px 12px; margin: 4px;">
+      <strong style="color: #f97316;">${escAttr(trap.word)}</strong>
+      <span style="font-weight: 700; color: var(--navy);">${escAttr(trap.ipa)}</span>
+      <span style="font-size: 12px; color: var(--ink-mute);">(${escAttr(trap.confusion)})</span>
     </article>`).join("")}
   </div>`;
 }
@@ -2724,18 +2760,33 @@ function renderVowel2SentenceTraps(traps){
 function renderVowel2SentenceSummary(state){
   const goodCount = state.statuses.filter(status=>status === "good").length;
   const practiceCount = state.statuses.filter(status=>status === "practice").length;
-  return `<section class="vowel2-sentence-summary">
-    <span class="vowel2-sentence-summary-icon">✓</span>
-    <h3>Hoàn thành ${state.items.length} câu</h3>
-    <div class="vowel2-sentence-summary-counts">
-      <article><strong>${goodCount}</strong><span>Đọc tốt</span></article>
-      <article><strong>${practiceCount}</strong><span>Cần luyện lại</span></article>
+  return `
+    <div class="vowel2-sentence-summary lesson2-compact-card" style="max-width: 600px; margin: 0 auto; padding: 40px 24px;">
+      <div style="font-size: 64px; margin-bottom: 16px;">🏆</div>
+      <h3 style="color: var(--navy); font-size: 28px; margin-bottom: 8px;">Hoàn thành Câu bẫy nâng cao</h3>
+      <p style="color: var(--ink-mute); font-weight: 600; margin-bottom: 24px;">Tuyệt vời! Bạn đã hoàn thành tất cả ${state.items.length} câu.</p>
+      
+      <div style="display: flex; gap: 16px; justify-content: center; margin-bottom: 32px; width: 100%;">
+        <div style="flex: 1; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 16px; padding: 16px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 900; color: #065f46;">${goodCount}</div>
+          <div style="font-size: 13px; font-weight: 700; color: #047857;">Đọc tốt</div>
+        </div>
+        <div style="flex: 1; background: #fff7ed; border: 1px solid #ffedd5; border-radius: 16px; padding: 16px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 900; color: #c2410c;">${practiceCount}</div>
+          <div style="font-size: 13px; font-weight: 700; color: #9a3412;">Cần luyện lại</div>
+        </div>
+      </div>
+      
+      <div class="lesson2-button-row">
+        <button class="lesson2-btn lesson2-btn-orange" onclick="_vowel2SentenceRetry()" ${practiceCount ? "" : "disabled"}>
+          Luyện lại câu sai
+        </button>
+        <button class="lesson2-btn lesson2-btn-navy" onclick="_vowel2SentenceRestart()">
+          Chơi lại từ đầu
+        </button>
+      </div>
     </div>
-    <div class="vowel2-sentence-summary-actions">
-      <button class="practice" onclick="_vowel2SentenceRetry()" ${practiceCount ? "" : "disabled"}>Luyện lại câu cần sai</button>
-      <button class="restart" onclick="_vowel2SentenceRestart()">Chơi lại</button>
-    </div>
-  </section>`;
+  `;
 }
 
 function renderVowel2SentenceGameHost(){
@@ -2798,12 +2849,21 @@ function _vowel2SentenceRestart(){
   renderVowel2SentenceGameHost();
 }
 
+const SOUND_TO_SECTION_INDEX = {
+  "/iː/": 1,
+  "/ɪ/": 2,
+  "/e/": 4,
+  "/æ/": 5,
+  "/ə/": 7,
+  "/ʌ/": 8
+};
+
 function renderVowel2FinalTabs(lesson){
   const data = lesson.vowelLesson;
   return `<div class="vowel2-tabs">
     <div class="vowel2-tab-buttons">
       <button data-vowel2-tab="game" onclick="showVowel2Tab('game')">1. Game</button>
-      <button data-vowel2-tab="record" onclick="showVowel2Tab('record')">2. Ghi âm</button>
+      <button data-vowel2-tab="record" onclick="showVowel2Tab('record')">2. Ghi âm phát âm</button>
       <button data-vowel2-tab="test" onclick="showVowel2Tab('test')">3. Mini test</button>
     </div>
     <section id="vowel2Tab-game" class="vowel2-tab-panel"><div id="vowel2GameHost">${renderVowel2ListenGame(data)}</div></section>
@@ -2815,38 +2875,98 @@ function renderVowel2FinalTabs(lesson){
 function renderVowel2ListenGame(data){
   const state = vowel2GameState;
   if (!state) return "";
-  if (state.completed) return renderVowel2GameSummary();
+  const rounds = data.listenGame;
+  const total = rounds.length;
 
-  const round = state.items[state.index];
-  const status = state.statuses[state.index];
-  const feedback = state.feedback
-    ? `<div class="vowel2-step-feedback ${state.answered ? "success" : "warning"}">${escAttr(state.feedback)}</div>`
-    : `<div class="vowel2-step-feedback neutral">Từ cần nghe đang được ẩn. Giáo viên có thể hiện từ sau khi học sinh trả lời đúng.</div>`;
-  const body = `
-    <p class="vowel2-step-instruction">Nghe từ mẫu, sau đó chọn âm đúng.</p>
-    <button class="vowel2-audio-orb" onclick="_vowel2PlayGameWord()" aria-label="Nghe từ">${SPEAKER_ICON_SVG}<span>Nghe từ</span></button>
-    ${state.answered ? `<div class="vowel2-revealed-word">Từ vừa nghe: <strong>${escAttr(round.word)}</strong></div>` : ""}
-    <div class="vowel2-answer-grid vowel2-sound-options">
-      ${data.sounds.map(sound => {
-        const isCorrect = state.answered && sound === round.answer;
-        const isWrong = state.wrongChoices.has(sound);
-        return `<button class="${isCorrect ? "correct" : isWrong ? "wrong" : ""}" onclick="_vowel2ChooseSound(this, '${escAttr(sound)}')" ${state.answered ? "disabled" : ""}>${escAttr(sound)}</button>`;
-      }).join("")}
-    </div>`;
+  if (state.completed || state.index >= total) {
+    const wrongSounds = Array.from(state.wrongChoices);
+    return `
+      <div class="vowel2-game-summary lesson2-compact-card" style="max-width: 500px; margin: 0 auto; padding: 32px 20px; text-align: center;">
+        <div style="font-size: 52px; margin-bottom: 12px;">🎉</div>
+        <h3 style="color: var(--navy); font-size: 24px; margin-bottom: 8px;">Kết thúc Trò chơi</h3>
+        <p style="font-size: 20px; font-weight: 800; color: var(--navy); margin-bottom: 16px;">
+          Điểm của bạn: <span style="color: var(--green); font-size: 28px;">${state.score}/${total}</span>
+        </p>
 
-  return renderSingleStepQuizShell({
-    title: "Nghe và chọn âm",
-    currentIndex: state.index,
-    total: state.items.length,
-    scoreLabel: `Điểm: ${state.score}`,
-    statusList: state.statuses,
-    status,
-    body,
-    feedback,
-    nextLabel: state.index === state.items.length - 1 ? "Xem tổng kết" : "Câu tiếp theo",
-    nextDisabled: !state.answered,
-    onNext: "_vowel2NextGameQuestion()",
-  });
+        ${wrongSounds.length ? `
+          <div style="background: #fff7ed; border: 1px solid #ffedd5; border-radius: 12px; padding: 14px; margin-bottom: 24px; text-align: left;">
+            <b style="color: #c2410c; display: block; margin-bottom: 8px;">Âm cần luyện lại:</b>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              ${wrongSounds.map(sound => `
+                <button class="lesson2-btn lesson2-btn-gray" style="padding: 6px 12px; font-size: 14px;" onclick="jumpTo(${SOUND_TO_SECTION_INDEX[sound] || 0})">
+                  ${escAttr(sound)} ↗
+                </button>
+              `).join("")}
+            </div>
+          </div>
+        ` : `<div class="lesson2-feedback-box lesson2-feedback-green">Tuyệt vời! Bạn không sai âm nào.</div>`}
+
+        <button class="lesson2-btn lesson2-btn-navy" onclick="_vowel2RestartGame()" style="min-width: 140px;">
+          Chơi lại
+        </button>
+      </div>
+    `;
+  }
+
+  const round = rounds[state.index];
+  const progressPercent = Math.round((state.index / total) * 100);
+
+  let feedbackHtml = "";
+  if (state.answered) {
+    feedbackHtml = `<div class="lesson2-feedback-box lesson2-feedback-green">Đúng rồi! "${round.word}" có âm ${round.answer}</div>`;
+  } else if (state.wrongChoices.size > 0) {
+    feedbackHtml = `<div class="lesson2-feedback-box lesson2-feedback-orange">Chưa đúng, nghe lại và chọn lại nhé!</div>`;
+  }
+
+  return `
+    <div class="vowel2-game-panel" style="width: min(100%, 720px); margin-inline: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; color: var(--navy); font-weight: 800; font-size: 15px;">
+        <span>Câu ${state.index + 1}/${total}</span>
+        <span>Điểm: ${state.score}</span>
+      </div>
+
+      <div class="compact-progress-container">
+        <div class="compact-progress-fill" style="width: ${progressPercent}%;"></div>
+      </div>
+
+      <div class="lesson2-compact-card">
+        <h3 style="color: var(--navy); font-size: 22px; margin-bottom: 16px;">Nghe và chọn âm</h3>
+        
+        <div style="margin: 24px 0;">
+          <button class="lesson2-btn lesson2-btn-orange" onclick="_vowel2PlayGameWord()" style="width: 100px; height: 100px; border-radius: 50%; font-size: 16px; flex-direction: column; gap: 4px; box-shadow: 0 8px 16px rgba(249,115,22,0.2);">
+            ${SPEAKER_ICON_SVG} Nghe từ
+          </button>
+        </div>
+
+        <div class="vowel2-game-sounds" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+          ${data.sounds.map(sound => {
+            let btnClass = "lesson2-btn-gray";
+            let disabled = state.answered ? "disabled" : "";
+            
+            if (state.answered && sound === round.answer) {
+              btnClass = "lesson2-btn-green";
+            } else if (state.wrongChoices.has(sound)) {
+              btnClass = "lesson2-btn-red";
+              disabled = "disabled";
+            }
+            return `<button class="lesson2-btn ${btnClass}" ${disabled} onclick="_vowel2ChooseSound(this, '${regTxt(sound)}')">
+              ${escAttr(sound)}
+            </button>`;
+          }).join("")}
+        </div>
+
+        <div id="vowel2GameFeedbackHost">${feedbackHtml}</div>
+
+        ${state.answered ? `
+          <div class="lesson2-button-row" style="margin-top: 16px;">
+            <button class="lesson2-btn lesson2-btn-navy" onclick="_vowel2NextGameQuestion()" style="min-width: 160px;">
+              Câu tiếp theo
+            </button>
+          </div>
+        ` : ""}
+      </div>
+    </div>
+  `;
 }
 
 function renderVowel2Recording(words){
@@ -2858,44 +2978,117 @@ function renderVowel2Recording(words){
   const teacherStatus = state.statuses[state.index];
   const isRecording = state.recordingState === "recording";
   const hasRecording = Boolean(state.recordings[state.index]);
+  const total = state.items.length;
+  const progressPercent = Math.round((state.index / total) * 100);
+
+  const aiResult = state.aiScores[state.index];
+  const hasAiScored = aiResult && aiResult.score !== undefined;
+  const isScored = teacherStatus !== "idle" || hasAiScored;
+
+  let actionButtons = "";
+  if (isRecording) {
+    actionButtons = `
+      <button class="lesson2-btn lesson2-btn-red" onclick="_vowel2StopRecording()">
+        ⏹ Dừng ghi âm
+      </button>
+    `;
+  } else if (isScored) {
+    actionButtons = `
+      <button class="lesson2-btn lesson2-btn-orange" onclick="_vowel2PlayRecording()">
+        🔊 Nghe lại
+      </button>
+      <button class="lesson2-btn lesson2-btn-navy" onclick="_vowel2NextRecordingWord()">
+        ${state.index === total - 1 ? "Xem tổng kết" : "Từ tiếp theo"}
+      </button>
+    `;
+  } else if (hasRecording) {
+    actionButtons = `
+      <button class="lesson2-btn lesson2-btn-orange" onclick="_vowel2PlayRecording()">
+        🔊 Nghe lại
+      </button>
+      <button class="lesson2-btn lesson2-btn-navy" onclick="_vowel2RunAiScoring()">
+        🤖 Chấm bằng AI
+      </button>
+      <button class="lesson2-btn lesson2-btn-green" onclick="_vowel2MarkRecording('pass')">
+        Đạt
+      </button>
+      <button class="lesson2-btn lesson2-btn-red" onclick="_vowel2MarkRecording('practice')">
+        Cần luyện lại
+      </button>
+    `;
+  } else {
+    actionButtons = `
+      <button class="lesson2-btn lesson2-btn-orange" onclick="_vowel2PlayRecordingWord()">
+        ${SPEAKER_ICON_SVG} Nghe mẫu
+      </button>
+      <button class="lesson2-btn lesson2-btn-navy" onclick="_vowel2StartRecording()">
+        🎤 Ghi âm
+      </button>
+    `;
+  }
+
+  let feedbackArea = "";
+  if (isScored) {
+    if (hasAiScored) {
+      if (aiResult.status === "unsupported") {
+        feedbackArea = `
+          <div class="lesson2-feedback-box lesson2-feedback-orange">
+            ${aiResult.feedback}
+          </div>
+        `;
+      } else {
+        const isPass = aiResult.status === "pass";
+        feedbackArea = `
+          <div class="lesson2-feedback-box ${isPass ? 'lesson2-feedback-green' : 'lesson2-feedback-red'}" style="text-align: left;">
+            <b style="font-size: 16px; display: block; margin-bottom: 8px; border-bottom: 1.5px solid currentColor; padding-bottom: 4px;">🤖 AI Chấm Phát Âm</b>
+            <div style="margin-bottom: 4px;"><b>Kết quả:</b> ${isPass ? '<span style="color: var(--green);">Đạt</span>' : '<span style="color: #c2410c;">Cần luyện lại</span>'} (${aiResult.score} điểm)</div>
+            <div style="margin-bottom: 4px;"><b>AI nghe được:</b> "${escAttr(aiResult.recognizedText)}"</div>
+            <div style="margin-bottom: 4px;"><b>Từ cần đọc:</b> "${escAttr(item.word)}"</div>
+            <div style="margin-bottom: 4px;"><b>Âm cần sửa:</b> ${escAttr(item.focus)}</div>
+            <div><b>Gợi ý:</b> ${escAttr(aiResult.feedback)}</div>
+          </div>
+        `;
+      }
+    } else {
+      const isPass = teacherStatus === "pass";
+      feedbackArea = `
+        <div class="lesson2-feedback-box ${isPass ? 'lesson2-feedback-green' : 'lesson2-feedback-orange'}">
+          <b>Giáo viên chấm:</b> ${isPass ? 'Đạt (Đọc tốt)' : 'Cần luyện lại'}
+        </div>
+      `;
+    }
+  }
+
   const fallback = state.micMessage
-    ? `<div class="vowel2-mic-message">${escAttr(state.micMessage)}</div>`
+    ? `<div class="lesson2-feedback-box lesson2-feedback-red" style="font-size: 13px; font-weight: 700; margin-top: 10px;">${escAttr(state.micMessage)}</div>`
     : "";
 
-  return `<section class="vowel2-recording vowel2-step-shell">
-    <div class="vowel2-step-meta">
-      <strong>Từ ${state.index + 1}/${state.items.length}</strong>
-      <span>Giáo viên chấm trực tiếp</span>
+  return `
+    <div class="vowel2-recording-panel" style="width: min(100%, 720px); margin-inline: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; color: var(--navy); font-weight: 800; font-size: 15px;">
+        <span>Từ ${state.index + 1}/${total}</span>
+        <span style="color: var(--navy); background: #fff1c2; padding: 4px 10px; border-radius: 999px;">Âm: ${item.focus}</span>
+      </div>
+
+      <div class="compact-progress-container">
+        <div class="compact-progress-fill" style="width: ${progressPercent}%;"></div>
+      </div>
+
+      <div class="lesson2-compact-card">
+        <h3 style="color: var(--ink-mute); font-size: 14px; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.05em;">Ghi âm phát âm</h3>
+        <h1 style="color: var(--navy); font-size: 56px; margin: 12px 0 0; line-height: 1.1;">${item.word}</h1>
+        <div style="font-size: 24px; font-weight: 900; color: #f97316; margin-bottom: 6px;">${item.ipa}</div>
+        <p style="color: var(--ink-soft); font-weight: 700; margin: 0 0 24px;">Nghĩa: ${item.meaning}</p>
+        
+        <div class="lesson2-button-row">
+          ${actionButtons}
+        </div>
+
+        <div id="vowel2RecordingFeedbackHost">${feedbackArea}</div>
+        ${fallback}
+      </div>
     </div>
-    ${renderVowel2StatusDots(state.statuses, state.index)}
-    <article class="vowel2-recording-card ${teacherStatus === "pass" ? "is-pass" : teacherStatus === "practice" ? "is-practice" : ""}">
-      <header>
-        <span>Ghi âm phát âm</span>
-        <h3>${escAttr(item.word)}</h3>
-        <b>${escAttr(item.ipa)}</b>
-      </header>
-      <div class="vowel2-word-details">
-        <span>Nghĩa: <strong>${escAttr(item.meaning)}</strong></span>
-        <span>Âm cần chú ý: <strong>${escAttr(item.focus)}</strong></span>
-      </div>
-      <button class="vowel2-listen-sample" onclick="_vowel2PlayRecordingWord()">${SPEAKER_ICON_SVG} Nghe mẫu</button>
-      <p class="vowel2-ai-note">AI feedback sẽ được bật sau; hiện tại giáo viên chấm trực tiếp.</p>
-      ${fallback}
-      <div class="vowel2-record-controls">
-        <button onclick="_vowel2StartRecording()" ${!state.canRecord || isRecording ? "disabled" : ""}>Bấm ghi âm</button>
-        <button class="danger" onclick="_vowel2StopRecording()" ${isRecording ? "" : "disabled"}>Dừng ghi âm</button>
-        <button class="secondary" onclick="_vowel2PlayRecording()" ${hasRecording && !isRecording ? "" : "disabled"}>Nghe lại</button>
-      </div>
-      <div class="vowel2-teacher-controls">
-        <span>Giáo viên chấm</span>
-        <button class="pass ${teacherStatus === "pass" ? "selected" : ""}" onclick="_vowel2MarkRecording('pass')" ${isRecording ? "disabled" : ""}>Đạt</button>
-        <button class="practice ${teacherStatus === "practice" ? "selected" : ""}" onclick="_vowel2MarkRecording('practice')" ${isRecording ? "disabled" : ""}>Cần luyện lại</button>
-      </div>
-      <button class="vowel2-step-next" onclick="_vowel2NextRecordingWord()" ${teacherStatus === "idle" || isRecording ? "disabled" : ""}>
-        ${state.index === state.items.length - 1 ? "Xem tổng kết" : "Từ tiếp theo"}
-      </button>
-    </article>
-  </section>`;
+  `;
 }
 
 function renderVowel2MiniTest(questions){
@@ -2907,125 +3100,170 @@ function renderVowel2MiniTest(questions){
   const selected = state.selections[state.index];
   const answered = selected !== null;
   const isCorrect = answered && selected === question.answer;
-  const feedback = answered
-    ? `<div class="vowel2-step-feedback ${isCorrect ? "success" : "warning"}">
-        <strong>${isCorrect ? "Đúng rồi!" : `Chưa đúng. Đáp án đúng: ${escAttr(question.options[question.answer])}.`}</strong>
-        <span>${escAttr(question.explanation)}</span>
-      </div>`
-    : `<div class="vowel2-step-feedback neutral">Chọn một đáp án để xem giải thích.</div>`;
-  const body = `
-    <h4 class="vowel2-test-question">${escAttr(question.q)}</h4>
-    ${question.audio ? `<button class="vowel2-mini-audio" onclick="_vowel2PlayMiniTestAudio()">${SPEAKER_ICON_SVG} Nghe từ</button>` : ""}
-    <div class="vowel2-answer-grid">
-      ${question.options.map((option, choice) => {
-        const correctClass = answered && choice === question.answer ? "correct" : "";
-        const wrongClass = answered && choice === selected && !isCorrect ? "wrong" : "";
-        return `<button class="${correctClass || wrongClass}" onclick="_vowel2TestChoice(${choice})" ${answered ? "disabled" : ""}>${escAttr(option)}</button>`;
-      }).join("")}
-    </div>`;
+  const total = state.questions.length;
+  const progressPercent = Math.round((state.index / total) * 100);
 
-  return renderSingleStepQuizShell({
-    title: "Mini test",
-    currentIndex: state.index,
-    total: state.questions.length,
-    scoreLabel: `Điểm: ${state.score}/${state.questions.length}`,
-    statusList: state.statuses,
-    status: state.statuses[state.index],
-    body,
-    feedback,
-    nextLabel: state.index === state.questions.length - 1 ? "Xem tổng kết" : "Câu tiếp theo",
-    nextDisabled: !answered,
-    onNext: "_vowel2NextMiniTestQuestion()",
-  });
-}
+  let feedbackHtml = "";
+  if (answered) {
+    feedbackHtml = `
+      <div class="lesson2-feedback-box ${isCorrect ? 'lesson2-feedback-green' : 'lesson2-feedback-red'}">
+        <b>${isCorrect ? 'Đúng rồi!' : 'Chưa đúng!'}</b><br>
+        <span style="font-size: 13.5px; font-weight: 600; opacity: 0.95;">
+          Giải thích: ${question.explanation || `Đáp án đúng là "${question.options[question.answer]}".`}
+        </span>
+      </div>
+    `;
+  }
 
-function renderSingleStepQuizShell({
-  title,
-  currentIndex,
-  total,
-  scoreLabel,
-  statusList,
-  status,
-  body,
-  feedback,
-  nextLabel,
-  nextDisabled,
-  onNext,
-}){
-  return `<section class="vowel2-step-shell ${status === "correct" || status === "retry" ? "is-correct" : status === "wrong" ? "is-wrong" : ""}">
-    <div class="vowel2-step-meta">
-      <strong>${escAttr(scoreLabel)}</strong>
-      <span>Câu ${currentIndex + 1}/${total}</span>
+  return `
+    <div class="vowel2-test-panel" style="width: min(100%, 720px); margin-inline: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; color: var(--navy); font-weight: 800; font-size: 15px;">
+        <span>Câu ${state.index + 1}/${total}</span>
+        <span>Điểm: ${state.score}/${total}</span>
+      </div>
+
+      <div class="compact-progress-container">
+        <div class="compact-progress-fill" style="width: ${progressPercent}%;"></div>
+      </div>
+
+      <div class="lesson2-compact-card">
+        <h3 style="color: var(--navy); font-size: 22px; margin-bottom: 20px; line-height: 1.35;">${escAttr(question.q)}</h3>
+        
+        ${question.audio ? `
+          <div style="margin-bottom: 24px;">
+            <button class="lesson2-btn lesson2-btn-orange" onclick="_vowel2PlayMiniTestAudio()">
+              ${SPEAKER_ICON_SVG} Nghe từ
+            </button>
+          </div>
+        ` : ""}
+
+        <div class="vowel2-test-options" style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px;">
+          ${question.options.map((option, choiceIdx) => {
+            let btnClass = "lesson2-btn-gray";
+            let disabled = answered ? "disabled" : "";
+
+            if (answered) {
+              if (choiceIdx === question.answer) {
+                btnClass = "lesson2-btn-green";
+              } else if (choiceIdx === selected) {
+                btnClass = "lesson2-btn-red";
+              }
+            }
+
+            return `<button class="lesson2-btn ${btnClass}" ${disabled} onclick="_vowel2TestChoice(${choiceIdx})">
+              ${escAttr(option)}
+            </button>`;
+          }).join("")}
+        </div>
+
+        <div id="vowel2TestFeedbackHost">${feedbackHtml}</div>
+
+        ${answered ? `
+          <div class="lesson2-button-row" style="margin-top: 16px;">
+            <button class="lesson2-btn lesson2-btn-navy" onclick="_vowel2NextMiniTestQuestion()" style="min-width: 160px;">
+              Câu tiếp theo
+            </button>
+          </div>
+        ` : ""}
+      </div>
     </div>
-    ${renderVowel2StatusDots(statusList, currentIndex)}
-    <article class="vowel2-step-card">
-      <h3>${escAttr(title)}</h3>
-      ${body}
-      ${feedback}
-      <button class="vowel2-step-next" onclick="${onNext}" ${nextDisabled ? "disabled" : ""}>${escAttr(nextLabel)}</button>
-    </article>
-  </section>`;
-}
-
-function renderVowel2StatusDots(statuses, activeIndex = -1){
-  return `<div class="vowel2-step-dots" aria-label="Trạng thái từng câu">
-    ${statuses.map((status, index) => `<span class="${escAttr(status)} ${index === activeIndex ? "active" : ""}" title="Mục ${index + 1}"></span>`).join("")}
-  </div>`;
-}
-
-function renderVowel2GameSummary(){
-  const state = vowel2GameState;
-  const weakSounds = [...new Set(state.items
-    .filter((_, index) => state.statuses[index] === "retry")
-    .map(item => item.answer))];
-  return `<section class="vowel2-summary-card">
-    <span class="vowel2-summary-icon">✓</span>
-    <h3>Hoàn thành game</h3>
-    <div class="vowel2-summary-counts">
-      <article><strong>${state.score}/${state.items.length}</strong><span>Điểm</span></article>
-      <article><strong>${state.score}</strong><span>Số câu đúng</span></article>
-    </div>
-    <p>${weakSounds.length ? `Âm cần luyện lại: <strong>${weakSounds.map(escAttr).join(", ")}</strong>` : "Không có âm cần luyện lại."}</p>
-    <button class="vowel2-primary-action" onclick="_vowel2RestartGame()">Chơi lại</button>
-  </section>`;
+  `;
 }
 
 function renderVowel2RecordingSummary(){
   const state = vowel2RecordingState;
   const passed = state.statuses.filter(status => status === "pass").length;
   const practice = state.statuses.filter(status => status === "practice").length;
-  return `<section class="vowel2-summary-card">
-    <span class="vowel2-summary-icon">✓</span>
-    <h3>Hoàn thành ghi âm phát âm</h3>
-    <div class="vowel2-summary-counts">
-      <article><strong>${passed}</strong><span>Số từ đạt</span></article>
-      <article><strong>${practice}</strong><span>Cần luyện lại</span></article>
+  return `
+    <div class="vowel2-recording-summary lesson2-compact-card" style="max-width: 500px; margin: 0 auto; padding: 32px 20px; text-align: center;">
+      <div style="font-size: 52px; margin-bottom: 12px;">🎓</div>
+      <h3 style="color: var(--navy); font-size: 24px; margin-bottom: 8px;">Hoàn thành Ghi âm phát âm</h3>
+      <p style="color: var(--ink-mute); font-weight: 600; margin-bottom: 24px;">Tuyệt vời! Bạn đã hoàn thành ghi âm tất cả ${state.items.length} từ.</p>
+      
+      <div style="display: flex; gap: 16px; justify-content: center; margin-bottom: 32px; width: 100%;">
+        <div style="flex: 1; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 16px; padding: 16px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 900; color: #065f46;">${passed}</div>
+          <div style="font-size: 13px; font-weight: 700; color: #047857;">Từ đạt</div>
+        </div>
+        <div style="flex: 1; background: #fff7ed; border: 1px solid #ffedd5; border-radius: 16px; padding: 16px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 900; color: #c2410c;">${practice}</div>
+          <div style="font-size: 13px; font-weight: 700; color: #9a3412;">Cần luyện lại</div>
+        </div>
+      </div>
+
+      <div class="lesson2-button-row">
+        <button class="lesson2-btn lesson2-btn-orange" onclick="_vowel2RetryRecordingWords()" ${practice ? "" : "disabled"}>
+          Luyện lại từ sai
+        </button>
+        <button class="lesson2-btn lesson2-btn-navy" onclick="_vowel2RestartRecording()">
+          Luyện lại từ đầu
+        </button>
+      </div>
     </div>
-    <div class="vowel2-summary-actions">
-      <button class="vowel2-warning-action" onclick="_vowel2RetryRecordingWords()" ${practice ? "" : "disabled"}>Luyện lại từ cần sai</button>
-      <button class="vowel2-primary-action" onclick="_vowel2RestartRecording()">Làm lại từ đầu</button>
-    </div>
-  </section>`;
+  `;
 }
 
 function renderVowel2MiniTestSummary(){
   const state = vowel2MiniTestState;
-  const weakQuestions = state.questions.filter((_, index) => state.statuses[index] === "wrong");
-  const remark = state.score >= 8
-    ? "Rất tốt"
-    : state.score >= 5
-      ? "Cần luyện thêm vài âm"
-      : "Nên học lại phần so sánh âm";
-  return `<section class="vowel2-summary-card">
-    <span class="vowel2-summary-icon">✓</span>
-    <h3>Hoàn thành mini test</h3>
-    <div class="vowel2-summary-score">${state.score}/${state.questions.length}</div>
-    <p><strong>${escAttr(remark)}</strong></p>
-    <div class="vowel2-summary-actions">
-      <button class="vowel2-primary-action" onclick="_vowel2RestartMiniTest()">Làm lại mini test</button>
-      <button class="vowel2-warning-action" onclick="_vowel2RetryWeakMiniTest()" ${weakQuestions.length ? "" : "disabled"}>Luyện lại âm yếu</button>
+  const total = state.questions.length;
+  let comment = "";
+  if (state.score >= 8) {
+    comment = "Rất tốt";
+  } else if (state.score >= 5) {
+    comment = "Cần luyện thêm vài âm";
+  } else {
+    comment = "Nên học lại phần so sánh âm";
+  }
+
+  const wrongSounds = new Set();
+  state.statuses.forEach((status, idx) => {
+    if (status === "wrong") {
+      const q = state.questions[idx];
+      const match = q.q.match(/\/[^\s\/]+\//);
+      if (match) {
+        wrongSounds.add(match[0]);
+      } else {
+        if (idx === 0 || idx === 5) wrongSounds.add("/iː/");
+        if (idx === 1 || idx === 6) wrongSounds.add("/ɪ/");
+        if (idx === 2) wrongSounds.add("/e/");
+        if (idx === 3) wrongSounds.add("/æ/");
+        if (idx === 4) wrongSounds.add("/ʌ/");
+        if (idx === 7) wrongSounds.add("/ə/");
+      }
+    }
+  });
+
+  const wrongSoundsList = Array.from(wrongSounds);
+
+  return `
+    <div class="vowel2-test-summary lesson2-compact-card" style="max-width: 500px; margin: 0 auto; padding: 32px 20px; text-align: center;">
+      <div style="font-size: 52px; margin-bottom: 12px;">📊</div>
+      <h3 style="color: var(--navy); font-size: 24px; margin-bottom: 8px;">Kết quả Mini test</h3>
+      <p style="font-size: 20px; font-weight: 800; color: var(--navy); margin-bottom: 12px;">
+        Điểm số: <span style="color: var(--green); font-size: 28px;">${state.score}/${total}</span>
+      </p>
+      <p style="color: var(--ink-soft); font-weight: 700; margin-bottom: 24px;">Nhận xét: ${comment}</p>
+
+      ${wrongSoundsList.length ? `
+        <div style="background: #fff7ed; border: 1px solid #ffedd5; border-radius: 12px; padding: 14px; margin-bottom: 24px; text-align: left;">
+          <b style="color: #c2410c; display: block; margin-bottom: 8px;">Luyện lại âm yếu:</b>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            ${wrongSoundsList.map(sound => `
+              <button class="lesson2-btn lesson2-btn-gray" style="padding: 6px 12px; font-size: 14px;" onclick="jumpTo(${SOUND_TO_SECTION_INDEX[sound] || 0})">
+                ${escAttr(sound)} ↗
+              </button>
+            `).join("")}
+          </div>
+        </div>
+      ` : ""}
+
+      <div class="lesson2-button-row">
+        <button class="lesson2-btn lesson2-btn-navy" onclick="_vowel2RestartMiniTest()">
+          Làm lại mini test
+        </button>
+      </div>
     </div>
-  </section>`;
+  `;
 }
 
 function shuffleVowel2Items(items){
@@ -3046,7 +3284,6 @@ function createVowel2GameState(items){
     statuses: shuffled.map(() => "idle"),
     wrongChoices: new Set(),
     answered: false,
-    feedback: "",
     completed: false,
   };
 }
@@ -3058,6 +3295,7 @@ function createVowel2RecordingState(items){
     index: 0,
     statuses: items.map(() => "idle"),
     recordings: items.map(() => null),
+    aiScores: items.map(() => ({})),
     recordingState: "idle",
     canRecord,
     micMessage: canRecord ? "" : "Trình duyệt chưa bật quyền micro. Giáo viên có thể chấm trực tiếp.",
@@ -3113,6 +3351,7 @@ const vowel2RecordingRuntime = {
   recordingIndex: -1,
   discard: false,
   playback: null,
+  recognition: null,
 };
 
 window.vowel2SingleSoundState = {};
@@ -3263,11 +3502,62 @@ window._vowel2PlayRecordingWord = function(){
   if(item) playEnglishAudio(item.word);
 };
 
+window.vowel2RecognizedText = "";
+
+function calculateAiScore(said, target) {
+  const normSaid = normalizeText(said);
+  const normTarget = normalizeText(target);
+  
+  if (!normSaid) {
+    return {
+      score: 0,
+      status: "fail",
+      feedback: "Không nghe rõ. Bạn hãy nhấn ghi âm và thử đọc lại chậm hơn."
+    };
+  }
+  
+  if (normSaid === normTarget) {
+    return {
+      score: 100,
+      status: "pass",
+      feedback: "Xuất sắc! Phát âm rất chuẩn xác."
+    };
+  }
+  
+  const sim = similarity(normSaid, normTarget);
+  const score = Math.min(100, Math.max(0, Math.round(sim * 100)));
+  
+  let status = "fail";
+  let feedback = "Chưa đúng. Vui lòng nghe mẫu và đọc lại chậm hơn.";
+  
+  if (score >= 90) {
+    status = "pass";
+    feedback = "Rất tốt! Phát âm gần như hoàn hảo.";
+  } else if (score >= 70) {
+    status = "pass";
+    feedback = "Khá tốt. Cần chú ý thêm về âm chuẩn.";
+  } else if (normSaid.includes(normTarget) || normTarget.includes(normSaid)) {
+    return {
+      score: Math.max(score, 75),
+      status: "pass",
+      feedback: "Khá tốt. Gần đúng rồi, hãy luyện thêm để chuẩn hơn."
+    };
+  }
+  
+  return {
+    score,
+    status,
+    feedback
+  };
+}
+
 window._vowel2StartRecording = async function(){
   const state = vowel2RecordingState;
   if(!state || state.recordingState === "recording" || !state.canRecord) return;
   stopCurrentSpeech();
   stopVowel2RecordedPlayback();
+
+  window.vowel2RecognizedText = "";
 
   try{
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -3287,17 +3577,47 @@ window._vowel2StartRecording = async function(){
     recorder.onstop = finishVowel2Recording;
     recorder.onerror = () => {
       state.recordingState = "idle";
-      state.micMessage = "Trình duyệt chưa bật quyền micro. Giáo viên có thể chấm trực tiếp.";
+      state.micMessage = "Chưa bật quyền micro. Vui lòng cho phép micro hoặc giáo viên chấm trực tiếp.";
       releaseVowel2RecordingStream();
       renderVowel2RecordingHost();
     };
     recorder.start();
     state.recordingState = "recording";
     state.micMessage = "";
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SR) {
+      try {
+        const rec = new SR();
+        rec.lang = "en-US";
+        rec.continuous = false;
+        rec.interimResults = false;
+        rec.maxAlternatives = 1;
+        
+        rec.onresult = (e) => {
+          const said = (e.results[0][0].transcript || "").trim();
+          window.vowel2RecognizedText = said;
+        };
+        
+        rec.onerror = (e) => {
+          console.warn("SpeechRecognition error:", e.error);
+        };
+        
+        rec.onend = () => {
+          vowel2RecordingRuntime.recognition = null;
+        };
+        
+        vowel2RecordingRuntime.recognition = rec;
+        rec.start();
+      } catch (err) {
+        console.error("Failed to start SpeechRecognition:", err);
+      }
+    }
+
     renderVowel2RecordingHost();
   }catch(error){
     state.recordingState = "idle";
-    state.micMessage = "Trình duyệt chưa bật quyền micro. Giáo viên có thể chấm trực tiếp.";
+    state.micMessage = "Chưa bật quyền micro. Vui lòng cho phép micro hoặc giáo viên chấm trực tiếp.";
     releaseVowel2RecordingStream();
     renderVowel2RecordingHost();
   }
@@ -3315,6 +3635,7 @@ window._vowel2PlayRecording = function(){
   stopVowel2RecordedPlayback();
   const audio = new Audio(url);
   vowel2RecordingRuntime.playback = audio;
+  activeAudioFile = audio;
   audio.onended = () => {
     if(vowel2RecordingRuntime.playback === audio) vowel2RecordingRuntime.playback = null;
   };
@@ -3328,6 +3649,37 @@ window._vowel2PlayRecording = function(){
     state.micMessage = "Không thể phát bản ghi này. Giáo viên có thể chấm trực tiếp.";
     renderVowel2RecordingHost();
   });
+};
+
+window._vowel2RunAiScoring = function() {
+  const state = vowel2RecordingState;
+  if (!state) return;
+  const item = state.items[state.index];
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  
+  if (!SR) {
+    state.aiScores[state.index] = {
+      score: undefined,
+      status: "unsupported",
+      recognizedText: "",
+      feedback: "AI chấm chưa hỗ trợ trên trình duyệt này. Giáo viên có thể chấm trực tiếp."
+    };
+    renderVowel2RecordingHost();
+    return;
+  }
+  
+  const said = window.vowel2RecognizedText || "";
+  const result = calculateAiScore(said, item.word);
+  
+  state.aiScores[state.index] = {
+    score: result.score,
+    status: result.status,
+    recognizedText: said || "(Không nhận diện được)",
+    feedback: result.feedback
+  };
+  
+  state.statuses[state.index] = result.status === "pass" ? "pass" : "practice";
+  renderVowel2RecordingHost();
 };
 
 window._vowel2MarkRecording = function(status){
@@ -3346,7 +3698,7 @@ window._vowel2NextRecordingWord = function(){
     state.completed = true;
   }else{
     state.index += 1;
-    state.micMessage = state.canRecord ? "" : "Trình duyệt chưa bật quyền micro. Giáo viên có thể chấm trực tiếp.";
+    state.micMessage = state.canRecord ? "" : "Chưa bật quyền micro. Vui lòng cho phép micro hoặc giáo viên chấm trực tiếp.";
   }
   renderVowel2RecordingHost();
 };
@@ -3439,6 +3791,14 @@ function finishVowel2Recording(){
 function stopVowel2RecordingCapture(discard = false){
   const recorder = vowel2RecordingRuntime.mediaRecorder;
   vowel2RecordingRuntime.discard = discard;
+  
+  if (vowel2RecordingRuntime.recognition) {
+    try {
+      vowel2RecordingRuntime.recognition.stop();
+    } catch(e) {}
+    vowel2RecordingRuntime.recognition = null;
+  }
+
   if(recorder && recorder.state !== "inactive"){
     try{
       recorder.stop();
@@ -7933,6 +8293,7 @@ let lastSpeakText = "";
 
 function stopCurrentSpeech() {
   stopSpeaking();
+  stopVowel2RecordedPlayback();
   if (activeAudioFile) {
     try {
       activeAudioFile.pause();
