@@ -825,10 +825,19 @@ function nextSection(){
 }
 
 // ============== RENDER SECTION ==============
+function stopHtml5Videos() {
+  document.querySelectorAll("video").forEach(video => {
+    try {
+      video.pause();
+    } catch(e) {}
+  });
+}
+
 function renderSection(){
   closeVideoModal();
   stopCurrentSpeech();
   stopYouTubeVideos();
+  stopHtml5Videos();
   const lesson = LESSONS.find(l=>l.id===STATE.lessonId);
   const stage = document.getElementById("lessonStage");
   const section = STATE.sections[STATE.sectionIdx];
@@ -1610,15 +1619,19 @@ function renderVowel2Section(lesson, section){
       return `${header}${renderVowel2SingleSoundLesson(groups["/ɪ/"], 2100)}`;
     case "vowel2_compare_i":
       return `${header}${renderVowel2FocusComparison(data.comparisonPairs || [])}`;
-    case "vowel2_e_ae":
-      return `${header}${renderVowel2SoundSwitcher("vowel2_e_ae", [groups["/e/"], groups["/æ/"]], 2200)}`;
+    case "vowel2_sound_e":
+      return `${header}${renderVowel2SingleSoundLesson(groups["/e/"], 2200)}`;
+    case "vowel2_sound_ae":
+      return `${header}${renderVowel2SingleSoundLesson(groups["/æ/"], 2300)}`;
     case "vowel2_compare_e_ae":
       return `${header}${renderVowel2Comparison(
         data.minimalPairs.slice(3, 5), "/e/", "/æ/",
         "Giáo viên cho học sinh đọc chậm: /e/ mở vừa, /æ/ hạ cằm và mở rộng hơn."
       )}`;
-    case "vowel2_schwa_caret":
-      return `${header}${renderVowel2SoundSwitcher("vowel2_schwa_caret", [groups["/ə/"], groups["/ʌ/"]], 2400)}`;
+    case "vowel2_sound_schwa":
+      return `${header}${renderVowel2SingleSoundLesson(groups["/ə/"], 2400)}`;
+    case "vowel2_sound_uh":
+      return `${header}${renderVowel2SingleSoundLesson(groups["/ʌ/"], 2500)}`;
     case "vowel2_compare_schwa_caret":
       return `${header}
         <div class="vowel2-label-compare"><span>/ə/ = nhẹ</span><strong>/ʌ/ = rõ</strong></div>
@@ -1728,6 +1741,7 @@ function renderVowel2SingleSoundLesson(group, offset){
     </section>`;
   }
 
+  const isLastWord = wordIndex === group.words.length - 1;
   return `<section class="vowel2-practice-layout" data-sound="${escAttr(group.symbol)}">
     <div class="vowel2-practice-left">
       <span class="vowel2-step-label">Bước 2</span>
@@ -1740,6 +1754,7 @@ function renderVowel2SingleSoundLesson(group, offset){
     <div class="vowel2-practice-right">
       <span class="word-indicator">Từ ${wordIndex + 1}/${group.words.length}</span>
       ${renderSoundWordPracticeCard(word, offset + wordIndex)}
+      ${isLastWord ? renderPronunciationGuideVideo(media, true) : ""}
       <div class="vowel2-nav-row">
         <button class="vowel2-nav-btn" onclick="_vowel2PrevSingleWord('${escAttr(stateKey)}')" ${wordIndex === 0 ? "disabled" : ""}>Từ trước</button>
         <button class="vowel2-nav-btn vowel2-next-btn" onclick="_vowel2NextSingleWord('${escAttr(stateKey)}', ${group.words.length})">${wordIndex === group.words.length - 1 ? "Xem video hướng dẫn" : "Từ tiếp theo"}</button>
@@ -1925,14 +1940,26 @@ function renderPronunciationMouthMedia(media, compact = false, options = {}){
   });
 }
 
-function renderPronunciationGuideVideo(media){
+function renderPronunciationGuideVideo(media, preloadOnly = false){
   const sound = media?.sound || "";
   const video = media?.guideVideo || "";
-  return `<div class="pronunciation-guide-video">
-    ${video ? `<video controls preload="metadata" hidden aria-label="Video hướng dẫn phát âm ${escAttr(sound)}" onloadedmetadata="_pronunciationVideoLoaded(this)" onerror="_pronunciationVideoFailed(this)">
+  if (!video) {
+    if (preloadOnly) return "";
+    return `<div class="pronunciation-guide-video">
+      <div class="video-pending-box pronunciation-video-fallback">Video hướng dẫn sẽ được cập nhật</div>
+    </div>`;
+  }
+  if (preloadOnly) {
+    return `<video preload="metadata" style="display:none;" aria-hidden="true">
+      <source src="${escAttr(video)}" type="video/mp4">
+    </video>`;
+  }
+  return `<div class="pronunciation-guide-video" style="position: relative; width: 100%;">
+    <div class="video-loading-box" style="position: absolute; top:0; left:0; right:0; bottom:0; display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.7); z-index:1; font-weight: 500; color: #475569; border-radius: 8px;">Đang tải video...</div>
+    <video controls preload="metadata" poster="${escAttr(media?.mouthImage || '')}" playsinline style="width: 100%; display: none; border-radius: 8px;" onloadedmetadata="_pronunciationVideoLoaded(this)" onerror="_pronunciationVideoFailed(this)">
       <source src="${escAttr(video)}" type="video/mp4" onerror="_pronunciationVideoFailed(this.parentElement)">
-    </video>` : ""}
-    <div class="video-pending-box pronunciation-video-fallback">Video hướng dẫn sẽ được cập nhật</div>
+    </video>
+    <div class="video-pending-box pronunciation-video-fallback" style="display:none;">Video hướng dẫn sẽ được cập nhật</div>
   </div>`;
 }
 
@@ -1947,13 +1974,29 @@ window._pronunciationImageFailed = function(image){
 };
 
 window._pronunciationVideoLoaded = function(video){
-  video.hidden = false;
+  video.style.display = "block";
+  const loadingBox = video.previousElementSibling;
+  if(loadingBox && loadingBox.classList.contains("video-loading-box")) {
+    loadingBox.style.display = "none";
+  }
   const fallback = video.nextElementSibling;
-  if(fallback) fallback.hidden = true;
+  if(fallback && fallback.classList.contains("pronunciation-video-fallback")) {
+    fallback.style.display = "none";
+  }
 };
 
 window._pronunciationVideoFailed = function(video){
-  video.remove();
+  const v = video.tagName === "VIDEO" ? video : video.querySelector("video");
+  if (!v) return;
+  v.style.display = "none";
+  const loadingBox = v.previousElementSibling;
+  if(loadingBox && loadingBox.classList.contains("video-loading-box")) {
+    loadingBox.style.display = "none";
+  }
+  const fallback = v.nextElementSibling;
+  if(fallback && fallback.classList.contains("pronunciation-video-fallback")) {
+    fallback.style.display = "block";
+  }
 };
 
 function highlightWord(word, focus){
