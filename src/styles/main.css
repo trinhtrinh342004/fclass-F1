@@ -4227,5 +4227,480 @@ body.admin-active > .topbar{
   }
 }
 
+/* ========================================================
+   LESSON 2 - SLIDE 14 & 15 CUSTOM PREMIUM AESTHETICS
+   ======================================================== */
+
+.vowel2-homework-slide, .vowel2-summary-slide {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  animation: fadeInSlide 0.4s ease-out;
+}
+
+@keyframes fadeInSlide {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Slide 14: Skills Grid */
+.vowel2-hw-skills-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.vowel2-hw-card {
+  background: #ffffff;
+  border: 1.5px solid #eadfce;
+  border-radius: 18px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vowel2-hw-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(23, 37, 84, 0.08);
+}
+
+/* Skill Accents */
+.vowel2-hw-card.card-listen { border-left: 6px solid #3b82f6; }
+.vowel2-hw-card.card-speak { border-left: 6px solid #10b981; }
+.vowel2-hw-card.card-read { border-left: 6px solid #f59e0b; }
+.vowel2-hw-card.card-write { border-left: 6px solid #8b5cf6; }
+
+.vowel2-hw-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f3ebe1;
+}
+
+.vowel2-hw-icon {
+  font-size: 26px;
+}
+
+.vowel2-hw-card-header h3 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.vowel2-hw-card-body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 12px;
+}
+
+.vowel2-hw-list {
+  padding-left: 18px;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 15px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vowel2-hw-list ol {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+
+.badge-pair {
+  display: inline-block;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.vowel2-hw-footer {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px dashed #f3ebe1;
+  font-size: 13px;
+}
+
+.vowel2-hw-time {
+  color: #b45309;
+  background: #fffbeb;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.vowel2-hw-criteria {
+  color: #1e3a8a;
+  background: #eff6ff;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+/* Checklist nộp bài */
+.vowel2-hw-checklist-card {
+  background: #ecfdf5;
+  border: 1.5px dashed #a7f3d0;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.vowel2-hw-checklist-card h3 {
+  margin: 0 0 12px;
+  color: #065f46;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.vowel2-hw-checklist-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  font-size: 15px;
+  color: #047857;
+  font-weight: 700;
+}
+
+.vowel2-hw-checklist-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Homework Buttons */
+.vowel2-hw-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.vowel2-hw-btn-assign, .vowel2-hw-btn-next, .vowel2-footer-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.vowel2-hw-btn-assign {
+  background: var(--navy);
+  color: white;
+}
+
+.vowel2-hw-btn-assign.assigned {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+}
+
+.vowel2-hw-btn-assign:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.15);
+}
+
+.vowel2-hw-btn-next {
+  background: #f59e0b;
+  color: #172554;
+}
+
+.vowel2-hw-btn-next:hover {
+  transform: translateY(-2px);
+  background: #d97706;
+}
+
+/* Slide 15: Summary sections */
+.vowel2-summary-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.vowel2-summary-subtitle {
+  margin: 0;
+  color: var(--navy);
+  font-size: 20px;
+  font-weight: 800;
+  border-left: 5px solid #f59e0b;
+  padding-left: 12px;
+  line-height: 1.2;
+}
+
+/* 6 sounds grid */
+.vowel2-summary-sounds-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.vowel2-sum-sound-card {
+  background: white;
+  border: 1.5px solid #eadfce;
+  border-radius: 16px;
+  padding: 16px 10px;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.vowel2-sum-sound-card:hover {
+  transform: translateY(-3px);
+  background: #fffdf9;
+  border-color: #f59e0b;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+}
+
+.vowel2-sum-sound-symbol {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--navy);
+  font-family: var(--font-display);
+}
+
+.vowel2-sum-sound-desc {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-mute);
+  line-height: 1.2;
+}
+
+/* Takeaways */
+.vowel2-summary-takeaways {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.vowel2-takeaway-card {
+  background: white;
+  border: 1.5px solid #eadfce;
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  box-shadow: var(--shadow-sm);
+}
+
+.vowel2-takeaway-num {
+  background: #172554;
+  color: white;
+  font-size: 16px;
+  font-weight: 900;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vowel2-takeaway-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vowel2-takeaway-content h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.3;
+}
+
+.vowel2-takeaway-content p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+/* Keyword Badges */
+.vowel2-summary-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.vowel2-badge-word {
+  background: white;
+  border: 1.5px solid #eadfce;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy);
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.vowel2-badge-word:hover {
+  transform: scale(1.05);
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+/* Eval Buttons */
+.vowel2-summary-eval-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.vowel2-eval-btn {
+  flex: 1;
+  background: white;
+  border: 1.5px solid #eadfce;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--navy);
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.vowel2-eval-btn:hover {
+  transform: translateY(-2px);
+  background: #fdfaf5;
+  border-color: #eadfce;
+}
+
+.vowel2-eval-btn.selected {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.vowel2-eval-feedback {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 750;
+  color: #b45309;
+}
+
+/* Lời kết */
+.vowel2-summary-conclusion {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-radius: 18px;
+  padding: 22px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.vowel2-summary-conclusion p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 750;
+  color: #1e3a8a;
+  line-height: 1.6;
+}
+
+/* Summary Footer Buttons */
+.vowel2-summary-footer-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.vowel2-footer-btn.secondary {
+  background: white;
+  border: 1.5px solid var(--navy);
+  color: var(--navy);
+}
+
+.vowel2-footer-btn.secondary:hover {
+  background: #f1f5f9;
+  transform: translateY(-2px);
+}
+
+.vowel2-footer-btn.warning {
+  background: #fff7df;
+  border: 1.5px solid #f59e0b;
+  color: #b45309;
+}
+
+.vowel2-footer-btn.warning:hover {
+  background: #fef3c7;
+  transform: translateY(-2px);
+}
+
+.vowel2-footer-btn.primary {
+  background: var(--navy);
+  color: white;
+}
+
+.vowel2-footer-btn.primary:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+}
+
+/* Responsive adjustment */
+@media (max-width: 768px) {
+  .vowel2-hw-skills-grid {
+    grid-template-columns: 1fr;
+  }
+  .vowel2-hw-checklist-list {
+    grid-template-columns: 1fr;
+  }
+  .vowel2-summary-sounds-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .vowel2-summary-takeaways {
+    grid-template-columns: 1fr;
+  }
+  .vowel2-summary-eval-buttons {
+    flex-direction: column;
+  }
+  .vowel2-summary-footer-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .vowel2-summary-footer-actions button {
+    width: 100%;
+  }
+}
+
+
 
 

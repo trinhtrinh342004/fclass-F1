@@ -12,6 +12,8 @@ const SECTION_FLOW = [
   "vowel2_word_practice",
   "vowel2_pairs_sentences",
   "vowel2_game_record_test",
+  "vowel2_homework",
+  "vowel2_summary",
 ];
 
 const WORD_GROUPS = [
@@ -300,6 +302,8 @@ export const lesson02SpellingLetterSounds = {
     vowel2_word_practice: "Câu dễ đọc sai",
     vowel2_pairs_sentences: "Câu bẫy nâng cao",
     vowel2_game_record_test: "Game + Ghi âm AI + Mini test",
+    vowel2_homework: "Bài tập về nhà",
+    vowel2_summary: "Tổng kết buổi học",
   },
   objectives: [
     "Nhận biết 6 âm /iː/ /ɪ/ /e/ /æ/ /ə/ /ʌ/.",
