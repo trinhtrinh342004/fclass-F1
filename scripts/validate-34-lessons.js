@@ -63,7 +63,8 @@ for (const [id, title] of expectedTitles) {
 const lesson01 = lessonById(1);
 check(lesson01?.title === "Buổi 1: Bảng chữ cái A–Z", "Lesson 1 must use the Vietnamese Alphabet A–Z title.");
 check(lesson01?.track === "alphabet-foundation", "Lesson 1 must use the dedicated Alphabet Foundation renderer.");
-check(lesson01?.sectionFlow?.length === 15, "Lesson 1 Alphabet sidebar must have exactly 15 sections.");
+check(lesson01?.metadata?.localContentAuthoritative === true, "Lesson 1 local Alphabet content must override stale Supabase content.");
+check(lesson01?.sectionFlow?.length === 21, "Lesson 1 Alphabet sidebar must have exactly 21 sections.");
 check(lesson01?.sectionFlow?.every((section) => section.startsWith("alphabet_")), "Lesson 1 must use dedicated alphabet sections.");
 check(lesson01?.alphabetFoundation?.letters?.length === 26, "Lesson 1 must have 26 alphabet letter cards.");
 check(lesson01?.alphabetFoundation?.letters?.every((item) => item.pronunciation && item.reading), "Lesson 1 letter cards must include pronunciation and reading text.");
@@ -80,9 +81,15 @@ check(arrayEquals(Object.values(lesson01?.sectionLabels || {}), [
   "Nghe và chọn chữ",
   "Ghép chữ hoa - chữ thường",
   "Ghép chữ với biểu tượng",
+  "Nhìn hình đoán chữ",
   "Điền chữ còn thiếu",
+  "Đọc nhanh chữ cái",
   "Đánh vần tên của em",
   "Đánh vần từ đơn giản",
+  "Tách chữ trong từ",
+  "Ghép chữ thành từ",
+  "Nhìn biểu tượng đọc từ",
+  "Thử thách đọc theo giáo viên",
   "Chơi game bảng chữ cái",
   "Video thư giãn cuối buổi",
 ]), "Lesson 1 sidebar labels must match the requested Vietnamese labels.");
@@ -108,6 +115,9 @@ const forbiddenAlphabetUi = [
   "Repeat",
   "Open Alphabet Game",
   "Upload alphabet",
+  "Introduction",
+  "Grammar",
+  "Translation",
 ];
 check(
   forbiddenAlphabetUi.every((label) => !alphabetRenderer.includes(label)),
@@ -123,6 +133,14 @@ check([
   "Tạo chữ cái",
   "Nghe từng chữ",
   "Làm lại",
+  "Đọc từng chữ",
+  "Ẩn chữ",
+  "Hiện chữ",
+  "Chữ tiếp theo",
+  "Từ tiếp theo",
+  "Hiện icon",
+  "Ẩn icon",
+  "Hoàn thành",
   "Mở game bảng chữ cái",
 ].every((label) => alphabetRenderer.includes(label)), "Lesson 1 renderer must contain the requested Vietnamese controls.");
 
