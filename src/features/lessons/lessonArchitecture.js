@@ -36,9 +36,15 @@ export const lessonSectionFlowOverrides = {
       "alphabet_listen_choose",
       "alphabet_case_match",
       "alphabet_icon_match",
+      "alphabet_image_guess",
       "alphabet_missing",
+      "alphabet_quick_read",
       "alphabet_spell_name",
       "alphabet_spell_words",
+      "alphabet_split_word",
+      "alphabet_build_word",
+      "alphabet_icon_read",
+      "alphabet_teacher_challenge",
       "alphabet_starfall",
       "alphabet_chill"
     ]
