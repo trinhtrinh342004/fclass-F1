@@ -2,16 +2,16 @@ export const lesson07Consonants2 = {
   id: 7,
   lessonNumber: 7,
   dayNumber: 7,
-  title: "BUỔI 7: Consonants 2 – Phụ âm gió & Âm khó",
-  titleEn: "Fricatives & Difficult Consonants",
-  titleVi: "Phụ âm gió & Âm khó",
+  title: "Âm mũi + L/R + W/Y",
+  titleEn: "Âm mũi + L/R + W/Y",
+  titleVi: "Âm mũi + L/R + W/Y",
   subtitle: "Sửa các lỗi phát âm phổ biến và luyện âm gió",
   cefrLevel: "A0-A1",
   unit: "ABC & IPA Foundation",
   module: "ABC & IPA Foundation",
   track: "consonants-2",
   slug: "consonants-2-am-gio-va-am-kho-voi-nguoi-viet",
-  mainTopic: "Consonants 2",
+  mainTopic: "Âm mũi + L/R + W/Y",
   estimatedMinutes: 90,
   lessonType: "abc-ipa-foundation",
   status: "ready",
@@ -37,7 +37,7 @@ export const lesson07Consonants2 = {
   ],
   architecture: {
     preserveSectionFlow: true,
-    source: "Buổi 7 MD: Consonants 2",
+    source: "Buổi 7 MD: Âm mũi + L/R + W/Y",
     sourceOfTruth: "Buổi 7 MD"
   },
   metadata: {
@@ -534,7 +534,7 @@ export const lesson07Consonants2 = {
   ],
   mindmap: {
     type: "structured",
-    center: "Consonants 2 - Phụ âm gió & Âm khó",
+    center: "Âm mũi + L/R + W/Y",
     branches: [
       {
         label: "Âm gió (Fricatives)",
@@ -555,7 +555,7 @@ export const lesson07Consonants2 = {
     ]
   },
   homeworkRich: {
-    title: "Bài tập về nhà - Buổi 7: Phụ âm gió & Âm khó",
+    title: "Bài tập về nhà - Buổi 7: Âm mũi + L/R + W/Y",
     submit: "Nộp file ghi âm qua nhóm lớp Zalo.",
     deadline: "Trước buổi học tiếp theo",
     tasks: [
@@ -583,6 +583,6 @@ export const lesson07Consonants2 = {
     "Luyện phát âm 15 phụ âm trước gương.",
     "Ghi âm 8 cặp từ tối thiểu phân biệt hơi/rung.",
     "Ghi âm đoạn văn ngắn tự giới thiệu.",
-    "Chuẩn bị bài tiếp theo Buổi 8 về trọng âm và âm Schwa."
+    "Chuẩn bị bài tiếp theo Buổi 8: Tổng ôn toàn bộ IPA."
   ]
 };

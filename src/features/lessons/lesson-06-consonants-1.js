@@ -2,16 +2,16 @@ export const lesson06Consonants1 = {
   id: 6,
   lessonNumber: 6,
   dayNumber: 6,
-  title: "BUỔI 6: Consonants 1 – Phụ âm bật, âm mũi, âm cuối",
-  titleEn: "Stop Sounds & Nasals",
-  titleVi: "Phụ âm bật & Âm mũi",
+  title: "Âm gió",
+  titleEn: "Âm gió",
+  titleVi: "Âm gió",
   subtitle: "Bật âm rõ, không nuốt âm cuối",
   cefrLevel: "A0-A1",
   unit: "ABC & IPA Foundation",
   module: "ABC & IPA Foundation",
   track: "consonants-1",
   slug: "consonants-1-stop-sounds-and-nasals",
-  mainTopic: "Consonants 1",
+  mainTopic: "Âm gió",
   estimatedMinutes: 75,
   lessonType: "abc-ipa-foundation",
   status: "ready",
@@ -35,7 +35,7 @@ export const lesson06Consonants1 = {
   ],
   architecture: {
     preserveSectionFlow: true,
-    source: "Buổi 6 MD: Consonants 1",
+    source: "Buổi 6 MD: Âm gió",
     sourceOfTruth: "Buổi 6 MD"
   },
   metadata: {
@@ -413,7 +413,7 @@ export const lesson06Consonants1 = {
     }
   ],
   homeworkRich: {
-    title: "Bài tập về nhà - Buổi 6: Phụ âm bật, âm mũi & âm cuối",
+    title: "Bài tập về nhà - Buổi 6: Âm gió",
     submit: "Nộp file ghi âm qua nhóm lớp Zalo.",
     deadline: "Trước buổi học tiếp theo",
     tasks: [
@@ -466,7 +466,7 @@ export const lesson06Consonants1 = {
       {
         title: "Nhiệm vụ 5: Chuẩn bị buổi sau",
         badge: "Làm trước",
-        desc: "Xem trước Buổi 7 về Consonants 2 – Âm gió và âm khó.",
+        desc: "Xem trước Buổi 7: Âm mũi + L/R + W/Y.",
         items: [
           "/f/ và /v/ khác nhau ở độ rung.",
           "/s/ và /z/ khác nhau ở độ rung.",
@@ -480,6 +480,6 @@ export const lesson06Consonants1 = {
     "Ghi âm đọc 18 từ vựng chứa âm bật, âm mũi.",
     "Ghi âm đọc các cặp âm cuối: cap - cat - cab, back - bag, sin - sing.",
     "Ghi âm đọc 8 câu luyện tập trong buổi học.",
-    "Chuẩn bị bài học Buổi 7 về các phụ âm gió và âm khó."
+    "Chuẩn bị bài học Buổi 7: Âm mũi + L/R + W/Y."
   ]
 };

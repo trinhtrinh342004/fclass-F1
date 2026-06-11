@@ -2,16 +2,16 @@ export const lesson08IpaReview = {
   id: 8,
   lessonNumber: 8,
   dayNumber: 8,
-  title: "BUỔI 8: IPA Review + Word Stress – Tổng ôn IPA và trọng âm",
-  titleEn: "IPA Review + Word Stress",
-  titleVi: "Tổng ôn IPA và trọng âm",
+  title: "Tổng ôn toàn bộ IPA",
+  titleEn: "Tổng ôn toàn bộ IPA",
+  titleVi: "Tổng ôn toàn bộ IPA",
   subtitle: "Tổng ôn ABC, spelling, IPA, âm cuối và trọng âm cơ bản",
   cefrLevel: "A0-A1",
   unit: "ABC & IPA Foundation",
   module: "ABC & IPA Foundation",
   track: "ipa-review",
   slug: "ipa-review-word-stress-tong-on",
-  mainTopic: "IPA Review + Word Stress",
+  mainTopic: "Tổng ôn toàn bộ IPA",
   estimatedMinutes: 90,
   lessonType: "abc-ipa-foundation",
   status: "ready",
@@ -37,7 +37,7 @@ export const lesson08IpaReview = {
   ],
   architecture: {
     preserveSectionFlow: true,
-    source: "Buổi 8 MD: IPA Review + Word Stress",
+    source: "Buổi 8 MD: Tổng ôn toàn bộ IPA",
     sourceOfTruth: "Buổi 8 MD"
   },
   metadata: {
@@ -493,7 +493,7 @@ export const lesson08IpaReview = {
   // Mindmap
   mindmap: {
     type: "structured",
-    center: "ABC & IPA Foundation",
+    center: "Tổng ôn toàn bộ IPA",
     branches: [
       {
         label: "Alphabet",
@@ -535,7 +535,7 @@ export const lesson08IpaReview = {
   },
   // Homework / post-module tasks
   homeworkRich: {
-    title: "Bài tập sau module – ABC & IPA Foundation",
+    title: "Bài tập sau module – Tổng ôn toàn bộ IPA",
     submit: "Nộp file ghi âm qua nhóm lớp Zalo.",
     deadline: "Trước buổi học tiếp theo",
     tasks: [

@@ -90,23 +90,23 @@ export const lesson04LongVowels = {
   id: 4,
   lessonNumber: 4,
   dayNumber: 4,
-  title: "BUỔI 4: Long Vowels - Nguyên âm dài",
-  titleEn: "Long Vowels",
-  titleVi: "Nguyên âm dài",
+  title: "Nguyên âm đôi",
+  titleEn: "Nguyên âm đôi",
+  titleVi: "Nguyên âm đôi",
   subtitle: "Hiểu dấu /ː/ và biết kéo dài âm đúng cách",
   cefrLevel: "A0-A1",
   unit: "ABC & IPA Foundation",
   module: "ipa-bootcamp",
   track: "long-vowels",
   slug: "long-vowels",
-  mainTopic: "Long Vowels",
+  mainTopic: "Nguyên âm đôi",
   estimatedMinutes: 75,
   lessonType: "abc-ipa-foundation",
   status: "ready",
   sectionFlow: SECTION_FLOW,
   architecture: {
     preserveSectionFlow: true,
-    source: "Buổi 4 MD: Long Vowels",
+    source: "Buổi 4 MD: Nguyên âm đôi",
     sourceOfTruth: "Buổi 4 MD",
   },
   metadata: {
@@ -128,7 +128,7 @@ export const lesson04LongVowels = {
     "Nghe âm mẫu, chọn đúng âm và ghi âm để giáo viên sửa.",
   ],
   ipa: {
-    topic: "Long Vowels - Nguyên âm dài",
+    topic: "Nguyên âm đôi",
     outcome: "Dấu /ː/ trong IPA nghĩa là âm đó cần được kéo dài hơn một chút.",
     shortReview: SHORT_REVIEW,
     sounds: LONG_SOUNDS,
@@ -201,7 +201,7 @@ export const lesson04LongVowels = {
     { q: "Nghe door. Chọn âm chính:", audio: "door", options: ["/ɒ/", "/ɔː/", "/ɑː/"], answer: 1 },
   ],
   mindmap: {
-    center: "Long Vowels - Nguyên âm dài",
+    center: "Nguyên âm đôi",
     branches: [
       { label: "Dấu /ː/", items: ["Kéo dài âm hơn"] },
       { label: "Long vowels", items: ["/iː/ see", "/uː/ food", "/ɑː/ car", "/ɔː/ door", "/ɜː/ bird"] },
@@ -211,7 +211,7 @@ export const lesson04LongVowels = {
     ],
   },
   homeworkRich: {
-    title: "Bài tập về nhà - Buổi 4: Long Vowels",
+    title: "Bài tập về nhà - Buổi 4: Nguyên âm đôi",
     submit: "Nộp voice note qua nhóm lớp hoặc cho giáo viên kiểm tra.",
     deadline: "Trước buổi học tiếp theo",
     tasks: [
@@ -219,7 +219,7 @@ export const lesson04LongVowels = {
       { title: "Đọc 15 từ", badge: "Bắt buộc", desc: "Ghi âm nhóm từ nguyên âm dài.", items: ["see", "green", "teacher", "food", "moon", "school", "car", "park", "father", "door", "four", "morning", "bird", "girl", "nurse"] },
       { title: "Đọc cặp ngắn/dài", badge: "Luyện thêm", desc: "Tạo sự khác biệt rõ giữa short và long.", items: ["sit - seat", "ship - sheep", "full - fool", "pull - pool", "cot - caught", "not - nought"] },
       { title: "Đọc 5 câu", badge: "Bắt buộc", desc: "Ghi âm câu mẫu của buổi học.", items: ["I see.", "I like food.", "This is a car.", "This is a door.", "This is a bird."] },
-      { title: "Chuẩn bị buổi sau", badge: "Preview", desc: "Buổi 5 học Diphthongs - Nguyên âm đôi.", items: ["/eɪ/ -> say", "/aɪ/ -> time", "/ɔɪ/ -> boy"] },
+      { title: "Chuẩn bị buổi sau", badge: "Preview", desc: "Buổi 5 học Phụ âm bật + âm bật đôi.", items: ["/eɪ/ -> say", "/aɪ/ -> time", "/ɔɪ/ -> boy"] },
     ],
   },
   homework: [
@@ -227,6 +227,6 @@ export const lesson04LongVowels = {
     "Ghi âm 15 từ nguyên âm dài.",
     "Ghi âm cặp âm ngắn/dài: sit-seat, ship-sheep, full-fool, pull-pool, cot-caught, not-nought.",
     "Ghi âm 5 câu mẫu của buổi học.",
-    "Chuẩn bị Buổi 5: Diphthongs - Nguyên âm đôi.",
+    "Chuẩn bị Buổi 5: Phụ âm bật + âm bật đôi.",
   ],
 };
