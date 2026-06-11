@@ -1538,7 +1538,7 @@ function renderVowel2Section(lesson, section){
           <p>Hôm nay mình học 6 nguyên âm đơn thường gặp.</p>
           <div class="vowel2-sound-hero">${data.sounds.map((sound, index)=>`
             <button onclick="speakById('${regTxt(groups[sound].words[0].word)}')">
-              <span>${escAttr(groups[sound].words[0].icon)}</span><b>${escAttr(sound)}</b><small>${index < 2 ? "ngắn / dài" : groups[sound].label}</small>
+              <span>${escAttr(groups[sound].words[0].icon)}</span><b>${escAttr(sound)}</b>
             </button>`).join("")}
           </div>
         </div>`;
