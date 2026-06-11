@@ -35,6 +35,7 @@ const alphabetFlashcardState = {
   openLetters: new Set(),
 };
 let vowel2SentenceGameState = null;
+let vowel2SentenceGameSource = "confusingSentences";
 const alphabetSingleGameStates = new Map();
 
 const STORAGE_KEY = "gateway_a1_progress_v2";
@@ -1926,8 +1927,9 @@ function renderVowel2Section(lesson, section){
     window.vowel2SingleSoundPhase = {};
     window.vowel2ComparisonPairIndex = 0;
     clearVowel2PairSequence();
-    if (section === "vowel2_word_practice") {
-      vowel2SentenceGameState = createVowel2SentenceGameState(data.confusingSentences || []);
+    if (section === "vowel2_word_practice" || section === "vowel2_pairs_sentences") {
+      vowel2SentenceGameSource = section === "vowel2_pairs_sentences" ? "advancedTrapSentences" : "confusingSentences";
+      vowel2SentenceGameState = createVowel2SentenceGameState(data[vowel2SentenceGameSource] || []);
     }
   }
 
@@ -1963,16 +1965,7 @@ function renderVowel2Section(lesson, section){
     case "vowel2_word_practice":
       return `${header}<div id="vowel2SentenceGameHost">${renderVowel2SentenceGame(data.confusingSentences || [])}</div>`;
     case "vowel2_pairs_sentences":
-      return `${header}
-        <h3 class="vowel2-subtitle">Minimal pairs</h3>
-        ${renderVowel2Comparison(data.minimalPairs, "A", "B", "Nghe từng bên, sau đó cho học sinh đọc lại.")}
-        <h3 class="vowel2-subtitle">Đọc câu ngắn</h3>
-        <div class="vowel2-sentences">${data.sentences.map((item,index)=>`
-          <article><b>${index + 1}</b><p>${highlightSentence(item.text, item.focusWords)}</p>
-          <button onclick="speakById('${regTxt(item.text)}')">Nghe câu</button>
-          <button id="mic-vowel2sentence${index}" onclick="recordById('vowel2sentence${index}', '${regTxt(item.text)}')">Luyện đọc</button>
-          <div id="speakRes-vowel2sentence${index}" class="dlg-result" style="display:none"></div></article>`).join("")}</div>
-        <div class="vowel2-teacher-tip">Giáo viên nhắc: đọc chậm trước, sau đó đọc tự nhiên.</div>`;
+      return `${header}<div id="vowel2SentenceGameHost">${renderVowel2SentenceGame(data.advancedTrapSentences || [])}</div>`;
     case "vowel2_game_record_test":
       return `${header}${renderVowel2FinalTabs(lesson)}`;
     default:
@@ -2355,20 +2348,20 @@ function renderVowel2SentenceGame(sentences){
   const item = state.items[state.index];
   const status = state.statuses[state.index];
   const canContinue = status !== "idle";
-  return `<section class="vowel2-sentence-game ${status === "good" ? "is-good" : status === "practice" ? "is-practice" : ""}">
+  return `<section class="vowel2-sentence-game ${vowel2SentenceGameSource === "advancedTrapSentences" ? "is-advanced" : ""} ${status === "good" ? "is-good" : status === "practice" ? "is-practice" : ""}">
     <div class="vowel2-sentence-meta">
       <strong>Câu ${state.index + 1}/${state.items.length}</strong>
       <span>${state.hasRead ? "Học sinh đã đọc" : "Nghe mẫu rồi đọc to"}</span>
     </div>
     <div class="vowel2-sentence-dots" aria-label="Trạng thái các câu">
-      ${state.statuses.map((dotStatus, index)=>`<span class="${dotStatus}" title="Câu ${index + 1}: ${dotStatus === "good" ? "Đọc tốt" : dotStatus === "practice" ? "Cần luyện lại" : "Chưa làm"}"></span>`).join("")}
+      ${state.statuses.map((dotStatus, index)=>`<span class="${dotStatus} ${index === state.index ? "current" : ""}" title="Câu ${index + 1}: ${dotStatus === "good" ? "Đọc tốt" : dotStatus === "practice" ? "Cần luyện lại" : "Chưa làm"}"></span>`).join("")}
     </div>
     <article class="vowel2-sentence-card">
       <p class="vowel2-sentence-text">${highlightSentence(item.sentence, item.highlightWords)}</p>
       <div class="vowel2-sentence-actions">
         <button class="vowel2-sentence-listen" onclick="_vowel2SentencePlay()">${SPEAKER_ICON_SVG} Nghe mẫu</button>
         <button class="vowel2-sentence-read ${state.hasRead ? "active" : ""}" onclick="_vowel2SentenceRead()">Em đã đọc</button>
-        <button class="vowel2-sentence-trap-toggle" onclick="_vowel2SentenceReveal()">${state.revealedTrap ? "Ẩn bẫy dễ nhầm" : "Hiện bẫy dễ nhầm"}</button>
+        <button class="vowel2-sentence-trap-toggle" onclick="_vowel2SentenceReveal()">${state.revealedTrap ? "Ẩn bẫy âm" : "Hiện bẫy âm"}</button>
       </div>
       ${state.revealedTrap ? renderVowel2SentenceTraps(item.trap) : ""}
       <div class="vowel2-sentence-marking" aria-label="Giáo viên chấm nhanh">
@@ -2413,7 +2406,7 @@ function renderVowel2SentenceSummary(state){
 function renderVowel2SentenceGameHost(){
   const host = document.getElementById("vowel2SentenceGameHost");
   const lesson = LESSONS.find(item=>item.id === STATE.lessonId);
-  if (host) host.innerHTML = renderVowel2SentenceGame(lesson?.vowelLesson?.confusingSentences || []);
+  if (host) host.innerHTML = renderVowel2SentenceGame(lesson?.vowelLesson?.[vowel2SentenceGameSource] || []);
 }
 
 function _vowel2SentencePlay(){
@@ -2466,7 +2459,7 @@ function _vowel2SentenceRetry(){
 function _vowel2SentenceRestart(){
   const lesson = LESSONS.find(item=>item.id === STATE.lessonId);
   stopCurrentSpeech();
-  vowel2SentenceGameState = createVowel2SentenceGameState(lesson?.vowelLesson?.confusingSentences || []);
+  vowel2SentenceGameState = createVowel2SentenceGameState(lesson?.vowelLesson?.[vowel2SentenceGameSource] || []);
   renderVowel2SentenceGameHost();
 }
 
