@@ -266,9 +266,77 @@ const ADVANCED_TRAP_SENTENCES = [
 }));
 
 const LISTEN_GAME = [
-  ["sheep", "/iː/"], ["ship", "/ɪ/"], ["bed", "/e/"], ["bad", "/æ/"], ["sofa", "/ə/"],
-  ["cup", "/ʌ/"], ["seat", "/iː/"], ["sit", "/ɪ/"], ["pen", "/e/"], ["pan", "/æ/"],
-].map(([word, answer]) => ({ word, answer }));
+  {
+    id: "sheep-i-long",
+    word: "sheep",
+    audioText: "sheep",
+    correctSound: "/iː/",
+    explanation: "sheep có âm dài /iː/."
+  },
+  {
+    id: "ship-i-short",
+    word: "ship",
+    audioText: "ship",
+    correctSound: "/ɪ/",
+    explanation: "ship có âm ngắn /ɪ/."
+  },
+  {
+    id: "bed-e",
+    word: "bed",
+    audioText: "bed",
+    correctSound: "/e/",
+    explanation: "bed có âm /e/."
+  },
+  {
+    id: "bad-ae",
+    word: "bad",
+    audioText: "bad",
+    correctSound: "/æ/",
+    explanation: "bad có âm /æ/."
+  },
+  {
+    id: "sofa-schwa",
+    word: "sofa",
+    audioText: "sofa",
+    correctSound: "/ə/",
+    explanation: "sofa có âm /ə/ ở cuối."
+  },
+  {
+    id: "cup-uh",
+    word: "cup",
+    audioText: "cup",
+    correctSound: "/ʌ/",
+    explanation: "cup có âm /ʌ/."
+  },
+  {
+    id: "seat-i-long",
+    word: "seat",
+    audioText: "seat",
+    correctSound: "/iː/",
+    explanation: "seat có âm dài /iː/."
+  },
+  {
+    id: "sit-i-short",
+    word: "sit",
+    audioText: "sit",
+    correctSound: "/ɪ/",
+    explanation: "sit có âm ngắn /ɪ/."
+  },
+  {
+    id: "pen-e",
+    word: "pen",
+    audioText: "pen",
+    correctSound: "/e/",
+    explanation: "pen có âm /e/."
+  },
+  {
+    id: "pan-ae",
+    word: "pan",
+    audioText: "pan",
+    correctSound: "/æ/",
+    explanation: "pan có âm /æ/."
+  }
+];
 
 export const lesson02SpellingLetterSounds = {
   id: 2,

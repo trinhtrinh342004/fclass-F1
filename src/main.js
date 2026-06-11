@@ -2875,8 +2875,7 @@ function renderVowel2FinalTabs(lesson){
 function renderVowel2ListenGame(data){
   const state = vowel2GameState;
   if (!state) return "";
-  const rounds = data.listenGame;
-  const total = rounds.length;
+  const total = state.items.length;
 
   if (state.completed || state.index >= total) {
     const wrongSounds = Array.from(state.wrongChoices);
@@ -2908,14 +2907,24 @@ function renderVowel2ListenGame(data){
     `;
   }
 
-  const round = rounds[state.index];
+  const round = state.items[state.index];
   const progressPercent = Math.round((state.index / total) * 100);
+
+  if (typeof import.meta !== "undefined" && import.meta.env?.DEV) {
+    console.debug("[Lesson2 ListenGame]", {
+      index: state.index,
+      id: round.id,
+      word: round.word,
+      audioText: round.audioText,
+      correctSound: round.correctSound
+    });
+  }
 
   let feedbackHtml = "";
   if (state.answered) {
-    feedbackHtml = `<div class="lesson2-feedback-box lesson2-feedback-green">Đúng rồi! "${round.word}" có âm ${round.answer}</div>`;
+    feedbackHtml = `<div class="lesson2-feedback-box lesson2-feedback-green">Đúng rồi! ‘${round.word}’ có âm ${round.correctSound}</div>`;
   } else if (state.wrongChoices.size > 0) {
-    feedbackHtml = `<div class="lesson2-feedback-box lesson2-feedback-orange">Chưa đúng, nghe lại và chọn lại nhé!</div>`;
+    feedbackHtml = `<div class="lesson2-feedback-box lesson2-feedback-orange">Chưa đúng. Nghe lại và chọn lại nhé.</div>`;
   }
 
   return `
@@ -2943,7 +2952,7 @@ function renderVowel2ListenGame(data){
             let btnClass = "lesson2-btn-gray";
             let disabled = state.answered ? "disabled" : "";
             
-            if (state.answered && sound === round.answer) {
+            if (state.answered && sound === round.correctSound) {
               btnClass = "lesson2-btn-green";
             } else if (state.wrongChoices.has(sound)) {
               btnClass = "lesson2-btn-red";
@@ -3452,7 +3461,7 @@ window.showVowel2Tab = function(tab){
 
 window._vowel2PlayGameWord = function(){
   const round = vowel2GameState?.items[vowel2GameState.index];
-  if(round) playEnglishAudio(round.word);
+  if(round) playEnglishAudio(round.audioText, { rate: 0.9, pitch: 1 });
 };
 
 window._vowel2ChooseSound = function(button, choice){
@@ -3460,18 +3469,18 @@ window._vowel2ChooseSound = function(button, choice){
   if(!state || state.answered) return;
   const round = state.items[state.index];
   const resolvedChoice = TXT_REG[choice] || choice;
-  const correct = resolvedChoice === round.answer;
+  const correct = resolvedChoice === round.correctSound;
   if(correct){
     const neededRetry = state.wrongChoices.size > 0;
     if(!neededRetry) state.score += 1;
     state.statuses[state.index] = neededRetry ? "retry" : "correct";
     state.answered = true;
-    state.feedback = `Đúng rồi! Đây là âm ${round.answer}.`;
+    state.feedback = `Đúng rồi! ‘${round.word}’ có âm ${round.correctSound}`;
   }else{
     state.wrongChoices.add(choice);
     state.wrongChoices.add(resolvedChoice);
     state.statuses[state.index] = "retry";
-    state.feedback = "Chưa đúng, nghe lại và chọn lại nhé.";
+    state.feedback = "Chưa đúng. Nghe lại và chọn lại nhé.";
   }
   renderVowel2GameHost();
 };
