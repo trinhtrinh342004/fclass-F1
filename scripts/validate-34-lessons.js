@@ -67,7 +67,17 @@ check(lesson01?.metadata?.localContentAuthoritative === true, "Lesson 1 local Al
 check(lesson01?.sectionFlow?.length === 21, "Lesson 1 Alphabet sidebar must have exactly 21 sections.");
 check(lesson01?.sectionFlow?.every((section) => section.startsWith("alphabet_")), "Lesson 1 must use dedicated alphabet sections.");
 check(lesson01?.alphabetFoundation?.letters?.length === 26, "Lesson 1 must have 26 alphabet letter cards.");
-check(lesson01?.alphabetFoundation?.letters?.every((item) => item.pronunciation && item.reading), "Lesson 1 letter cards must include pronunciation and reading text.");
+check(
+  lesson01?.alphabetFoundation?.letters?.every((item) => item.pronunciation && item.reading && item.meaning && item.group),
+  "Lesson 1 letter cards must include pronunciation, reading text, meaning, and group."
+);
+check(
+  arrayEquals(
+    ["A-G", "H-N", "O-U", "V-Z"].map((group) => lesson01?.alphabetFoundation?.letters?.filter((item) => item.group === group).length),
+    [7, 7, 7, 5]
+  ),
+  "Lesson 1 grouped letter cards must preserve the 7/7/7/5 group sizes."
+);
 check(lesson01?.alphabetFoundation?.groupAG?.length === 7, "Lesson 1 A-G group must have 7 interactive letter items.");
 check(
   arrayEquals(lesson01?.alphabetFoundation?.groupAG?.map((item) => item.uppercase), ["A", "B", "C", "D", "E", "F", "G"]),
@@ -163,9 +173,6 @@ check(
   "Lesson 1 renderer must not contain forbidden English UI labels."
 );
 check([
-  "Nghe chữ cái",
-  "Nghe từ vựng",
-  "Đọc theo",
   "Nghe lại",
   "Kiểm tra",
   "Câu tiếp theo",
@@ -182,6 +189,30 @@ check([
   "Hoàn thành",
   "Mở game bảng chữ cái",
 ].every((label) => alphabetRenderer.includes(label)), "Lesson 1 renderer must contain the requested Vietnamese controls.");
+const alphabetFlashcardRenderer = mainSource.slice(
+  mainSource.indexOf("function renderAlphabetFlashcardSection"),
+  mainSource.indexOf("function renderAlphabetWordGame")
+);
+check([
+  "Chọn nhóm chữ, bấm vào thẻ để xem từ vựng.",
+  "A-G",
+  "H-N",
+  "O-U",
+  "V-Z",
+  "Xem lại chữ",
+  "_alphabetSelectCardGroup",
+  "_alphabetOpenFlashcard",
+  "_alphabetFlashcardSpeak",
+].every((label) => alphabetFlashcardRenderer.includes(label)), "Lesson 1 flashcards must contain grouped flip-card controls.");
+check(
+  ["Nghe chữ cái", "Nghe từ vựng", "Đọc theo", ">Nghe lại</button>"].every((label) => !alphabetFlashcardRenderer.includes(label)),
+  "Lesson 1 flashcards must not contain the removed long-form speech buttons."
+);
+check(
+  alphabetFlashcardRenderer.includes("alphabetFlashcardState.openLetters.clear()")
+    && alphabetFlashcardRenderer.includes("speakEnglish(TXT_REG[wordSpeechId], { isWord: true })"),
+  "Lesson 1 flashcards must reset open cards on group change and use shared English speech."
+);
 check([
   "Bắt đầu học",
   "Hiện chữ thường",
@@ -268,7 +299,7 @@ check(
   "Lesson 2 single-sound renderer must use shared media fallback helpers and no /i:/ special state."
 );
 check(lesson02?.track === "single-vowels-1", "Lesson 2 must use the dedicated single-vowels renderer.");
-check(lesson02?.sectionFlow?.length === 14, "Lesson 2 sidebar must have exactly 14 grouped sections.");
+check(lesson02?.sectionFlow?.length === 13, "Lesson 2 sidebar must have exactly 13 grouped sections.");
 check(lesson02?.sectionFlow?.every((section) => section.startsWith("vowel2_")), "Lesson 2 must use dedicated vowel2 sections.");
 check(lesson02?.vowelLesson?.sounds?.length === 6, "Lesson 2 must include 6 monophthongs.");
 check(lesson02?.vowelLesson?.wordGroups?.length === 6, "Lesson 2 must include 6 vocabulary groups.");

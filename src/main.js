@@ -30,6 +30,10 @@ const STATE = {
   sectionIdx: 0,
   sections: [],
 };
+const alphabetFlashcardState = {
+  group: "A-G",
+  openLetters: new Set(),
+};
 
 const STORAGE_KEY = "gateway_a1_progress_v2";
 const IPA34_PROGRESS_MIGRATED_KEY = "gateway_a1_progress_v2_ipa34_migrated";
@@ -941,8 +945,7 @@ function renderAlphabetSection(lesson, section){
           <div class="alphabet-video-frame"><iframe src="${escAttr(alphabet.song?.embedUrl || "")}" title="Alphabet Song / A–Z" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
         </div>`;
     case "alphabet_cards":
-      return `${header}<p class="alphabet-instruction">Bấm nút để nghe và đọc theo.</p>
-        <div class="alphabet-letter-grid">${(alphabet.letters || []).map(renderAlphabetLetterCard).join("")}</div>`;
+      return `${header}${renderAlphabetFlashcardSection(alphabet.letters || [])}`;
     case "alphabet_vowels":
       return `${header}<p class="alphabet-instruction">5 chữ cái đặc biệt</p>
         <div class="alphabet-vowel-hero">A E I O U</div>
@@ -1073,17 +1076,103 @@ function renderAlphabetGroup(letters){
   </div>`;
 }
 
+function renderAlphabetFlashcardSection(items){
+  alphabetFlashcardState.group = "A-G";
+  alphabetFlashcardState.openLetters.clear();
+  return `<div class="alphabet-flashcard-section">
+    <p class="alphabet-instruction">Chọn nhóm chữ, bấm vào thẻ để xem từ vựng.</p>
+    ${renderAlphabetGroupTabs()}
+    <div class="alphabet-letter-grid" data-alphabet-flashcard-grid>
+      ${renderAlphabetFlashcardGroup(items, alphabetFlashcardState.group)}
+    </div>
+  </div>`;
+}
+
+function renderAlphabetGroupTabs(){
+  return `<div class="alphabet-group-tabs" role="tablist" aria-label="Chọn nhóm chữ cái">
+    ${["A-G", "H-N", "O-U", "V-Z"].map(group=>`
+      <button type="button" role="tab" aria-selected="${group === alphabetFlashcardState.group}" class="${group === alphabetFlashcardState.group ? "active" : ""}" onclick="_alphabetSelectCardGroup(this, '${group}')">${group.replace("-", "–")}</button>
+    `).join("")}
+  </div>`;
+}
+
+function renderAlphabetFlashcardGroup(items, group){
+  return items.filter(item=>item.group === group).map(renderAlphabetLetterCard).join("");
+}
+
 function renderAlphabetLetterCard(item){
-  return `<article class="alphabet-letter-card">
-    <div class="alphabet-letter-pair">${item.letter} <span>${item.lower}</span></div>
-    <div class="alphabet-pronunciation">${escAttr(item.pronunciation || "")}</div>
-    <div class="alphabet-letter-icon">${item.icon}</div><strong>${escAttr(item.word)}</strong><p>${escAttr(item.reading)}</p>
-    <div class="alphabet-card-actions">
-      <button onclick="speakById('${regTxt(item.letter)}')">Nghe chữ cái</button>
-      <button onclick="speakById('${regTxt(item.word)}')">Nghe từ vựng</button>
-      <button onclick="speakById('${regTxt(item.reading)}')">Đọc theo</button>
+  const letterSpeechId = regTxt(item.letter);
+  const wordSpeechId = regTxt(item.word);
+  const isOpen = alphabetFlashcardState.openLetters.has(item.letter);
+  const letterButtons = `<div class="alphabet-letter-pair">
+    <button type="button" onclick="_alphabetFlashcardSpeak(event, '${letterSpeechId}')" aria-label="Nghe chữ ${escAttr(item.letter)}">${escAttr(item.letter)}</button>
+    <button type="button" onclick="_alphabetFlashcardSpeak(event, '${letterSpeechId}')" aria-label="Nghe chữ ${escAttr(item.lower)}">${escAttr(item.lower)}</button>
+  </div>`;
+  const iconButton = `<button class="alphabet-letter-icon" type="button" onclick="_alphabetFlashcardSpeak(event, '${wordSpeechId}')" aria-label="Nghe từ ${escAttr(item.word)}">${item.icon}</button>`;
+
+  return `<article class="alphabet-letter-card${isOpen ? " is-open" : ""}" role="button" tabindex="0" aria-expanded="${isOpen}" data-letter="${escAttr(item.letter)}" onclick="_alphabetOpenFlashcard(this, '${wordSpeechId}')" onkeydown="_alphabetFlashcardKeydown(event, this, '${wordSpeechId}')">
+    <div class="alphabet-letter-card-inner">
+      <div class="alphabet-letter-face alphabet-letter-front">
+        ${letterButtons}
+        ${iconButton}
+      </div>
+      <div class="alphabet-letter-face alphabet-letter-back">
+        ${letterButtons}
+        ${iconButton}
+        <span class="alphabet-pronunciation">${escAttr(item.letterSound || item.pronunciation || "")}</span>
+        <button class="alphabet-card-word" type="button" onclick="_alphabetFlashcardSpeak(event, '${wordSpeechId}')">${escAttr(item.word)}</button>
+        <span class="alphabet-card-meaning">${escAttr(item.meaning || "")}</span>
+        <p>${escAttr(item.chant || item.reading || "")}</p>
+        <div class="alphabet-card-actions">
+          <button class="alphabet-card-speaker" type="button" onclick="_alphabetFlashcardSpeak(event, '${wordSpeechId}')" aria-label="Nghe lại từ ${escAttr(item.word)}" title="Nghe lại">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"></path><path d="M16 9.5c1.3 1.3 1.3 3.7 0 5M18.5 7c2.7 2.7 2.7 7.3 0 10"></path></svg>
+          </button>
+          <button class="alphabet-card-reset" type="button" onclick="_alphabetResetFlashcard(event, this)">Xem lại chữ</button>
+        </div>
+      </div>
     </div>
   </article>`;
+}
+
+function _alphabetSelectCardGroup(button, group){
+  alphabetFlashcardState.group = group;
+  alphabetFlashcardState.openLetters.clear();
+  const section = button.closest(".alphabet-flashcard-section");
+  section.querySelectorAll(".alphabet-group-tabs button").forEach(tab=>{
+    const active = tab === button;
+    tab.classList.toggle("active", active);
+    tab.setAttribute("aria-selected", String(active));
+  });
+  const lesson = LESSONS.find(item=>item.id === STATE.lessonId);
+  const items = lesson?.alphabetFoundation?.letters || [];
+  section.querySelector("[data-alphabet-flashcard-grid]").innerHTML = renderAlphabetFlashcardGroup(items, group);
+}
+
+function _alphabetOpenFlashcard(card, wordSpeechId){
+  if(card.classList.contains("is-open")) return;
+  alphabetFlashcardState.openLetters.add(card.dataset.letter);
+  card.classList.add("is-open");
+  card.setAttribute("aria-expanded", "true");
+  speakEnglish(TXT_REG[wordSpeechId], { isWord: true });
+}
+
+function _alphabetFlashcardKeydown(event, card, wordSpeechId){
+  if(event.target !== card || (event.key !== "Enter" && event.key !== " ")) return;
+  event.preventDefault();
+  _alphabetOpenFlashcard(card, wordSpeechId);
+}
+
+function _alphabetFlashcardSpeak(event, speechId){
+  event.stopPropagation();
+  speakEnglish(TXT_REG[speechId], { isWord: true });
+}
+
+function _alphabetResetFlashcard(event, button){
+  event.stopPropagation();
+  const card = button.closest(".alphabet-letter-card");
+  alphabetFlashcardState.openLetters.delete(card.dataset.letter);
+  card.classList.remove("is-open");
+  card.setAttribute("aria-expanded", "false");
 }
 
 function renderAlphabetWordGame(word, letters=[]){
@@ -1618,34 +1707,19 @@ function renderVowel2Section(lesson, section){
     case "vowel2_short_i":
       return `${header}${renderVowel2SingleSoundLesson(groups["/ɪ/"], 2100)}`;
     case "vowel2_compare_i":
-      return `${header}${renderVowel2FocusComparison(data.comparisonPairs || [])}`;
+      return `${header}${renderVowel2FocusComparison(data.comparisonPairs || [], "/ɪ/", "/iː/")}`;
     case "vowel2_sound_e":
       return `${header}${renderVowel2SingleSoundLesson(groups["/e/"], 2200)}`;
     case "vowel2_sound_ae":
       return `${header}${renderVowel2SingleSoundLesson(groups["/æ/"], 2300)}`;
     case "vowel2_compare_e_ae":
-      return `${header}${renderVowel2Comparison(
-        data.minimalPairs.slice(3, 5), "/e/", "/æ/",
-        "Giáo viên cho học sinh đọc chậm: /e/ mở vừa, /æ/ hạ cằm và mở rộng hơn."
-      )}`;
+      return `${header}${renderVowel2FocusComparison(data.comparisonPairsE || [], "/e/", "/æ/")}`;
     case "vowel2_sound_schwa":
       return `${header}${renderVowel2SingleSoundLesson(groups["/ə/"], 2400)}`;
     case "vowel2_sound_uh":
       return `${header}${renderVowel2SingleSoundLesson(groups["/ʌ/"], 2500)}`;
     case "vowel2_compare_schwa_caret":
-      return `${header}
-        <div class="vowel2-label-compare"><span>/ə/ = nhẹ</span><strong>/ʌ/ = rõ</strong></div>
-        <div class="vowel2-schwa-compare">
-          ${[
-            ["about", "/əˈbaʊt/", "cup", "/kʌp/"],
-            ["sofa", "/ˈsoʊfə/", "sun", "/sʌn/"],
-          ].map(([a,ai,b,bi])=>`<article><div><b>${escAttr(a)}</b><span>${escAttr(ai)}</span><small>đọc nhẹ</small></div><i>≠</i><div><b>${escAttr(b)}</b><span>${escAttr(bi)}</span><small>đọc rõ</small></div></article>`).join("")}
-        </div>
-        <div class="vowel2-teacher-tip">Giáo viên nhắc: /ə/ đọc nhẹ như lướt qua. /ʌ/ đọc rõ hơn.</div>`;
-    case "vowel2_mouth_grid":
-      return `${header}<div class="vowel2-mouth-grid">${data.wordGroups.map(group=>`
-        <article><b>${escAttr(group.symbol)}</b>${renderPronunciationMouthMedia(getPronunciationMedia(2, group.sectionKey), true)}<p>${escAttr(group.guide)}</p>
-        <button class="vowel2-speaker-btn" onclick="_vowel2SpeakSound('${escAttr(group.symbol)}')" title="Nghe âm ${escAttr(group.symbol)}" aria-label="Nghe âm ${escAttr(group.symbol)}">${SPEAKER_ICON_SVG}</button></article>`).join("")}</div>`;
+      return `${header}${renderVowel2FocusComparison(data.comparisonPairsSchwa || [], "/ə/", "/ʌ/")}`;
     case "vowel2_word_practice":
       return `${header}<div class="vowel2-practice-groups">${data.wordGroups.map((group, groupIndex)=>`
         <article><header><b>${escAttr(group.symbol)}</b><span>${escAttr(group.label)}</span>
@@ -1670,7 +1744,7 @@ function renderVowel2Section(lesson, section){
 }
 
 function renderVowel2Header(lesson, section){
-  const title = section === "vowel2_compare_i"
+  const title = (section === "vowel2_compare_i" || section === "vowel2_compare_e_ae" || section === "vowel2_compare_schwa_caret")
     ? ""
     : `<h2 class="stage-title">${escAttr(lesson.sectionLabels[section])}</h2>`;
   return `<div class="stage-h"><span class="stage-tag">Buổi 2 · Nguyên âm đơn</span>
@@ -1809,7 +1883,7 @@ function renderVowel2Comparison(pairs, leftSymbol, rightSymbol, tip){
   </div>`;
 }
 
-function renderVowel2FocusComparison(pairs){
+function renderVowel2FocusComparison(pairs, leftSound, rightSound){
   const pairIndex = Math.min(window.vowel2ComparisonPairIndex || 0, Math.max(0, pairs.length - 1));
   window.vowel2ComparisonPairIndex = pairIndex;
   const pair = pairs[pairIndex];
@@ -1817,9 +1891,9 @@ function renderVowel2FocusComparison(pairs){
 
   return `<section class="vowel2-focus-comparison lesson2-card-compact">
     <div class="vowel2-focus-sounds">
-      ${renderVowel2SoundButton("/ɪ/")}
+      ${renderVowel2SoundButton(leftSound)}
       <i>≠</i>
-      ${renderVowel2SoundButton("/iː/")}
+      ${renderVowel2SoundButton(rightSound)}
     </div>
     <div class="vowel2-focus-counter">Cặp ${pairIndex + 1}/${pairs.length}</div>
     <article class="vowel2-focus-pair">
@@ -7111,6 +7185,8 @@ Object.assign(window, {
   _alphabetAgStart, _alphabetAgShowLowercase, _alphabetAgShowIcon,
   _alphabetAgSpeakLetter, _alphabetAgSpeakWord,
   _alphabetAgNext, _alphabetAgRestart,
+  _alphabetSelectCardGroup, _alphabetOpenFlashcard, _alphabetFlashcardKeydown,
+  _alphabetFlashcardSpeak, _alphabetResetFlashcard,
   _alphabetReadEach, _alphabetToggleGroup, _alphabetQuickNext, _alphabetSpeakQuick,
   _alphabetToggleSplit, _alphabetChallengeNext, _alphabetToggleChallengeIcon, _alphabetCompleteChallenge,
   _alphabetAddWordLetter, _alphabetRemoveWordLetter, _alphabetCheckWord, _alphabetResetWord,

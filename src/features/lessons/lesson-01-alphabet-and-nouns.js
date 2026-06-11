@@ -1,20 +1,26 @@
 const alphabetLetters = [
-  ["A", "apple", "🍎", "/eɪ/"], ["B", "ball", "⚽", "/biː/"], ["C", "cat", "🐱", "/siː/"],
-  ["D", "dog", "🐶", "/diː/"], ["E", "egg", "🥚", "/iː/"], ["F", "fish", "🐟", "/ef/"],
-  ["G", "goat", "🐐", "/dʒiː/"], ["H", "hat", "🎩", "/eɪtʃ/"], ["I", "ink", "🖋️", "/aɪ/"],
-  ["J", "juice", "🧃", "/dʒeɪ/"], ["K", "kite", "🪁", "/keɪ/"], ["L", "lion", "🦁", "/el/"],
-  ["M", "monkey", "🐵", "/em/"], ["N", "nose", "👃", "/en/"], ["O", "orange", "🍊", "/oʊ/"],
-  ["P", "pen", "🖊️", "/piː/"], ["Q", "queen", "👑", "/kjuː/"], ["R", "rabbit", "🐰", "/ɑːr/"],
-  ["S", "sun", "☀️", "/es/"], ["T", "tiger", "🐯", "/tiː/"], ["U", "umbrella", "☂️", "/juː/"],
-  ["V", "van", "🚐", "/viː/"], ["W", "window", "🪟", "/ˈdʌbəl juː/"], ["X", "box", "📦", "/eks/"],
-  ["Y", "yellow", "🟨", "/waɪ/"], ["Z", "zebra", "🦓", "/ziː/"],
-].map(([letter, word, icon, pronunciation]) => ({
+  ["A", "apple", "quả táo", "🍎", "/eɪ/"], ["B", "ball", "quả bóng", "⚽", "/biː/"], ["C", "cat", "con mèo", "🐱", "/siː/"],
+  ["D", "dog", "con chó", "🐶", "/diː/"], ["E", "egg", "quả trứng", "🥚", "/iː/"], ["F", "fish", "con cá", "🐟", "/ef/"],
+  ["G", "goat", "con dê", "🐐", "/dʒiː/"], ["H", "hat", "cái mũ", "🎩", "/eɪtʃ/"], ["I", "ink", "mực", "🖋️", "/aɪ/"],
+  ["J", "juice", "nước ép", "🧃", "/dʒeɪ/"], ["K", "kite", "diều", "🪁", "/keɪ/"], ["L", "lion", "sư tử", "🦁", "/el/"],
+  ["M", "monkey", "con khỉ", "🐵", "/em/"], ["N", "nose", "cái mũi", "👃", "/en/"], ["O", "orange", "quả cam", "🍊", "/oʊ/"],
+  ["P", "pen", "cây bút", "🖊️", "/piː/"], ["Q", "queen", "nữ hoàng", "👑", "/kjuː/"], ["R", "rabbit", "con thỏ", "🐰", "/ɑːr/"],
+  ["S", "sun", "mặt trời", "☀️", "/es/"], ["T", "tiger", "con hổ", "🐯", "/tiː/"], ["U", "umbrella", "cái ô", "☂️", "/juː/"],
+  ["V", "van", "xe van", "🚐", "/viː/"], ["W", "window", "cửa sổ", "🪟", "/ˈdʌbəl juː/"], ["X", "box", "cái hộp", "📦", "/eks/"],
+  ["Y", "yellow", "màu vàng", "🟨", "/waɪ/"], ["Z", "zebra", "ngựa vằn", "🦓", "/ziː/"],
+].map(([letter, word, meaning, icon, pronunciation], index) => ({
   letter,
   lower: letter.toLowerCase(),
+  uppercase: letter,
+  lowercase: letter.toLowerCase(),
   word,
+  meaning,
   icon,
   pronunciation,
+  letterSound: pronunciation,
   reading: `${letter}, ${letter}, ${word}.`,
+  chant: `${letter}, ${letter}, ${word}.`,
+  group: index < 7 ? "A-G" : index < 14 ? "H-N" : index < 21 ? "O-U" : "V-Z",
 }));
 
 const alphabetSectionFlow = [
