@@ -45,7 +45,7 @@ for (let id = 1; id <= expectedTotal; id += 1) {
 
 const expectedTitles = new Map([
   [1, "IPA Foundation – Cách đọc một từ tiếng Anh"],
-  [2, "Short vs Long Vowels – Nguyên âm ngắn và dài"],
+  [2, "Spelling & Letter Sounds – Đánh vần và âm chữ cái"],
   [3, "Diphthongs – Nguyên âm đôi"],
   [4, "BUỔI 4: Long Vowels - Nguyên âm dài"],
   [5, "Fricatives – Âm gió / âm ma sát"],
@@ -68,6 +68,17 @@ check(lesson01?.ipa?.videoSlots?.length === 7, "Lesson 1 must have 7 video slots
 check(lesson01?.ipa?.imageSlots?.length === 6, "Lesson 1 must have 6 vocabulary image slots.");
 check(lesson01?.ipa?.blendGame?.length >= 4, "Lesson 1 must have blend game data.");
 check(lesson01?.ipa?.listenChooseGame?.length >= 4, "Lesson 1 must have listen-and-choose game data.");
+
+const lesson02 = lessonById(2);
+check(lesson02?.slug === "spelling-letter-sounds", "Lesson 2 must route to Spelling & Letter Sounds.");
+check(lesson02?.track === "spelling-letter-sounds", "Lesson 2 must use the dedicated spelling renderer.");
+check(lesson02?.sectionFlow?.length === 16, "Lesson 2 sidebar must have exactly 16 sections.");
+check(lesson02?.sectionFlow?.every((section) => section.startsWith("spelling_")), "Lesson 2 must use dedicated spelling sections.");
+check(lesson02?.spelling?.letterSounds?.length === 5, "Lesson 2 must compare 5 letter names and sounds.");
+check(lesson02?.spelling?.cvcWords?.length === 8, "Lesson 2 must include 8 CVC words.");
+check(lesson02?.spelling?.objects?.length === 6, "Lesson 2 must include 6 object spelling cards.");
+check(lesson02?.minitest?.length >= 10, "Lesson 2 must include the complete spelling mini test.");
+check(lesson02?.homeworkRich?.tasks?.length >= 4, "Lesson 2 must include the requested homework.");
 
 const lesson06 = lessonById(6);
 check(lesson06?.sectionFlow?.length === 16, "Lesson 6 sidebar must have the 16 requested sections.");

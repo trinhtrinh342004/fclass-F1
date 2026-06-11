@@ -3,6 +3,7 @@ import { lesson06Consonants1 } from "../lessons/lesson-06-consonants-1.js";
 import { lesson03Diphthongs } from "../lessons/lesson-03-diphthongs.js";
 import { lesson08IpaReview } from "../lessons/lesson-08-ipa-review.js";
 import { lesson07Consonants2 } from "../lessons/lesson-07-consonants-2.js";
+import { lesson02SpellingLetterSounds } from "../lessons/lesson-02-spelling-letter-sounds.js";
 
 export const IPA_BOOTCAMP_SECTION_FLOW = [
   "ipa_intro",
@@ -165,12 +166,12 @@ export const IPA_BOOTCAMP_CURRICULUM_MAP = [
   },
   {
     lessonId: 2,
-    topicEnglish: "Short vs Long Vowels – Nguyên âm ngắn và dài",
-    topicVietnamese: "Phân biệt âm ngắn và âm dài",
-    slug: "short-vs-long-vowels",
+    topicEnglish: "Spelling & Letter Sounds – Đánh vần và âm chữ cái",
+    topicVietnamese: "Hiểu tên chữ cái khác với âm trong từ",
+    slug: "spelling-letter-sounds",
     sourceLessons: [],
     status: "ready",
-    notes: "IPA Bootcamp lesson.",
+    notes: "Buổi 2 có structure riêng 16 mục theo MD Spelling & Letter Sounds.",
   },
   {
     lessonId: 3,
@@ -250,14 +251,7 @@ export const IPA_BOOTCAMP_LESSONS = [
       { q: "Khi học phát âm cần quan sát gì?", options: ["môi, lưỡi, răng, hơi", "màu bút", "số trang", "chữ viết hoa"], answer: 0 },
     ],
   }),
-  createIpaLesson({
-    id: 2,
-    title: "Short vs Long Vowels – Nguyên âm ngắn và dài",
-    subtitle: "Phân biệt âm ngắn và âm dài",
-    topic: "Nguyên âm dài",
-    learningItems: "/iː/ /uː/ /ɑː/ /ɔː/ /ɜː/",
-    outcome: "Học sinh hiểu dấu /ː/ là kéo dài âm, phân biệt được âm ngắn và âm dài.",
-  }),
+  lesson02SpellingLetterSounds,
   createDiphthongLesson(lesson03Diphthongs),
   {
     ...lesson04LongVowels,
