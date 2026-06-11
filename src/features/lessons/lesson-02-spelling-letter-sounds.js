@@ -147,7 +147,6 @@ const COMPARISON_PAIRS = [
   },
 }));
 
-
 const SENTENCES = [
   ["I see a sheep.", ["see", "sheep"]],
   ["Sit on the seat.", ["Sit", "seat"]],
