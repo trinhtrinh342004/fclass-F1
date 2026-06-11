@@ -64,8 +64,12 @@ const lesson01 = lessonById(1);
 check(lesson01?.title === "Buổi 1: Bảng chữ cái A–Z", "Lesson 1 must use the Vietnamese Alphabet A–Z title.");
 check(lesson01?.track === "alphabet-foundation", "Lesson 1 must use the dedicated Alphabet Foundation renderer.");
 check(lesson01?.metadata?.localContentAuthoritative === true, "Lesson 1 local Alphabet content must override stale Supabase content.");
-check(lesson01?.sectionFlow?.length === 15, "Lesson 1 Alphabet sidebar must have exactly 15 sections after removing six games.");
+check(lesson01?.sectionFlow?.length === 17, "Lesson 1 Alphabet sidebar must have exactly 17 sections.");
 check(lesson01?.sectionFlow?.every((section) => section.startsWith("alphabet_")), "Lesson 1 must use dedicated alphabet sections.");
+check(
+  arrayEquals(lesson01?.sectionFlow?.slice(-2), ["alphabet_homework", "alphabet_summary"]),
+  "Lesson 1 must end with homework and summary sections."
+);
 check(
   ["alphabet_case_match", "alphabet_icon_match", "alphabet_spell_words", "alphabet_build_word", "alphabet_teacher_challenge", "alphabet_starfall"]
     .every((section) => !lesson01?.sectionFlow?.includes(section)),
@@ -113,6 +117,15 @@ for (const [key, groupTitle, completedMessage, length, first, last] of expectedA
 check(lesson01?.alphabetFoundation?.vowels?.length === 5, "Lesson 1 must have 5 vowel cards.");
 check(lesson01?.alphabetFoundation?.listenChoose?.length === 26, "Lesson 1 listen-and-choose game must cover A-Z.");
 check(lesson01?.alphabetFoundation?.practiceWords?.length === 26, "Lesson 1 single-question word games must have 26 practice words.");
+check(lesson01?.alphabetFoundation?.homework?.skills?.length === 4, "Lesson 1 homework must cover four skills.");
+check(
+  arrayEquals(lesson01?.alphabetFoundation?.homework?.skills?.map((skill) => skill.title), ["Nghe", "Nói", "Đọc", "Viết"]),
+  "Lesson 1 homework skill titles must be Nghe, Nói, Đọc, Viết."
+);
+check(
+  arrayEquals(lesson01?.alphabetFoundation?.summary?.vowels, ["A", "E", "I", "O", "U"]),
+  "Lesson 1 summary must show the five vowels A E I O U."
+);
 check(arrayEquals(Object.values(lesson01?.sectionLabels || {}), [
   "Video bài hát bảng chữ cái",
   "Nhóm chữ A–G",
@@ -129,6 +142,8 @@ check(arrayEquals(Object.values(lesson01?.sectionLabels || {}), [
   "Tách chữ trong từ",
   "Nhìn biểu tượng đọc từ",
   "Video thư giãn cuối buổi",
+  "Bài tập về nhà",
+  "Tổng kết buổi học",
 ]), "Lesson 1 sidebar labels must match the requested Vietnamese labels.");
 
 const mainSource = readFileSync(new URL("../src/main.js", import.meta.url), "utf8");
