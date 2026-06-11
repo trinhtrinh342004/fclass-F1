@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { LESSONS } from "../src/features/lessons/lessonRegistry.js";
 import { COURSE_TOTAL_LESSONS, TUWI_34_CURRICULUM_MAP } from "../src/features/curriculum/curriculumMap.js";
 
@@ -207,6 +207,26 @@ check([
 
 const lesson02 = lessonById(2);
 check(lesson02?.slug === "nguyen-am-don-1", "Lesson 2 must route to Monophthongs 1.");
+const longIMouthImage = new URL(
+  "../public/pronunciation/lesson-2/i-long/mouth-position.png",
+  import.meta.url
+);
+const longIGuideVideo = new URL(
+  "../public/pronunciation/lesson-2/i-long/guide-video.mp4",
+  import.meta.url
+);
+const hasLongIMouthImage = existsSync(longIMouthImage);
+const hasLongIGuideVideo = existsSync(longIGuideVideo);
+check(hasLongIMouthImage, "Lesson 2 long /i:/ mouth image must exist in the configured public folder.");
+check(hasLongIGuideVideo, "Lesson 2 long /i:/ guide video must exist in the configured public folder.");
+check(
+  !hasLongIMouthImage || statSync(longIMouthImage).size > 100_000,
+  "Lesson 2 long /i:/ mouth image must contain the imported PNG asset."
+);
+check(
+  !hasLongIGuideVideo || statSync(longIGuideVideo).size > 1_000_000,
+  "Lesson 2 long /i:/ guide video must contain the imported MP4 asset."
+);
 check(
   pronunciationMediaSource.includes('["i-long", "/iː/"]')
     && pronunciationMediaSource.includes("mouth-position.png")
