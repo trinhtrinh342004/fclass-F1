@@ -3609,6 +3609,7 @@ body.admin-active > .topbar{
 .alphabet-letter-card{display:flex;min-height:360px;flex-direction:column;align-items:center;gap:8px;border:2px solid var(--line);border-radius:18px;background:#fff;padding:18px;text-align:center;box-shadow:var(--shadow-sm)}
 .alphabet-letter-pair{color:var(--navy);font-family:var(--font-display);font-size:52px;font-weight:900;line-height:1}
 .alphabet-letter-pair span{color:var(--blue)}
+.alphabet-pronunciation{border-radius:999px;background:var(--blue-1);color:var(--navy);padding:4px 10px;font-size:14px;font-weight:850}
 .alphabet-letter-icon{font-size:68px;line-height:1.25}
 .alphabet-letter-card>strong{color:var(--navy);font-size:26px}
 .alphabet-letter-card>p{margin:0;color:var(--ink-mute);font-size:17px;font-weight:750}
@@ -3630,6 +3631,7 @@ body.admin-active > .topbar{
 .alphabet-next-button{margin-left:7px;background:#fff;color:var(--navy);border:1.5px solid var(--navy)}
 .alphabet-name-card{display:grid;gap:18px}.alphabet-name-card input{width:100%;border:2px solid var(--line-strong);border-radius:12px;padding:14px 16px;color:var(--navy);font-size:20px;font-weight:800}.alphabet-action-row,.alphabet-name-letters{display:flex;flex-wrap:wrap;gap:10px}.alphabet-name-letters button{width:64px;height:64px;border-radius:13px;font-size:32px}
 .alphabet-word-card strong{font-family:var(--font-display);font-size:34px;color:var(--navy)}.alphabet-word-card span{color:var(--ink-mute);font-size:18px;font-weight:850}
+.alphabet-word-game{min-height:280px}.alphabet-word-answer,.alphabet-word-choices,.alphabet-word-actions{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}.alphabet-word-answer{min-height:48px;width:100%;border:2px dashed var(--line-strong);border-radius:10px;background:var(--bg-soft);padding:7px}.alphabet-word-answer button,.alphabet-word-choices button{min-width:38px;height:38px;border:1.5px solid var(--line-strong);border-radius:8px;background:#fff;color:var(--navy);font-size:17px;font-weight:900}.alphabet-word-answer button{background:var(--yellow)}.alphabet-word-actions button{flex:1;min-width:105px}
 .alphabet-starfall-card{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.6fr);gap:18px;align-items:center}.alphabet-starfall-card iframe{width:100%;min-height:470px;border:1.5px solid var(--line);border-radius:12px}.alphabet-starfall-card strong{color:var(--navy);font-size:18px}.alphabet-starfall-card p{color:var(--ink-mute);font-weight:700}.alphabet-starfall-card a{display:inline-block;border-radius:10px;background:var(--navy);color:#fff;padding:12px 16px;font-weight:850;text-decoration:none}
 @media (max-width:760px){.alphabet-group-letters button{width:62px;height:62px;border-radius:13px;font-size:32px}.alphabet-starfall-card{grid-template-columns:1fr}.alphabet-starfall-card iframe{min-height:340px}.alphabet-letter-grid{grid-template-columns:1fr 1fr}.alphabet-letter-card{min-height:330px;padding:14px}.alphabet-letter-pair{font-size:42px}.alphabet-letter-icon{font-size:54px}.alphabet-card-actions button{width:100%}}
 @media (max-width:520px){.alphabet-letter-grid{grid-template-columns:1fr}.alphabet-action-row button{width:100%}}

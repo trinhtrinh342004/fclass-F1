@@ -1,18 +1,19 @@
 const alphabetLetters = [
-  ["A", "apple", "🍎"], ["B", "ball", "⚽"], ["C", "cat", "🐱"],
-  ["D", "dog", "🐶"], ["E", "egg", "🥚"], ["F", "fish", "🐟"],
-  ["G", "goat", "🐐"], ["H", "hat", "🎩"], ["I", "ink", "🖋️"],
-  ["J", "juice", "🧃"], ["K", "kite", "🪁"], ["L", "lion", "🦁"],
-  ["M", "monkey", "🐵"], ["N", "nose", "👃"], ["O", "orange", "🍊"],
-  ["P", "pen", "🖊️"], ["Q", "queen", "👑"], ["R", "rabbit", "🐰"],
-  ["S", "sun", "☀️"], ["T", "tiger", "🐯"], ["U", "umbrella", "☂️"],
-  ["V", "van", "🚐"], ["W", "window", "🪟"], ["X", "box", "📦"],
-  ["Y", "yellow", "🟨"], ["Z", "zebra", "🦓"],
-].map(([letter, word, icon]) => ({
+  ["A", "apple", "🍎", "/eɪ/"], ["B", "ball", "⚽", "/biː/"], ["C", "cat", "🐱", "/siː/"],
+  ["D", "dog", "🐶", "/diː/"], ["E", "egg", "🥚", "/iː/"], ["F", "fish", "🐟", "/ef/"],
+  ["G", "goat", "🐐", "/dʒiː/"], ["H", "hat", "🎩", "/eɪtʃ/"], ["I", "ink", "🖋️", "/aɪ/"],
+  ["J", "juice", "🧃", "/dʒeɪ/"], ["K", "kite", "🪁", "/keɪ/"], ["L", "lion", "🦁", "/el/"],
+  ["M", "monkey", "🐵", "/em/"], ["N", "nose", "👃", "/en/"], ["O", "orange", "🍊", "/oʊ/"],
+  ["P", "pen", "🖊️", "/piː/"], ["Q", "queen", "👑", "/kjuː/"], ["R", "rabbit", "🐰", "/ɑːr/"],
+  ["S", "sun", "☀️", "/es/"], ["T", "tiger", "🐯", "/tiː/"], ["U", "umbrella", "☂️", "/juː/"],
+  ["V", "van", "🚐", "/viː/"], ["W", "window", "🪟", "/ˈdʌbəl juː/"], ["X", "box", "📦", "/eks/"],
+  ["Y", "yellow", "🟨", "/waɪ/"], ["Z", "zebra", "🦓", "/ziː/"],
+].map(([letter, word, icon, pronunciation]) => ({
   letter,
   lower: letter.toLowerCase(),
   word,
   icon,
+  pronunciation,
   reading: `${letter}, ${letter}, ${word}.`,
 }));
 
