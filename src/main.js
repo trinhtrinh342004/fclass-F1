@@ -1589,6 +1589,8 @@ function renderVowel2Section(lesson, section){
     window.vowel2LastSection = section;
     window.vowel2SingleSoundState = {};
     window.vowel2SingleSoundPhase = {};
+    window.vowel2ComparisonPairIndex = 0;
+    clearVowel2PairSequence();
   }
 
   switch(section){
@@ -1607,10 +1609,7 @@ function renderVowel2Section(lesson, section){
     case "vowel2_short_i":
       return `${header}${renderVowel2SingleSoundLesson(groups["/ɪ/"], 2100)}`;
     case "vowel2_compare_i":
-      return `${header}${renderVowel2Comparison(
-        data.minimalPairs.slice(0, 3), "/ɪ/", "/iː/",
-        "Bên trái âm ngắn, bên phải âm dài."
-      )}`;
+      return `${header}${renderVowel2FocusComparison(data.comparisonPairs || [])}`;
     case "vowel2_e_ae":
       return `${header}${renderVowel2SoundSwitcher("vowel2_e_ae", [groups["/e/"], groups["/æ/"]], 2200)}`;
     case "vowel2_compare_e_ae":
@@ -1790,6 +1789,58 @@ function renderVowel2Comparison(pairs, leftSymbol, rightSymbol, tip){
     </article>`).join("")}
     <div class="vowel2-teacher-tip">${escAttr(tip)}</div>
   </div>`;
+}
+
+function renderVowel2FocusComparison(pairs){
+  const pairIndex = Math.min(window.vowel2ComparisonPairIndex || 0, Math.max(0, pairs.length - 1));
+  window.vowel2ComparisonPairIndex = pairIndex;
+  const pair = pairs[pairIndex];
+  if (!pair) return renderMissingSection("vowel2_compare_i");
+
+  return `<section class="vowel2-focus-comparison">
+    <div class="vowel2-focus-sounds">
+      ${renderVowel2SoundButton("/ɪ/")}
+      <i>≠</i>
+      ${renderVowel2SoundButton("/iː/")}
+    </div>
+    <div class="vowel2-focus-counter">Cặp ${pairIndex + 1}/${pairs.length}</div>
+    <article class="vowel2-focus-pair">
+      ${renderVowel2FocusWord(pair.left)}
+      <i>≠</i>
+      ${renderVowel2FocusWord(pair.right)}
+      <button class="vowel2-focus-listen-pair" onclick="_vowel2PlayComparisonPair('${regTxt(pair.left.word)}', '${regTxt(pair.right.word)}')">${SPEAKER_ICON_SVG} Nghe cả cặp</button>
+    </article>
+    <div class="vowel2-focus-dots" aria-label="Vị trí cặp hiện tại">
+      ${pairs.map((_, index) => `<button class="${index === pairIndex ? "active" : ""}" onclick="_vowel2SetComparisonPair(${index}, ${pairs.length})" aria-label="Mở cặp ${index + 1}"></button>`).join("")}
+    </div>
+    <div class="vowel2-focus-nav">
+      <button onclick="_vowel2SetComparisonPair(${pairIndex - 1}, ${pairs.length})" ${pairIndex === 0 ? "disabled" : ""}>Cặp trước</button>
+      <button class="vowel2-focus-next" onclick="_vowel2SetComparisonPair(${pairIndex + 1}, ${pairs.length})" ${pairIndex === pairs.length - 1 ? "disabled" : ""}>Cặp tiếp theo</button>
+    </div>
+  </section>`;
+}
+
+function renderVowel2SoundButton(symbol){
+  return `<button class="vowel2-focus-sound" onclick="_vowel2SpeakSound('${escAttr(symbol)}')" aria-label="Nghe âm ${escAttr(symbol)}">${escAttr(symbol)}</button>`;
+}
+
+function renderVowel2FocusWord(item){
+  const wordId = regTxt(item.word);
+  return `<div class="vowel2-focus-word">
+    <button class="vowel2-focus-word-text" onclick="_vowel2SpeakComparisonText('${wordId}')" aria-label="Nghe từ ${escAttr(item.word)}">
+      ${highlightInteractiveComparisonWord(item.word, item.highlight, item.sound)}
+    </button>
+    <span class="vowel2-focus-ipa">${escAttr(item.ipa)}</span>
+    <small>(${escAttr(item.meaning)})</small>
+    <span class="vowel2-focus-icon" role="img" aria-label="${escAttr(item.meaning)}">${escAttr(item.icon)}</span>
+    <button class="vowel2-speaker-btn" onclick="_vowel2SpeakComparisonText('${wordId}')" title="Nghe từ ${escAttr(item.word)}" aria-label="Nghe từ ${escAttr(item.word)}">${SPEAKER_ICON_SVG}</button>
+  </div>`;
+}
+
+function highlightInteractiveComparisonWord(word, focus, sound){
+  const focusIndex = word.indexOf(focus);
+  if (focusIndex < 0) return escAttr(word);
+  return `${escAttr(word.slice(0, focusIndex))}<mark onclick="event.stopPropagation();_vowel2SpeakSound('${escAttr(sound)}')" title="Nghe âm ${escAttr(sound)}" aria-label="Nghe âm ${escAttr(sound)}">${escAttr(focus)}</mark>${escAttr(word.slice(focusIndex + focus.length))}`;
 }
 
 function renderVowel2MouthSvg(shape){
@@ -1981,10 +2032,37 @@ window.vowel2SingleSoundState = {};
 window.vowel2SingleSoundPhase = {};
 window.vowel2SelectedSound = {};
 window.vowel2LastSection = "";
+window.vowel2ComparisonPairIndex = 0;
+let vowel2PairSequenceTimer = null;
+
+function clearVowel2PairSequence(){
+  if (vowel2PairSequenceTimer) clearTimeout(vowel2PairSequenceTimer);
+  vowel2PairSequenceTimer = null;
+}
 
 window._vowel2SpeakSound = function(symbol) {
+  clearVowel2PairSequence();
   const speechText = VOWEL2_SOUND_SPEECH_TEXT[symbol] || symbol;
   speak(speechText, 0.68, null, "en-US");
+};
+window._vowel2SpeakComparisonText = function(id) {
+  clearVowel2PairSequence();
+  speakById(id, 0.9);
+};
+window._vowel2PlayComparisonPair = function(leftId, rightId) {
+  clearVowel2PairSequence();
+  stopCurrentSpeech();
+  speak(TXT_REG[leftId], 0.9, () => {
+    vowel2PairSequenceTimer = setTimeout(() => {
+      vowel2PairSequenceTimer = null;
+      speak(TXT_REG[rightId], 0.9);
+    }, 600);
+  });
+};
+window._vowel2SetComparisonPair = function(index, total) {
+  clearVowel2PairSequence();
+  window.vowel2ComparisonPairIndex = Math.max(0, Math.min(total - 1, index));
+  renderSection();
 };
 window._vowel2SetSingleSound = function(section, symbol) {
   const lesson = LESSONS.find(item => item.id === STATE.lessonId);

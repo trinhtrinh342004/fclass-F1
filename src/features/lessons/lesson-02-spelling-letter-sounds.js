@@ -131,6 +131,20 @@ const MINIMAL_PAIRS = [
   left, leftIpa, leftMeaning, leftFocus, right, rightIpa, rightMeaning, rightFocus,
 }));
 
+const COMPARISON_PAIRS = [
+  ["ship", "/ʃɪp/", "tàu thủy", "/ɪ/", "i", "🚢", "sheep", "/ʃiːp/", "con cừu", "/iː/", "ee", "🐑"],
+  ["sit", "/sɪt/", "ngồi", "/ɪ/", "i", "🪑", "seat", "/siːt/", "ghế", "/iː/", "ea", "🪑"],
+  ["fit", "/fɪt/", "phù hợp", "/ɪ/", "i", "✅", "feet", "/fiːt/", "bàn chân", "/iː/", "ee", "🦶"],
+].map(([leftWord, leftIpa, leftMeaning, leftSound, leftHighlight, leftIcon,
+  rightWord, rightIpa, rightMeaning, rightSound, rightHighlight, rightIcon]) => ({
+  left: {
+    word: leftWord, ipa: leftIpa, meaning: leftMeaning, sound: leftSound, highlight: leftHighlight, icon: leftIcon,
+  },
+  right: {
+    word: rightWord, ipa: rightIpa, meaning: rightMeaning, sound: rightSound, highlight: rightHighlight, icon: rightIcon,
+  },
+}));
+
 const SENTENCES = [
   ["I see a sheep.", ["see", "sheep"]],
   ["Sit on the seat.", ["Sit", "seat"]],
@@ -188,6 +202,7 @@ export const lesson02SpellingLetterSounds = {
     sounds: ["/iː/", "/ɪ/", "/e/", "/æ/", "/ə/", "/ʌ/"],
     wordGroups: WORD_GROUPS,
     minimalPairs: MINIMAL_PAIRS,
+    comparisonPairs: COMPARISON_PAIRS,
     sentences: SENTENCES,
     listenGame: LISTEN_GAME,
     recordingWords: ["sheep", "ship", "seat", "sit", "feet", "fit", "bed", "bad", "pen", "pan", "cup", "cap"],
