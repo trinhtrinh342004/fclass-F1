@@ -9,7 +9,6 @@ const SECTION_FLOW = [
   "vowel2_sound_schwa",
   "vowel2_sound_uh",
   "vowel2_compare_schwa_caret",
-  "vowel2_mouth_grid",
   "vowel2_word_practice",
   "vowel2_pairs_sentences",
   "vowel2_game_record_test",
@@ -147,6 +146,32 @@ const COMPARISON_PAIRS = [
   },
 }));
 
+const COMPARISON_PAIRS_E = [
+  ["bed", "/bed/", "cái giường", "/e/", "e", "🛏️", "bad", "/bæd/", "xấu/tệ", "/æ/", "a", "👎"],
+  ["pen", "/pen/", "cây bút", "/e/", "e", "🖊️", "pan", "/pæn/", "cái chảo", "/æ/", "a", "🍳"],
+].map(([leftWord, leftIpa, leftMeaning, leftSound, leftHighlight, leftIcon,
+  rightWord, rightIpa, rightMeaning, rightSound, rightHighlight, rightIcon]) => ({
+  left: {
+    word: leftWord, ipa: leftIpa, meaning: leftMeaning, sound: leftSound, highlight: leftHighlight, icon: leftIcon,
+  },
+  right: {
+    word: rightWord, ipa: rightIpa, meaning: rightMeaning, sound: rightSound, highlight: rightHighlight, icon: rightIcon,
+  },
+}));
+
+const COMPARISON_PAIRS_SCHWA = [
+  ["about", "/əˈbaʊt/", "về", "/ə/", "a", "💬", "cup", "/kʌp/", "cái cốc", "/ʌ/", "u", "🥤"],
+  ["sofa", "/ˈsoʊfə/", "ghế sofa", "/ə/", "a", "🛋️", "sun", "/sʌn/", "mặt trời", "/ʌ/", "u", "☀️"],
+].map(([leftWord, leftIpa, leftMeaning, leftSound, leftHighlight, leftIcon,
+  rightWord, rightIpa, rightMeaning, rightSound, rightHighlight, rightIcon]) => ({
+  left: {
+    word: leftWord, ipa: leftIpa, meaning: leftMeaning, sound: leftSound, highlight: leftHighlight, icon: leftIcon,
+  },
+  right: {
+    word: rightWord, ipa: rightIpa, meaning: rightMeaning, sound: rightSound, highlight: rightHighlight, icon: rightIcon,
+  },
+}));
+
 const SENTENCES = [
   ["I see a sheep.", ["see", "sheep"]],
   ["Sit on the seat.", ["Sit", "seat"]],
@@ -192,7 +217,6 @@ export const lesson02SpellingLetterSounds = {
     vowel2_sound_schwa: "Âm /ə/",
     vowel2_sound_uh: "Âm /ʌ/",
     vowel2_compare_schwa_caret: "So sánh /ə/ và /ʌ/",
-    vowel2_mouth_grid: "Khẩu hình trực quan",
     vowel2_word_practice: "Từ vựng luyện đọc",
     vowel2_pairs_sentences: "Minimal pairs + Đọc câu",
     vowel2_game_record_test: "Game + Ghi âm AI + Mini test",
@@ -207,6 +231,8 @@ export const lesson02SpellingLetterSounds = {
     wordGroups: WORD_GROUPS,
     minimalPairs: MINIMAL_PAIRS,
     comparisonPairs: COMPARISON_PAIRS,
+    comparisonPairsE: COMPARISON_PAIRS_E,
+    comparisonPairsSchwa: COMPARISON_PAIRS_SCHWA,
     sentences: SENTENCES,
     listenGame: LISTEN_GAME,
     recordingWords: ["sheep", "ship", "seat", "sit", "feet", "fit", "bed", "bad", "pen", "pan", "cup", "cap"],
