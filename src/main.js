@@ -2009,19 +2009,19 @@ function renderVowel2Section(lesson, section){
     case "vowel2_short_i":
       return `${header}${renderVowel2SingleSoundLesson(groups["/ɪ/"], 2100)}`;
     case "vowel2_compare_i":
-      return `${header}${renderVowel2FocusComparison(data.comparisonPairs || [], "/ɪ/", "/iː/")}`;
+      return `${header}${renderVowel2FocusComparison(data.comparisons?.[section])}`;
     case "vowel2_sound_e":
       return `${header}${renderVowel2SingleSoundLesson(groups["/e/"], 2200)}`;
     case "vowel2_sound_ae":
       return `${header}${renderVowel2SingleSoundLesson(groups["/æ/"], 2300)}`;
     case "vowel2_compare_e_ae":
-      return `${header}${renderVowel2FocusComparison(data.comparisonPairsE || [], "/e/", "/æ/")}`;
+      return `${header}${renderVowel2FocusComparison(data.comparisons?.[section])}`;
     case "vowel2_sound_schwa":
       return `${header}${renderVowel2SingleSoundLesson(groups["/ə/"], 2400)}`;
     case "vowel2_sound_uh":
       return `${header}${renderVowel2SingleSoundLesson(groups["/ʌ/"], 2500)}`;
     case "vowel2_compare_schwa_caret":
-      return `${header}${renderVowel2FocusComparison(data.comparisonPairsSchwa || [], "/ə/", "/ʌ/")}`;
+      return `${header}${renderVowel2FocusComparison(data.comparisons?.[section])}`;
     case "vowel2_word_practice":
       return `${header}<div id="vowel2SentenceGameHost">${renderVowel2SentenceGame(data.confusingSentences || [])}</div>`;
     case "vowel2_pairs_sentences":
@@ -2173,7 +2173,8 @@ function renderVowel2Comparison(pairs, leftSymbol, rightSymbol, tip){
   </div>`;
 }
 
-function renderVowel2FocusComparison(pairs, leftSound, rightSound){
+function renderVowel2FocusComparison(comparison = {}){
+  const { pairs = [], leftSound = "", rightSound = "" } = comparison;
   const pairIndex = Math.min(window.vowel2ComparisonPairIndex || 0, Math.max(0, pairs.length - 1));
   window.vowel2ComparisonPairIndex = pairIndex;
   const pair = pairs[pairIndex];
@@ -2582,8 +2583,10 @@ window.vowel2SelectedSound = {};
 window.vowel2LastSection = "";
 window.vowel2ComparisonPairIndex = 0;
 let vowel2PairSequenceTimer = null;
+let vowel2PairSequenceId = 0;
 
 function clearVowel2PairSequence(){
+  vowel2PairSequenceId += 1;
   if (vowel2PairSequenceTimer) clearTimeout(vowel2PairSequenceTimer);
   vowel2PairSequenceTimer = null;
 }
@@ -2599,9 +2602,12 @@ window._vowel2SpeakComparisonText = function(id) {
 };
 window._vowel2PlayComparisonPair = function(leftId, rightId) {
   clearVowel2PairSequence();
+  const sequenceId = vowel2PairSequenceId;
   stopCurrentSpeech();
   speak(TXT_REG[leftId], 0.9, () => {
+    if (sequenceId !== vowel2PairSequenceId) return;
     vowel2PairSequenceTimer = setTimeout(() => {
+      if (sequenceId !== vowel2PairSequenceId) return;
       vowel2PairSequenceTimer = null;
       speak(TXT_REG[rightId], 0.9);
     }, 600);
@@ -2609,6 +2615,7 @@ window._vowel2PlayComparisonPair = function(leftId, rightId) {
 };
 window._vowel2SetComparisonPair = function(index, total) {
   clearVowel2PairSequence();
+  stopCurrentSpeech();
   window.vowel2ComparisonPairIndex = Math.max(0, Math.min(total - 1, index));
   renderSection();
 };
