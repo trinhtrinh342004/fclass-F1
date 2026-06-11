@@ -218,18 +218,18 @@ const lesson02SingleSounds = new Map(
   (lesson02?.vowelLesson?.wordGroups || []).map((group) => [group.symbol, group])
 );
 [
-  ["/iː/", "i-long", "long_i", "Âm dài /iː/"],
-  ["/ɪ/", "i-short", "short_i", "Âm ngắn /ɪ/"],
-  ["/e/", "e", "e", "Âm /e/"],
-  ["/æ/", "ae", "ae", "Âm /æ/"],
-  ["/ə/", "schwa", "schwa", "Âm /ə/"],
-  ["/ʌ/", "uh", "uh", "Âm /ʌ/"],
-].forEach(([symbol, sectionKey, practiceKey, title]) => {
+  ["/iː/", "i-long", "long_i", "Âm dài /iː/", 5],
+  ["/ɪ/", "i-short", "short_i", "Âm ngắn /ɪ/", 5],
+  ["/e/", "e", "e", "Âm /e/", 5],
+  ["/æ/", "ae", "ae", "Âm /æ/", 5],
+  ["/ə/", "schwa", "schwa", "Âm /ə/", 4],
+  ["/ʌ/", "uh", "uh", "Âm /ʌ/", 5],
+].forEach(([symbol, sectionKey, practiceKey, title, wordCount]) => {
   const group = lesson02SingleSounds.get(symbol);
   check(group?.sectionKey === sectionKey, `Lesson 2 ${symbol} must configure its pronunciation media key.`);
   check(group?.practiceKey === practiceKey, `Lesson 2 ${symbol} must configure a stable practice key.`);
   check(group?.title === title, `Lesson 2 ${symbol} must expose the single-sound section title.`);
-  check(group?.words?.length === 5, `Lesson 2 ${symbol} must include exactly 5 practice words.`);
+  check(group?.words?.length === wordCount, `Lesson 2 ${symbol} must include exactly ${wordCount} practice words.`);
 });
 check(
   mainSource.includes("function renderVowel2SingleSoundLesson")
@@ -237,7 +237,8 @@ check(
     && mainSource.includes("function renderVowel2SoundSwitcher")
     && mainSource.includes('renderVowel2SoundSwitcher("vowel2_e_ae"')
     && mainSource.includes('renderVowel2SoundSwitcher("vowel2_schwa_caret"')
-    && mainSource.includes("TỪ ${wordIndex + 1}/${group.words.length}"),
+    && mainSource.includes("Từ ${wordIndex + 1}/${group.words.length}")
+    && mainSource.includes("Xem video hướng dẫn"),
   "Lesson 2 individual vowels must render through the shared single-sound practice template."
 );
 check(
@@ -246,10 +247,11 @@ check(
   "Lesson 2 individual vowels must keep word icons and sound/word audio controls."
 );
 check(
-  mainSource.includes("pronunciation-mouth-placeholder")
-    && mainSource.includes("Chưa có hình khẩu hình")
+  mainSource.includes("function renderPronunciationMouthImage")
+    && mainSource.includes("function renderPronunciationGuideVideo")
+    && mainSource.includes("_vowel2SpeakSound")
     && !mainSource.includes("vowel2LongIState"),
-  "Lesson 2 single-sound renderer must use compact mouth placeholders and no /i:/ special state."
+  "Lesson 2 single-sound renderer must use shared media fallback helpers and no /i:/ special state."
 );
 check(lesson02?.track === "single-vowels-1", "Lesson 2 must use the dedicated single-vowels renderer.");
 check(lesson02?.sectionFlow?.length === 12, "Lesson 2 sidebar must have exactly 12 grouped sections.");
