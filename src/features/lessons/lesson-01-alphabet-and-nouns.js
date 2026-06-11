@@ -39,6 +39,8 @@ const alphabetSectionFlow = [
   "alphabet_split_word",
   "alphabet_icon_read",
   "alphabet_chill",
+  "alphabet_homework",
+  "alphabet_summary",
 ];
 
 const createAlphabetLetterGroup = (groupTitle, completedMessage, start, end) => ({
@@ -87,6 +89,8 @@ export const lesson01 = {
     alphabet_split_word: "Tách chữ trong từ",
     alphabet_icon_read: "Nhìn biểu tượng đọc từ",
     alphabet_chill: "Video thư giãn cuối buổi",
+    alphabet_homework: "Bài tập về nhà",
+    alphabet_summary: "Tổng kết buổi học",
   },
   metadata: {
     sourceLessonIds: [],
@@ -133,6 +137,67 @@ export const lesson01 = {
     teacherChallenge: ["cat", "dog", "pen", "sun", "box"],
     starfallUrl: "https://www.starfall.com/h/abcs/?mg=k",
     chillVideo: "/alphabet/alphabet.mp4",
+    homework: {
+      subtitle: "Luyện đủ 4 kỹ năng: nghe, nói, đọc, viết.",
+      reminder: "Phụ huynh chỉ cần cho bé luyện 10–15 phút.",
+      skills: [
+        {
+          icon: "🎧",
+          title: "Nghe",
+          checklist: "Hoàn thành nghe",
+          items: [
+            "Nghe lại bài hát bảng chữ cái 2 lần.",
+            "Nghe và chỉ đúng 10 chữ cái bất kỳ.",
+            "Ôn nhóm chữ A–Z cùng phụ huynh.",
+          ],
+        },
+        {
+          icon: "🎤",
+          title: "Nói",
+          checklist: "Hoàn thành nói",
+          items: [
+            "Đọc A–Z 3 lần.",
+            "Đọc 10 từ: apple, ball, cat, dog, egg, fish, goat, hat, ink, juice.",
+            "Tập nói mẫu: “A, A, apple.”",
+          ],
+        },
+        {
+          icon: "📖",
+          title: "Đọc",
+          checklist: "Hoàn thành đọc",
+          items: [
+            "Nhìn chữ hoa và đọc tên chữ cái.",
+            "Nhìn chữ thường và đọc tên chữ cái.",
+            "Đọc 10 thẻ từ vựng có icon.",
+          ],
+        },
+        {
+          icon: "✏️",
+          title: "Viết",
+          checklist: "Hoàn thành viết",
+          items: [
+            "Viết A–Z chữ hoa 1 dòng.",
+            "Viết a–z chữ thường 1 dòng.",
+            "Chép 5 từ: apple, ball, cat, dog, egg.",
+          ],
+        },
+      ],
+    },
+    summary: {
+      subtitle: "Hôm nay em đã hoàn thành Buổi 1!",
+      learnedTitle: "Hôm nay em đã học:",
+      learnedItems: [
+        "Nhận diện bảng chữ cái A–Z",
+        "Đọc chữ hoa và chữ thường",
+        "Học từ vựng theo icon",
+        "Biết 5 nguyên âm A E I O U",
+        "Luyện nghe, đọc, đánh vần và ghép chữ",
+      ],
+      rememberTitle: "Em nhớ được gì?",
+      vowels: ["A", "E", "I", "O", "U"],
+      vowelsCaption: "5 chữ cái đặc biệt",
+      celebration: "Giỏi lắm! Em đã hoàn thành bài học đầu tiên.",
+    },
   },
   review: {
     title: "Ôn đầu vào / Khởi động",

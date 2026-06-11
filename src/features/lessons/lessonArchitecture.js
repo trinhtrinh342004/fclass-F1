@@ -40,7 +40,9 @@ export const lessonSectionFlowOverrides = {
       "alphabet_spell_name",
       "alphabet_split_word",
       "alphabet_icon_read",
-      "alphabet_chill"
+      "alphabet_chill",
+      "alphabet_homework",
+      "alphabet_summary"
     ]
   },
   31: {

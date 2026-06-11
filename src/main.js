@@ -722,6 +722,8 @@ Object.assign(SECTION_LABELS, {
   alphabet_split_word: "Tách chữ trong từ",
   alphabet_icon_read: "Nhìn biểu tượng đọc từ",
   alphabet_chill: "Video thư giãn cuối buổi",
+  alphabet_homework: "Bài tập về nhà",
+  alphabet_summary: "Tổng kết buổi học",
 });
 
 const IPA_SECTION_ALIASES = {
@@ -979,6 +981,10 @@ function renderAlphabetSection(lesson, section){
           <video controls preload="metadata" onerror="_alphabetVideoError(this)"><source src="${escAttr(alphabet.chillVideo || "")}" type="video/mp4"></video>
           <div class="alphabet-video-placeholder">Không thể tải video bảng chữ cái.</div>
         </div>`;
+    case "alphabet_homework":
+      return `${header}${renderAlphabetHomework(alphabet.homework || {})}`;
+    case "alphabet_summary":
+      return `${header}${renderAlphabetSummary(alphabet.summary || {})}`;
     default:
       return renderMissingSection(section);
   }
@@ -987,6 +993,60 @@ function renderAlphabetSection(lesson, section){
 function renderAlphabetHeader(lesson, section){
   return `<div class="stage-h"><span class="stage-tag">Bảng chữ cái A–Z</span><span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span></div>
     <h2 class="stage-title">${escAttr(lesson.sectionLabels?.[section] || SECTION_LABELS[section])}</h2>`;
+}
+
+function renderAlphabetHomework(homework){
+  return `<p class="alphabet-section-subtitle">${escAttr(homework.subtitle || "")}</p>
+    <div class="alphabet-homework-grid">
+      ${(homework.skills || []).map((skill, index)=>`
+        <article class="alphabet-homework-card alphabet-homework-card-${index + 1}">
+          <div class="alphabet-homework-heading">
+            <span aria-hidden="true">${skill.icon || "✅"}</span>
+            <h3>${escAttr(skill.title || "")}</h3>
+          </div>
+          <ul>${(skill.items || []).map(item=>`<li>${escAttr(item)}</li>`).join("")}</ul>
+          <label class="alphabet-homework-check">
+            <input type="checkbox">
+            <span>${escAttr(skill.checklist || `Hoàn thành ${skill.title || ""}`)}</span>
+          </label>
+        </article>`).join("")}
+    </div>
+    <aside class="alphabet-parent-reminder">
+      <span aria-hidden="true">⏱️</span>
+      <strong>${escAttr(homework.reminder || "")}</strong>
+    </aside>`;
+}
+
+function renderAlphabetSummary(summary){
+  const confettiColors = ["#facc15", "#2563eb", "#22c55e", "#f97316", "#ec4899"];
+  const confetti = Array.from({ length: 24 }, (_, index)=>`
+    <i style="--x:${(index * 37) % 100}%;--delay:${(index % 8) * 0.08}s;--spin:${180 + (index % 5) * 90}deg;--color:${confettiColors[index % confettiColors.length]}"></i>
+  `).join("");
+  return `<section class="alphabet-summary">
+    <div class="alphabet-summary-confetti" aria-hidden="true">${confetti}</div>
+    <p class="alphabet-section-subtitle">${escAttr(summary.subtitle || "")}</p>
+    <div class="alphabet-summary-grid">
+      <article class="alphabet-summary-learned">
+        <h3>${escAttr(summary.learnedTitle || "")}</h3>
+        <ol>${(summary.learnedItems || []).map(item=>`<li>${escAttr(item)}</li>`).join("")}</ol>
+      </article>
+      <article class="alphabet-summary-memory">
+        <h3>${escAttr(summary.rememberTitle || "")}</h3>
+        <div class="alphabet-summary-vowels">
+          ${(summary.vowels || []).map(vowel=>`<span>${escAttr(vowel)}</span>`).join("")}
+        </div>
+        <p>${escAttr(summary.vowelsCaption || "")}</p>
+      </article>
+    </div>
+    <div class="alphabet-summary-celebration">
+      <span aria-hidden="true">🏆</span>
+      <strong>${escAttr(summary.celebration || "")}</strong>
+    </div>
+    <div class="alphabet-summary-actions">
+      <button type="button" class="alphabet-summary-replay" onclick="jumpTo(0)">Học lại Buổi 1</button>
+      <button type="button" class="alphabet-summary-next" onclick="openLesson(2)">Sang Buổi 2</button>
+    </div>
+  </section>`;
 }
 
 function renderAlphabetLetterGroup(group, section){
