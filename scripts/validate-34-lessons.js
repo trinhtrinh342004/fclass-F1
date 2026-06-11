@@ -77,6 +77,24 @@ check(
   lesson01?.alphabetFoundation?.groupAG?.every((item) => item.uppercase && item.lowercase && item.word && item.icon && item.chant),
   "Lesson 1 A-G interactive items must include uppercase, lowercase, word, icon, and chant."
 );
+const alphabetLetterGroups = lesson01?.alphabetFoundation?.letterGroups || {};
+const expectedAlphabetLetterGroups = [
+  ["alphabet_group_ag", "Nhóm chữ A–G", "Hoàn thành nhóm chữ A–G!", 7, "A", "G"],
+  ["alphabet_group_hn", "Nhóm chữ H–N", "Hoàn thành nhóm chữ H–N!", 7, "H", "N"],
+  ["alphabet_group_ou", "Nhóm chữ O–U", "Hoàn thành nhóm chữ O–U!", 7, "O", "U"],
+  ["alphabet_group_vz", "Nhóm chữ V–Z", "Hoàn thành nhóm chữ V–Z!", 5, "V", "Z"],
+];
+for (const [key, groupTitle, completedMessage, length, first, last] of expectedAlphabetLetterGroups) {
+  const group = alphabetLetterGroups[key];
+  check(group?.groupTitle === groupTitle, `Lesson 1 ${groupTitle} must include its groupTitle.`);
+  check(group?.completedMessage === completedMessage, `Lesson 1 ${groupTitle} must include its completed message.`);
+  check(group?.letters?.length === length, `Lesson 1 ${groupTitle} must have ${length} interactive letter items.`);
+  check(group?.letters?.[0]?.uppercase === first && group?.letters?.[length - 1]?.uppercase === last, `Lesson 1 ${groupTitle} letter range mismatch.`);
+  check(
+    group?.letters?.every((item) => item.uppercase && item.lowercase && item.word && item.icon && item.chant),
+    `Lesson 1 ${groupTitle} items must include uppercase, lowercase, word, icon, and chant.`
+  );
+}
 check(lesson01?.alphabetFoundation?.vowels?.length === 5, "Lesson 1 must have 5 vowel cards.");
 check(lesson01?.alphabetFoundation?.simpleWords?.length === 10, "Lesson 1 must have 10 simple spelling words.");
 check(arrayEquals(Object.values(lesson01?.sectionLabels || {}), [
@@ -112,8 +130,8 @@ const alphabetRenderer = mainSource.slice(
   mainSource.indexOf("function renderAlphabetSection"),
   mainSource.indexOf("function renderSpellingSection")
 );
-const alphabetAgRenderer = mainSource.slice(
-  mainSource.indexOf("function renderAlphabetGroupAG"),
+const alphabetGroupRenderer = mainSource.slice(
+  mainSource.indexOf("function renderAlphabetLetterGroup"),
   mainSource.indexOf("function _alphabetReadEach")
 );
 const alphabetAgFlowRenderer = mainSource.slice(
@@ -169,32 +187,31 @@ check([
   "Hiện chữ thường",
   "Hiện biểu tượng",
   "Từ tiếp theo",
-  "Học lại nhóm A–G",
-].every((label) => alphabetAgRenderer.includes(label)), "Lesson 1 A-G activity must contain all requested Vietnamese controls.");
+  "Học lại",
+  "Giỏi lắm!",
+].every((label) => alphabetGroupRenderer.includes(label)), "Lesson 1 Alphabet group activity must contain all requested Vietnamese controls.");
 check(
   alphabetAgFlowRenderer.includes('class="alphabet-ag-speaker"')
-    && alphabetAgFlowRenderer.includes('aria-label="Nghe chữ ${escAttr(letter)}"')
+    && alphabetAgFlowRenderer.includes('aria-label="Nghe lại"')
+    && alphabetAgFlowRenderer.includes('title="Nghe lại"')
     && !alphabetAgFlowRenderer.includes('>Nghe lại</button>'),
-  "Lesson 1 A-G speaker must use a letter-specific accessible label without visible replay text."
+  "Lesson 1 Alphabet group speaker must use an accessible icon without visible replay text."
 );
 check(
   alphabetAgFlowRenderer.includes('onclick="_alphabetAgSpeakLetter(this)"')
     && alphabetAgFlowRenderer.includes('aria-label="Nghe chữ ${escAttr(item.uppercase)}"')
     && alphabetAgFlowRenderer.includes("_alphabetAgSpeakWord"),
-  "Lesson 1 A-G uppercase, lowercase, and speaker controls must share the letter pronunciation handler."
+  "Lesson 1 Alphabet group uppercase, lowercase, icon, and word controls must be directly clickable for pronunciation."
 );
 check(
-  alphabetAgFlowRenderer.includes('utterance.lang = "en-US"')
-    && alphabetAgFlowRenderer.includes("utterance.rate = 0.9")
-    && alphabetAgFlowRenderer.includes("utterance.pitch = 1")
-    && alphabetAgFlowRenderer.includes("stopCurrentSpeech()")
-    && alphabetAgFlowRenderer.includes("synthesis.speak(utterance)")
-    && !alphabetAgFlowRenderer.includes("await waitForVoices"),
-  "Lesson 1 A-G speech must cancel old audio and speak synchronously inside the user interaction."
+  alphabetAgFlowRenderer.includes("speakEnglish(text")
+    && alphabetAgFlowRenderer.includes('rate: 0.86')
+    && alphabetAgFlowRenderer.includes('lang: "en-US"'),
+  "Lesson 1 Alphabet group speech must use the shared English speech helper."
 );
 check(
   !alphabetAgFlowRenderer.includes('alphabetAgSpeak("Good job!"'),
-  "Lesson 1 A-G completion must not speak the English praise phrase."
+  "Lesson 1 Alphabet group completion must not speak the English praise phrase."
 );
 check([
   "\"idle\"",
@@ -203,7 +220,7 @@ check([
   "\"icon\"",
   "\"completedLetter\"",
   "\"completedGroup\"",
-].every((state) => alphabetAgRenderer.includes(state)), "Lesson 1 A-G activity must preserve its learning states.");
+].every((state) => alphabetGroupRenderer.includes(state)), "Lesson 1 Alphabet group activity must preserve its learning states.");
 
 const lesson02 = lessonById(2);
 check(lesson02?.slug === "nguyen-am-don-1", "Lesson 2 must route to Monophthongs 1.");

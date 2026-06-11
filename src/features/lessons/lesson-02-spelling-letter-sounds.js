@@ -41,9 +41,9 @@ const WORD_GROUPS = [
     mouth: "relaxed-small",
     soundText: "/ɪ/",
     words: [
-      ["ship", "/ʃɪp/", "tàu thủy", "🚢", "i"],
+      ["ship", "/ʃɪp/", "con tàu", "🚢", "i"],
       ["sit", "/sɪt/", "ngồi", "🪑", "i"],
-      ["fit", "/fɪt/", "phù hợp", "✅", "i"],
+      ["fit", "/fɪt/", "vừa / phù hợp", "✅", "i"],
       ["fish", "/fɪʃ/", "con cá", "🐟", "i"],
       ["milk", "/mɪlk/", "sữa", "🥛", "i"],
     ],
@@ -60,7 +60,7 @@ const WORD_GROUPS = [
     words: [
       ["bed", "/bed/", "cái giường", "🛏️", "e"],
       ["pen", "/pen/", "cây bút", "🖊️", "e"],
-      ["ten", "/ten/", "số 10", "🔟", "e"],
+      ["ten", "/ten/", "số mười", "🔟", "e"],
       ["egg", "/eg/", "quả trứng", "🥚", "e"],
       ["red", "/red/", "màu đỏ", "🟥", "e"],
     ],
