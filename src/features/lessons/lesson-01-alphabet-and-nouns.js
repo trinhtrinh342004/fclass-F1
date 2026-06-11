@@ -110,6 +110,13 @@ export const lesson01 = {
       alphabet_group_ou: "O P Q R S T U",
       alphabet_group_vz: "V W X Y Z",
     },
+    groupAG: alphabetLetters.slice(0, 7).map(({ letter, lower, word, icon, reading }) => ({
+      uppercase: letter,
+      lowercase: lower,
+      word,
+      icon,
+      chant: reading,
+    })),
     letters: alphabetLetters,
     vowels: alphabetLetters.filter(({ letter }) => "AEIOU".includes(letter)),
     listenChoose: [

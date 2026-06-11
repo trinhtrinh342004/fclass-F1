@@ -68,6 +68,11 @@ check(lesson01?.sectionFlow?.length === 21, "Lesson 1 Alphabet sidebar must have
 check(lesson01?.sectionFlow?.every((section) => section.startsWith("alphabet_")), "Lesson 1 must use dedicated alphabet sections.");
 check(lesson01?.alphabetFoundation?.letters?.length === 26, "Lesson 1 must have 26 alphabet letter cards.");
 check(lesson01?.alphabetFoundation?.letters?.every((item) => item.pronunciation && item.reading), "Lesson 1 letter cards must include pronunciation and reading text.");
+check(lesson01?.alphabetFoundation?.groupAG?.length === 7, "Lesson 1 A-G group must have 7 interactive letter items.");
+check(
+  lesson01?.alphabetFoundation?.groupAG?.every((item) => item.uppercase && item.lowercase && item.word && item.icon && item.chant),
+  "Lesson 1 A-G interactive items must include uppercase, lowercase, word, icon, and chant."
+);
 check(lesson01?.alphabetFoundation?.vowels?.length === 5, "Lesson 1 must have 5 vowel cards.");
 check(lesson01?.alphabetFoundation?.simpleWords?.length === 10, "Lesson 1 must have 10 simple spelling words.");
 check(arrayEquals(Object.values(lesson01?.sectionLabels || {}), [
@@ -143,6 +148,22 @@ check([
   "Hoàn thành",
   "Mở game bảng chữ cái",
 ].every((label) => alphabetRenderer.includes(label)), "Lesson 1 renderer must contain the requested Vietnamese controls.");
+check([
+  "Bắt đầu học",
+  "Nghe lại",
+  "Hiện chữ thường",
+  "Hiện biểu tượng",
+  "Từ tiếp theo",
+  "Học lại nhóm A–G",
+].every((label) => alphabetRenderer.includes(label)), "Lesson 1 A-G activity must contain all requested Vietnamese controls.");
+check([
+  "\"idle\"",
+  "\"uppercase\"",
+  "\"lowercase\"",
+  "\"icon\"",
+  "\"completedLetter\"",
+  "\"completedGroup\"",
+].every((state) => alphabetRenderer.includes(state)), "Lesson 1 A-G activity must preserve its learning states.");
 
 const lesson02 = lessonById(2);
 check(lesson02?.slug === "spelling-letter-sounds", "Lesson 2 must route to Spelling & Letter Sounds.");

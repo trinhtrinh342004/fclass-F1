@@ -907,6 +907,7 @@ function renderMissingSection(section){
 function renderAlphabetSection(lesson, section){
   const alphabet = lesson.alphabetFoundation || {};
   const header = renderAlphabetHeader(lesson, section);
+  if(section === "alphabet_group_ag") return `${header}${renderAlphabetGroupAG(alphabet.groupAG || [])}`;
   if(alphabet.groups?.[section]) return `${header}${renderAlphabetGroup(alphabet.groups[section])}`;
 
   switch(section){
@@ -1013,6 +1014,19 @@ function renderAlphabetSection(lesson, section){
 function renderAlphabetHeader(lesson, section){
   return `<div class="stage-h"><span class="stage-tag">Bảng chữ cái A–Z</span><span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span></div>
     <h2 class="stage-title">${escAttr(lesson.sectionLabels?.[section] || SECTION_LABELS[section])}</h2>`;
+}
+
+function renderAlphabetGroupAG(items){
+  return `<div class="alphabet-ag-activity" data-state="idle" data-index="0">
+    <div class="alphabet-ag-overview">
+      <div class="alphabet-ag-card-row">${items.map(item=>`
+        <article class="alphabet-ag-mini-card">
+          <div><b>${escAttr(item.uppercase)}</b><span>${escAttr(item.lowercase)}</span></div>
+          <i>${item.icon}</i><small>${escAttr(item.word)}</small>
+        </article>`).join("")}</div>
+      <button class="alphabet-ag-start" onclick="_alphabetAgStart(this)">Bắt đầu học</button>
+    </div>
+  </div>`;
 }
 
 function renderAlphabetGroup(letters){
@@ -1135,6 +1149,136 @@ function _alphabetInstantCheck(button){
 
 function _alphabetNextRound(button){
   button.closest(".alphabet-game-card")?.nextElementSibling?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function getAlphabetAgItems(){
+  return LESSONS.find(item=>item.id === STATE.lessonId)?.alphabetFoundation?.groupAG || [];
+}
+
+function _alphabetAgStart(button){
+  const activity = button.closest(".alphabet-ag-activity");
+  activity.dataset.index = "0";
+  showAlphabetAgPhase(activity, "uppercase");
+}
+
+function showAlphabetAgPhase(activity, state){
+  const items = getAlphabetAgItems();
+  const index = Number(activity.dataset.index || 0);
+  const item = items[index];
+  if(!item) return;
+  activity.dataset.state = state;
+
+  if(state === "uppercase"){
+    activity.innerHTML = renderAlphabetAgLearningCard(item, state, `
+      <button onclick="_alphabetAgReplay(this)">Nghe lại</button>
+      <button onclick="_alphabetAgShowLowercase(this)">Hiện chữ thường</button>
+    `);
+    alphabetAgSpeak(item.uppercase, activity);
+    return;
+  }
+
+  if(state === "lowercase"){
+    activity.innerHTML = renderAlphabetAgLearningCard(item, state, `
+      <button onclick="_alphabetAgReplay(this)">Nghe lại</button>
+      <button onclick="_alphabetAgShowIcon(this)">Hiện biểu tượng</button>
+    `);
+    alphabetAgSpeak(item.uppercase, activity);
+    return;
+  }
+
+  const completedGroup = index === items.length - 1;
+  if(state === "icon"){
+    activity.innerHTML = renderAlphabetAgLearningCard(item, state, `
+      <button onclick="_alphabetAgReplay(this)">Nghe lại</button>
+    `);
+    alphabetAgSpeak(item.word, activity);
+    setTimeout(()=>{
+      if(activity.isConnected && activity.dataset.state === "icon"){
+        showAlphabetAgPhase(activity, completedGroup ? "completedGroup" : "completedLetter");
+      }
+    }, 1100);
+    return;
+  }
+
+  activity.innerHTML = renderAlphabetAgLearningCard(item, "icon", `
+    <button onclick="_alphabetAgReplay(this)">Nghe lại</button>
+    <button onclick="${completedGroup ? "_alphabetAgRestart(this)" : "_alphabetAgNext(this)"}">
+      ${completedGroup ? "Học lại nhóm A–G" : "Từ tiếp theo"}
+    </button>
+  `, completedGroup);
+  alphabetAgSpeak("Good job!", activity, false);
+  launchAlphabetAgConfetti(activity, completedGroup);
+}
+
+function renderAlphabetAgLearningCard(item, state, actions, completedGroup=false){
+  const showLowercase = state !== "uppercase";
+  const showIcon = state === "icon";
+  return `<div class="alphabet-ag-learning-card">
+    <div class="alphabet-ag-step" aria-live="polite">
+      <div class="alphabet-ag-main-letter">${escAttr(item.uppercase)}${showLowercase ? `<span>${escAttr(item.lowercase)}</span>` : ""}</div>
+      ${showIcon ? `<div class="alphabet-ag-focus-icon">${item.icon}</div>
+        <strong>${escAttr(item.word)}</strong><p>${escAttr(item.chant)}</p>
+        <div class="alphabet-ag-praise">${completedGroup ? "Hoàn thành nhóm chữ A–G!" : "Giỏi lắm!"}</div>` : ""}
+    </div>
+    <div class="alphabet-ag-actions">${actions}</div>
+    <div class="alphabet-ag-speech-fallback" aria-live="polite"></div>
+    <div class="alphabet-ag-confetti" aria-hidden="true"></div>
+  </div>`;
+}
+
+function _alphabetAgShowLowercase(button){
+  showAlphabetAgPhase(button.closest(".alphabet-ag-activity"), "lowercase");
+}
+
+function _alphabetAgShowIcon(button){
+  showAlphabetAgPhase(button.closest(".alphabet-ag-activity"), "icon");
+}
+
+function _alphabetAgReplay(button){
+  const activity = button.closest(".alphabet-ag-activity");
+  const item = getAlphabetAgItems()[Number(activity.dataset.index || 0)];
+  if(!item) return;
+  const state = activity.dataset.state;
+  const replayText = state === "icon"
+    ? item.word
+    : state === "completedLetter" || state === "completedGroup"
+      ? item.chant
+      : item.uppercase;
+  alphabetAgSpeak(replayText, activity);
+}
+
+function _alphabetAgNext(button){
+  const activity = button.closest(".alphabet-ag-activity");
+  activity.dataset.index = String(Number(activity.dataset.index || 0) + 1);
+  showAlphabetAgPhase(activity, "uppercase");
+}
+
+function _alphabetAgRestart(button){
+  const activity = button.closest(".alphabet-ag-activity");
+  activity.dataset.index = "0";
+  activity.dataset.state = "idle";
+  activity.outerHTML = renderAlphabetGroupAG(getAlphabetAgItems());
+}
+
+function alphabetAgSpeak(text, activity, showFallback=true){
+  const fallback = activity.querySelector(".alphabet-ag-speech-fallback");
+  if(!("speechSynthesis" in window)){
+    if(showFallback && fallback) fallback.textContent = "Trình duyệt chưa hỗ trợ phát âm.";
+    return;
+  }
+  if(fallback) fallback.textContent = "";
+  speak(text, 0.82);
+}
+
+function launchAlphabetAgConfetti(activity, large=false){
+  const container = activity.querySelector(".alphabet-ag-confetti");
+  if(!container) return;
+  const count = large ? 42 : 24;
+  container.innerHTML = Array.from({length:count}, (_, index)=>`
+    <i style="--x:${(index * 37) % 100}%;--delay:${(index % 8) * 0.04}s;--spin:${180 + (index % 5) * 90}deg;background:hsl(${(index * 47) % 360} 85% 58%)"></i>
+  `).join("");
+  container.classList.add("active", ...(large ? ["large"] : []));
+  setTimeout(()=>{ container.className = "alphabet-ag-confetti"; container.innerHTML = ""; }, 1900);
 }
 
 function _alphabetReadEach(button){
@@ -6358,6 +6502,8 @@ Object.assign(window, {
   getBestEnglishVoice, speakEnglish, normalizeSpeechText, stopCurrentSpeech,
   _checkIpaChoice,
   _alphabetSelect, _alphabetCheck, _alphabetInstantCheck, _alphabetNextRound,
+  _alphabetAgStart, _alphabetAgShowLowercase, _alphabetAgShowIcon, _alphabetAgReplay,
+  _alphabetAgNext, _alphabetAgRestart,
   _alphabetReadEach, _alphabetToggleGroup, _alphabetQuickNext, _alphabetSpeakQuick,
   _alphabetToggleSplit, _alphabetChallengeNext, _alphabetToggleChallengeIcon, _alphabetCompleteChallenge,
   _alphabetAddWordLetter, _alphabetRemoveWordLetter, _alphabetCheckWord, _alphabetResetWord,
