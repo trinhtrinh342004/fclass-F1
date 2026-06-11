@@ -13,6 +13,7 @@ import { getCurrentProfile, getCurrentUser, signOut } from "./lib/supabase/auth.
 import { subscribeToMyProgress, unsubscribe as unsubscribeProgressRealtime } from "./features/progress/progressRealtime.js";
 import { requireApprovedStudent } from "./features/auth/authGuard.js";
 import { requireApprovedClassMembership } from "./features/student/studentRepository.js";
+import { getPronunciationMedia } from "./data/pronunciationMedia.js";
 import {
   getBestEnglishVoice as selectBestEnglishVoice,
   speakEnglish as speakEnglishWithSharedUtility,
@@ -1582,6 +1583,7 @@ function renderVowel2Section(lesson, section){
         </div>`;
     case "vowel2_long_i": {
       const group = groups["/iː/"];
+      const media = getPronunciationMedia(2, "i-long");
       if (window.vowel2LongIState.step === 1) {
         return `${header}
           <div class="vowel2-sound-group">
@@ -1592,7 +1594,7 @@ function renderVowel2Section(lesson, section){
                 <p>${escAttr(group.guide)}</p>
                 <button class="vowel2-speaker-btn" onclick="speakById('${regTxt("ee")}')" title="Nghe âm ${group.symbol}" aria-label="Nghe âm ${group.symbol}">${SPEAKER_ICON_SVG}</button>
               </div>
-              ${renderVowel2MouthPositionSvg()}
+              ${renderPronunciationMouthMedia(media)}
             </div>
             <button class="vowel2-start-practice-btn" onclick="window.vowel2LongIStartPractice()">Bắt đầu phát âm</button>
           </div>`;
@@ -1606,7 +1608,7 @@ function renderVowel2Section(lesson, section){
               <span class="ipa-label">${escAttr(group.label)}</span>
               <p class="ipa-desc">${escAttr(group.guide)}</p>
               <button class="vowel2-speaker-btn" onclick="speakById('${regTxt("ee")}')" title="Nghe lại âm ${group.symbol}" aria-label="Nghe lại âm ${group.symbol}">${SPEAKER_ICON_SVG}</button>
-              ${renderVowel2MouthPositionSvg()}
+              ${renderPronunciationMouthMedia(media, true)}
             </div>
             <div class="vowel2-practice-right">
               <span class="word-indicator">Từ ${window.vowel2LongIState.wordIndex + 1}/5</span>
@@ -1639,9 +1641,7 @@ function renderVowel2Section(lesson, section){
               <span class="video-intro-badge">VIDEO HƯỚNG DẪN</span>
             </div>
             <h3 class="video-intro-title">Video hướng dẫn âm ${escAttr(group.symbol)}</h3>
-            <div class="video-pending-box" style="margin-top: 15px; border: 2px dashed var(--line-strong); border-radius: 12px; background: var(--bg-soft); padding: 44px 18px; text-align: center; font-weight: 800; color: var(--navy);">
-              <span>Video hướng dẫn sẽ được cập nhật</span>
-            </div>
+            ${renderPronunciationGuideVideo(media)}
             <div class="vowel2-nav-row" style="margin-top: 24px;">
               <button class="vowel2-nav-btn" onclick="window.vowel2LongIBackToPractice()">Từ trước</button>
             </div>
@@ -1800,6 +1800,46 @@ function renderVowel2MouthPositionSvg(){
     <text x="195" y="214" fill="#1d4ed8" font-size="15" font-weight="800" font-family="sans-serif">front</text>
   </svg>`;
 }
+
+function renderPronunciationMouthMedia(media, compact = false){
+  const sound = media?.sound || "";
+  const image = media?.mouthImage || "";
+  return `<div class="pronunciation-mouth-media${compact ? " compact" : ""}">
+    ${image ? `<img src="${escAttr(image)}" alt="Khẩu hình miệng phát âm ${escAttr(sound)}" hidden onload="_pronunciationImageLoaded(this)" onerror="_pronunciationImageFailed(this)">` : ""}
+    <div class="pronunciation-mouth-fallback">${renderVowel2MouthPositionSvg()}</div>
+  </div>`;
+}
+
+function renderPronunciationGuideVideo(media){
+  const sound = media?.sound || "";
+  const video = media?.guideVideo || "";
+  return `<div class="pronunciation-guide-video">
+    ${video ? `<video controls preload="metadata" hidden aria-label="Video hướng dẫn phát âm ${escAttr(sound)}" onloadedmetadata="_pronunciationVideoLoaded(this)" onerror="_pronunciationVideoFailed(this)">
+      <source src="${escAttr(video)}" type="video/mp4" onerror="_pronunciationVideoFailed(this.parentElement)">
+    </video>` : ""}
+    <div class="video-pending-box pronunciation-video-fallback">Video hướng dẫn sẽ được cập nhật</div>
+  </div>`;
+}
+
+window._pronunciationImageLoaded = function(image){
+  image.hidden = false;
+  const fallback = image.nextElementSibling;
+  if(fallback) fallback.hidden = true;
+};
+
+window._pronunciationImageFailed = function(image){
+  image.remove();
+};
+
+window._pronunciationVideoLoaded = function(video){
+  video.hidden = false;
+  const fallback = video.nextElementSibling;
+  if(fallback) fallback.hidden = true;
+};
+
+window._pronunciationVideoFailed = function(video){
+  video.remove();
+};
 
 function highlightWord(word, focus){
   const focuses = Array.isArray(focus) ? [...focus] : [focus];

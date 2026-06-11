@@ -100,6 +100,10 @@ check(arrayEquals(Object.values(lesson01?.sectionLabels || {}), [
 ]), "Lesson 1 sidebar labels must match the requested Vietnamese labels.");
 
 const mainSource = readFileSync(new URL("../src/main.js", import.meta.url), "utf8");
+const pronunciationMediaSource = readFileSync(
+  new URL("../src/data/pronunciationMedia.js", import.meta.url),
+  "utf8"
+);
 const alphabetRenderer = mainSource.slice(
   mainSource.indexOf("function renderAlphabetSection"),
   mainSource.indexOf("function renderSpellingSection")
@@ -167,6 +171,27 @@ check([
 
 const lesson02 = lessonById(2);
 check(lesson02?.slug === "nguyen-am-don-1", "Lesson 2 must route to Monophthongs 1.");
+check(
+  pronunciationMediaSource.includes('["i-long", "/iː/"]')
+    && pronunciationMediaSource.includes("mouth-position.png")
+    && pronunciationMediaSource.includes("guide-video.mp4")
+    && !pronunciationMediaSource.includes("/words/"),
+  "Lesson 2 pronunciation media must configure mouth and guide files without per-word images."
+);
+check(
+  mainSource.includes("renderPronunciationMouthMedia(media)")
+    && mainSource.includes("renderPronunciationMouthMedia(media, true)")
+    && mainSource.includes("renderPronunciationGuideVideo(media)")
+    && mainSource.includes("renderVowel2MouthPositionSvg()")
+    && mainSource.includes("Video hướng dẫn sẽ được cập nhật"),
+  "Lesson 2 long /i:/ must render static media with mouth and video fallbacks."
+);
+check(
+  mainSource.includes('<span>${escAttr(word.icon)}</span>')
+    && mainSource.includes('regTxt("ee")')
+    && mainSource.includes("regTxt(word.word)"),
+  "Lesson 2 long /i:/ must keep default word icons and separate sound/word audio controls."
+);
 check(lesson02?.track === "single-vowels-1", "Lesson 2 must use the dedicated single-vowels renderer.");
 check(lesson02?.sectionFlow?.length === 12, "Lesson 2 sidebar must have exactly 12 grouped sections.");
 check(lesson02?.sectionFlow?.every((section) => section.startsWith("vowel2_")), "Lesson 2 must use dedicated vowel2 sections.");

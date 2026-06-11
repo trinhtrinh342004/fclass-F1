@@ -3825,6 +3825,9 @@ body.admin-active > .topbar{
 .vowel2-practice-left .vowel2-mouth-position-svg {
   max-width: 200px;
 }
+.vowel2-practice-left .pronunciation-mouth-media {
+  max-width: 200px;
+}
 .vowel2-practice-right {
   display: flex;
   flex-direction: column;
@@ -3920,6 +3923,47 @@ body.admin-active > .topbar{
 .vowel2-mouth-position-svg {
   width: 100%;
   filter: drop-shadow(0 4px 6px rgba(23,37,84,0.08));
+}
+.pronunciation-mouth-media {
+  width: 100%;
+  max-width: 260px;
+  justify-self: center;
+}
+.pronunciation-mouth-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 6px rgba(23,37,84,0.08));
+}
+.pronunciation-mouth-media img[hidden],
+.pronunciation-mouth-fallback[hidden],
+.pronunciation-guide-video video[hidden],
+.pronunciation-video-fallback[hidden] {
+  display: none;
+}
+.pronunciation-mouth-fallback {
+  width: 100%;
+}
+.pronunciation-guide-video {
+  margin-top: 15px;
+}
+.pronunciation-guide-video video {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  border-radius: 12px;
+  background: #000;
+}
+.pronunciation-guide-video .video-pending-box {
+  margin-top: 0;
+  padding: 44px 18px;
+  border: 2px dashed var(--line-strong);
+  background: var(--bg-soft);
+  color: var(--navy);
+  text-align: center;
+  font-weight: 800;
 }
 .vowel2-listen-pair {
   display: inline-flex !important;
