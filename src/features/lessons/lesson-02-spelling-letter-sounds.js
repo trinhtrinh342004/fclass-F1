@@ -3,9 +3,11 @@ const SECTION_FLOW = [
   "vowel2_long_i",
   "vowel2_short_i",
   "vowel2_compare_i",
-  "vowel2_e_ae",
+  "vowel2_sound_e",
+  "vowel2_sound_ae",
   "vowel2_compare_e_ae",
-  "vowel2_schwa_caret",
+  "vowel2_sound_schwa",
+  "vowel2_sound_uh",
   "vowel2_compare_schwa_caret",
   "vowel2_mouth_grid",
   "vowel2_word_practice",
@@ -131,6 +133,21 @@ const MINIMAL_PAIRS = [
   left, leftIpa, leftMeaning, leftFocus, right, rightIpa, rightMeaning, rightFocus,
 }));
 
+const COMPARISON_PAIRS = [
+  ["ship", "/ʃɪp/", "tàu thủy", "/ɪ/", "i", "🚢", "sheep", "/ʃiːp/", "con cừu", "/iː/", "ee", "🐑"],
+  ["sit", "/sɪt/", "ngồi", "/ɪ/", "i", "🪑", "seat", "/siːt/", "ghế", "/iː/", "ea", "🪑"],
+  ["fit", "/fɪt/", "phù hợp", "/ɪ/", "i", "✅", "feet", "/fiːt/", "bàn chân", "/iː/", "ee", "🦶"],
+].map(([leftWord, leftIpa, leftMeaning, leftSound, leftHighlight, leftIcon,
+  rightWord, rightIpa, rightMeaning, rightSound, rightHighlight, rightIcon]) => ({
+  left: {
+    word: leftWord, ipa: leftIpa, meaning: leftMeaning, sound: leftSound, highlight: leftHighlight, icon: leftIcon,
+  },
+  right: {
+    word: rightWord, ipa: rightIpa, meaning: rightMeaning, sound: rightSound, highlight: rightHighlight, icon: rightIcon,
+  },
+}));
+
+
 const SENTENCES = [
   ["I see a sheep.", ["see", "sheep"]],
   ["Sit on the seat.", ["Sit", "seat"]],
@@ -170,9 +187,11 @@ export const lesson02SpellingLetterSounds = {
     vowel2_long_i: "Âm dài /iː/",
     vowel2_short_i: "Âm ngắn /ɪ/",
     vowel2_compare_i: "So sánh /ɪ/ và /iː/",
-    vowel2_e_ae: "Âm /e/ và /æ/",
+    vowel2_sound_e: "Âm /e/",
+    vowel2_sound_ae: "Âm /æ/",
     vowel2_compare_e_ae: "So sánh /e/ và /æ/",
-    vowel2_schwa_caret: "Âm /ə/ và /ʌ/",
+    vowel2_sound_schwa: "Âm /ə/",
+    vowel2_sound_uh: "Âm /ʌ/",
     vowel2_compare_schwa_caret: "So sánh /ə/ và /ʌ/",
     vowel2_mouth_grid: "Khẩu hình trực quan",
     vowel2_word_practice: "Từ vựng luyện đọc",
@@ -188,6 +207,7 @@ export const lesson02SpellingLetterSounds = {
     sounds: ["/iː/", "/ɪ/", "/e/", "/æ/", "/ə/", "/ʌ/"],
     wordGroups: WORD_GROUPS,
     minimalPairs: MINIMAL_PAIRS,
+    comparisonPairs: COMPARISON_PAIRS,
     sentences: SENTENCES,
     listenGame: LISTEN_GAME,
     recordingWords: ["sheep", "ship", "seat", "sit", "feet", "fit", "bed", "bad", "pen", "pan", "cup", "cap"],
