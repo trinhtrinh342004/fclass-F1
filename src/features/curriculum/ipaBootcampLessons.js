@@ -1,8 +1,9 @@
 import { lesson04LongVowels } from "../lessons/lesson-04-long-vowels.js";
 import { lesson06Consonants1 } from "../lessons/lesson-06-consonants-1.js";
-import { lesson03Diphthongs } from "../lessons/lesson-03-diphthongs.js";
+import { lesson03ShortVowels } from "../lessons/lesson-03-short-vowels.js";
 import { lesson08IpaReview } from "../lessons/lesson-08-ipa-review.js";
 import { lesson07Consonants2 } from "../lessons/lesson-07-consonants-2.js";
+import { lesson02SpellingLetterSounds } from "../lessons/lesson-02-spelling-letter-sounds.js";
 
 export const IPA_BOOTCAMP_SECTION_FLOW = [
   "ipa_intro",
@@ -165,21 +166,21 @@ export const IPA_BOOTCAMP_CURRICULUM_MAP = [
   },
   {
     lessonId: 2,
-    topicEnglish: "Short vs Long Vowels – Nguyên âm ngắn và dài",
-    topicVietnamese: "Phân biệt âm ngắn và âm dài",
-    slug: "short-vs-long-vowels",
+    topicEnglish: "Spelling & Letter Sounds – Đánh vần và âm chữ cái",
+    topicVietnamese: "Hiểu tên chữ cái khác với âm trong từ",
+    slug: "spelling-letter-sounds",
     sourceLessons: [],
     status: "ready",
-    notes: "IPA Bootcamp lesson.",
+    notes: "Buổi 2 có structure riêng 16 mục theo MD Spelling & Letter Sounds.",
   },
   {
     lessonId: 3,
-    topicEnglish: "Diphthongs – Nguyên âm đôi",
-    topicVietnamese: "Học cách đọc âm trượt từ âm này sang âm khác",
-    slug: "diphthongs-nguyen-am-doi",
+    topicEnglish: "IPA Foundation + Short Vowels",
+    topicVietnamese: "IPA và nguyên âm ngắn",
+    slug: "short-vowels",
     sourceLessons: [],
     status: "ready",
-    notes: "Buổi 3 có structure riêng theo tài liệu Diphthongs.",
+    notes: "Buổi 3 có structure riêng 18 mục theo tài liệu IPA Foundation + Short Vowels.",
   },
   {
     lessonId: 4,
@@ -250,15 +251,8 @@ export const IPA_BOOTCAMP_LESSONS = [
       { q: "Khi học phát âm cần quan sát gì?", options: ["môi, lưỡi, răng, hơi", "màu bút", "số trang", "chữ viết hoa"], answer: 0 },
     ],
   }),
-  createIpaLesson({
-    id: 2,
-    title: "Short vs Long Vowels – Nguyên âm ngắn và dài",
-    subtitle: "Phân biệt âm ngắn và âm dài",
-    topic: "Nguyên âm dài",
-    learningItems: "/iː/ /uː/ /ɑː/ /ɔː/ /ɜː/",
-    outcome: "Học sinh hiểu dấu /ː/ là kéo dài âm, phân biệt được âm ngắn và âm dài.",
-  }),
-  createDiphthongLesson(lesson03Diphthongs),
+  lesson02SpellingLetterSounds,
+  lesson03ShortVowels,
   {
     ...lesson04LongVowels,
     id: 4,

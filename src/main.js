@@ -624,6 +624,24 @@ Object.assign(SECTION_LABELS, {
   ipa_mini_test: "Mini test",
   ipa_mindmap: "Mindmap",
   ipa_homework: "Bài tập về nhà",
+  short_intro: "IPA là gì?",
+  short_why: "Vì sao cần IPA?",
+  short_letter_sound: "Letter vs Sound",
+  short_sound_table: "Bảng âm hôm nay",
+  short_mouth_visual: "Khẩu hình trực quan",
+  short_video_mouth: "Video khẩu hình",
+  short_audio_samples: "Nghe âm mẫu",
+  short_read_ipa: "Nhìn IPA đọc âm",
+  short_compare_e_ae: "So sánh /e/ và /æ/",
+  short_compare_caret_o: "So sánh /ʌ/ và /ɒ/",
+  short_spell_words: "Đánh vần từ mẫu",
+  short_image_sentence: "Hình ảnh & câu minh họa",
+  short_blend_words: "Ghép âm thành từ",
+  short_listen_choose: "Nghe chọn âm",
+  short_ai_speaking: "Luyện nói AI",
+  short_mini_test: "Mini test",
+  short_mindmap: "Mindmap",
+  short_homework: "Bài tập về nhà",
   consonants1_consonant_intro: "Phụ âm là gì?",
   consonants1_stop_intro: "Âm bật là gì?",
   consonants1_nasal_intro: "Âm mũi là gì?",
@@ -679,6 +697,24 @@ Object.assign(SECTION_LABELS, {
 });
 
 const IPA_SECTION_ALIASES = {
+  short_intro: "ipa_intro",
+  short_why: "ipa_why",
+  short_letter_sound: "ipa_word_process",
+  short_sound_table: "ipa_sound_table",
+  short_mouth_visual: "ipa_mouth_visual",
+  short_video_mouth: "ipa_video_mouth",
+  short_audio_samples: "ipa_audio_samples",
+  short_read_ipa: "ipa_read_symbols",
+  short_compare_e_ae: "ipa_compare_sounds",
+  short_compare_caret_o: "ipa_compare_sounds",
+  short_spell_words: "ipa_spell_words",
+  short_image_sentence: "ipa_image_sentence",
+  short_blend_words: "ipa_blend_words",
+  short_listen_choose: "ipa_listen_choose_sound",
+  short_ai_speaking: "ipa_ai_speaking",
+  short_mini_test: "ipa_mini_test",
+  short_mindmap: "ipa_mindmap",
+  short_homework: "ipa_homework",
   consonants2_intro_fricative: "ipa_intro",
   consonants2_voicing: "ipa_compare_sounds",
   consonants2_pair_f_v: "ipa_compare_sounds",
@@ -773,6 +809,8 @@ function renderSection(){
   let html="";
   if(lesson?.module === "ipa-bootcamp" && section.startsWith("review8_")){
     html = renderReview8Section(lesson, section);
+  }else if(lesson?.track === "spelling-letter-sounds" && section.startsWith("spelling_")){
+    html = renderSpellingSection(lesson, section);
   }else if(section.startsWith("consonants1_")){
     html = renderConsonants1Section(lesson, section);
   }else if(lesson?.module === "ipa-bootcamp" && (section.startsWith("ipa_") || IPA_SECTION_ALIASES[section])){
@@ -843,11 +881,158 @@ function renderMissingSection(section){
   `;
 }
 
+function renderSpellingSection(lesson, section){
+  const data = lesson.spelling || {};
+  const header = renderSpellingHeader(lesson, section);
+  switch(section){
+    case "spelling_alphabet_review":
+      return `${header}
+        <div class="ipa-hero-panel">
+          <div><span class="ipa-kicker">ABC & IPA Foundation</span><h3>Spelling bắt đầu từ A-Z</h3>
+          <p>Khi spell, em đọc từng tên chữ cái: cat = C-A-T, pen = P-E-N, book = B-O-O-K.</p></div>
+          <div class="ipa-symbol-stack">${"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(letter=>`<span>${letter}</span>`).join("")}</div>
+        </div>
+        <div class="ipa-info-card"><h3>26 chữ cái tiếng Anh</h3><p>${escAttr((data.alphabetLines || []).join(" · "))}</p>
+          <button class="ipa-listen-button" onclick="speakById('${regTxt((data.alphabetLines || []).join(" "))}')">Nghe A-Z</button>
+        </div>${renderSpellingQuestions(data.quickCheck || [])}`;
+    case "spelling_letter_name":
+      return `${header}<div class="ipa-info-card"><h3>Letter name = tên chữ cái</h3>
+        <p>Khi em đọc bảng chữ cái, em đang đọc letter name.</p>
+        ${renderReview8Table(["Chữ cái", "Letter name"], data.letterNames || [])}
+        <button class="ipa-listen-button" onclick="speakById('${regTxt("A B C D E")}')">Nghe letter name</button>
+      </div>`;
+    case "spelling_letter_sound":
+      return `${header}<div class="ipa-info-card"><h3>Letter sound = âm của chữ cái trong từ</h3>
+        <p>Letter name là tên chữ cái. Letter sound là âm chữ cái khi nằm trong từ.</p></div>
+        <div class="ipa-compare-grid">${(data.letterSounds || []).map(([letter, name, word, sound])=>`
+          <article class="ipa-compare-card">
+            <div><b>${escAttr(letter)} = ${escAttr(name)}</b><span>khi đọc bảng chữ cái</span></div>
+            <div><b>${escAttr(word)}: ${escAttr(letter.toLowerCase())} = ${escAttr(sound)}</b><span>âm trong từ</span></div>
+          </article>`).join("")}</div>`;
+    case "spelling_vowels_consonants":
+      return `${header}<div class="ipa-two-col">
+        <div class="ipa-info-card"><h3>Vowel letters</h3><div class="ipa-symbol-stack">${(data.vowels || []).map(letter=>`<span>${letter}</span>`).join("")}</div></div>
+        <div class="ipa-info-card"><h3>Consonant letters</h3><p>${escAttr((data.consonants || []).join(" "))}</p></div>
+      </div>${renderSpellingQuestions((data.sortLetters || []).map(([letter, answer])=>({q:`${letter} thuộc nhóm nào?`,options:["Vowel","Consonant"],answer})))}`;
+    case "spelling_how_spell":
+      return `${header}<div class="ipa-info-card"><h3>How do you spell...?</h3><p>Dùng để hỏi cách đánh vần tên hoặc từ.</p>
+        <div class="grammar-examples">
+          <div class="grammar-ex"><div><div class="gex-en">Teacher: How do you spell "cat"?</div><div class="gex-vi">Student: C-A-T.</div></div></div>
+          <div class="grammar-ex"><div><div class="gex-en">Teacher: How do you spell your name?</div><div class="gex-vi">Student: L-A-N.</div></div></div>
+        </div>
+        <button class="ipa-listen-button" onclick="speakById('${regTxt("How do you spell cat? C A T.")}')">Nghe mẫu</button>
+      </div>`;
+    case "spelling_names":
+      return `${header}<div class="ipa-info-card"><h3>Spell tên người</h3>${renderReview8Table(["Tên", "Spelling"], data.names || [])}</div>
+        <div class="ipa-info-card"><h3>Spell tên của em</h3>
+          <div class="mt-write-row"><input class="mt-input" placeholder="Ví dụ: Lan" oninput="_spellLesson2Name(this)">
+          <strong id="lesson2SpellingOutput" class="ipa-example-line">L-A-N</strong></div>
+          <button class="ipa-listen-button" onclick="_speakLesson2Name()">Nghe spelling</button>
+        </div>`;
+    case "spelling_objects":
+      return `${header}${renderSpellingCards(data.objects || [])}`;
+    case "spelling_initial_sound":
+      return `${header}<div class="ipa-info-card"><h3>Chữ cái đầu và âm đầu</h3>
+        <p>Chữ cái đầu là letter. Âm đọc trong từ là sound. Hai phần liên quan nhưng không phải lúc nào cũng giống hệt.</p>
+        ${renderReview8Table(["Từ", "Chữ cái đầu", "Nghĩa"], data.initialWords || [])}</div>
+        ${renderSpellingQuestions([{q:"Từ cat bắt đầu bằng chữ nào?",options:["C","B","D"],answer:"C"}])}`;
+    case "spelling_listen_letter_word":
+      return `${header}${renderSpellingQuestions((data.listenLetterQuestions || []).map(item=>({
+        ...item, q:`Nghe chữ ${item.audioText}. Chọn từ bắt đầu bằng chữ đó.`,
+      })), true)}`;
+    case "spelling_image_initial":
+      return `${header}<div class="ipa-image-grid">${(data.imageInitialQuestions || []).map(item=>`
+        <article class="ipa-image-card"><div class="ipa-illustration">${escAttr(item.word.toUpperCase())}</div>
+          <h3>${escAttr(item.word)} <span>${escAttr(item.meaning)}</span></h3><small>${escAttr(item.imageSlot)} · placeholder an toàn</small>
+          <div class="ipa-option-row">${item.options.map(option=>`<button data-answer="${escAttr(item.answer)}" data-choice="${escAttr(option)}" onclick="_checkIpaChoice(this)">${escAttr(option)}</button>`).join("")}</div>
+        </article>`).join("")}</div>`;
+    case "spelling_cvc_words":
+      return `${header}<div class="ipa-info-card"><h3>CVC = Consonant + Vowel + Consonant</h3><p>cat = C + A + T · pen = P + E + N · sit = S + I + T</p></div>
+        ${renderSpellingCvcCards(data.cvcWords || [])}
+        <div class="ipa-info-card"><h3>Nghe spelling, chọn từ</h3>${renderSpellingQuestions(data.spellingChoiceQuestions || [], true)}</div>
+        ${renderSpellingQuestions([{q:"Sắp xếp đúng để spell dog:",options:["D-O-G","G-D-O","O-D-G"],answer:"D-O-G"}])}`;
+    case "spelling_teacher_feedback":
+      return `${header}<div class="ipa-info-card"><h3>Khung giáo viên sửa lỗi</h3>
+        ${renderReview8Table(["Lỗi", "Ví dụ", "Cách sửa"], data.teacherCorrections || [])}</div>
+        <div class="ipa-info-card"><h3>Feedback mẫu</h3><p>Em spell đúng thứ tự rồi, nhưng cần đọc từng chữ rõ hơn.</p><p>Từ book có 2 chữ O: B-O-O-K.</p></div>`;
+    case "spelling_ai":
+      return `${header}<div class="ipa-ai-panel"><h3>Luyện nói AI</h3>
+        <p>Tính năng AI speaking đang được kết nối. Em vẫn có thể ghi âm để giáo viên kiểm tra.</p>
+        <div class="ipa-reading-list">${(data.aiModes || []).map((item,index)=>`
+          <div class="ipa-reading-card"><b>${index + 1}</b><span><strong>${escAttr(item.title)}</strong><br>${escAttr(item.target)}</span>
+          <div class="ipa-card-actions"><button onclick="speakById('${regTxt(item.target)}')">Nghe mẫu</button>
+          <button id="mic-${1200 + index}" onclick="recordById(${1200 + index}, '${regTxt(item.target)}')">Ghi âm</button></div>
+          <div id="speakRes-${1200 + index}" class="dlg-result" style="display:none"></div></div>`).join("")}</div>
+      </div>`;
+    case "spelling_mini_test":
+      return renderMinitest(lesson);
+    case "spelling_mindmap":
+      return `${header}${renderMindmap(lesson)}<div class="ipa-info-card"><h3>Câu chốt cuối buổi</h3>
+        <p>Letter name là tên chữ cái. Letter sound là âm của chữ cái trong từ. Khi spell, em đọc từng chữ cái trong từ.</p></div>`;
+    case "spelling_homework":
+      return renderHomework(lesson);
+    default:
+      return renderMissingSection(section);
+  }
+}
+
+function renderSpellingHeader(lesson, section){
+  return `<div class="stage-h"><span class="stage-tag">${escAttr(lesson.unit)}</span><span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span></div>
+    <h2 class="stage-title">${escAttr(lesson.sectionLabels?.[section] || section)}</h2>
+    <p class="stage-sub">${escAttr(lesson.title)} · ${escAttr(lesson.subtitle)}</p>`;
+}
+
+function renderSpellingQuestions(questions, playAudio=false){
+  return `<div class="ipa-game">${questions.map((item,index)=>`
+    <div class="ipa-game-row"><div><b>Câu ${index + 1}: ${escAttr(item.q)}</b>
+      ${playAudio ? `<button class="ipa-listen-button" onclick="speakById('${regTxt(item.audioText)}')">Nghe</button>` : ""}</div>
+      <div class="ipa-option-row">${item.options.map(option=>`<button data-answer="${escAttr(item.answer)}" data-choice="${escAttr(option)}" onclick="_checkIpaChoice(this)">${escAttr(option)}</button>`).join("")}</div>
+    </div>`).join("")}</div>`;
+}
+
+function renderSpellingCards(items){
+  return `<div class="ipa-image-grid">${items.map((item,index)=>`
+    <article class="ipa-image-card"><div class="ipa-illustration">${escAttr(item.word.toUpperCase())}</div>
+      <h3>${escAttr(item.word)}</h3><p>${escAttr(item.meaning)} · <strong>${escAttr(item.spelling)}</strong></p>
+      <small>${escAttr(item.imageSlot)} · placeholder an toàn</small>
+      <div class="ipa-card-actions"><button onclick="speakById('${regTxt(item.word)}')">Nghe</button>
+      <button id="mic-${1100 + index}" onclick="recordById(${1100 + index}, '${regTxt(item.spelling.replaceAll("-", " "))}')">Spell thử</button></div>
+      <div id="speakRes-${1100 + index}" class="dlg-result" style="display:none"></div>
+    </article>`).join("")}</div>`;
+}
+
+function renderSpellingCvcCards(items){
+  return `<div class="ipa-sound-grid">${items.map((item,index)=>`
+    <article class="ipa-sound-card"><div class="ipa-symbol">${escAttr(item.spelling.join("-"))}</div>
+      <h3>${escAttr(item.word)}</h3><p>${escAttr(item.meaning)}</p><div class="ipa-audio-slot">${escAttr(item.audioSlot)} · audio placeholder</div>
+      <div class="ipa-card-actions"><button onclick="speakById('${regTxt(item.word)}')">Nghe từ</button>
+      <button id="mic-${1150 + index}" onclick="recordById(${1150 + index}, '${regTxt(item.spelling.join(" "))}')">Spell thử</button></div>
+      <div id="speakRes-${1150 + index}" class="dlg-result" style="display:none"></div>
+    </article>`).join("")}</div>`;
+}
+
+window._spellLesson2Name = function(input){
+  const output = document.getElementById("lesson2SpellingOutput");
+  if(!output) return;
+  output.textContent = String(input.value || "").toUpperCase().replace(/[^A-Z]/g, "").split("").join("-") || "L-A-N";
+};
+
+window._speakLesson2Name = function(){
+  const output = document.getElementById("lesson2SpellingOutput");
+  speak(String(output?.textContent || "L-A-N").replaceAll("-", " "), 0.8);
+};
+
 function renderIpaSection(lesson, section){
   const ipa = lesson.ipa || {};
   const sounds = ipa.sounds || [];
   const header = renderIpaHeader(lesson, section);
   const normalizedSection = IPA_SECTION_ALIASES[section] || section;
+  if(section === "short_letter_sound"){
+    return `${header}${renderShortLetterSound(ipa.letterSoundRows || [])}${renderIpaProcessBlock(ipa)}`;
+  }
+  if(section === "short_spell_words"){
+    return `${header}${renderShortWordBreakdown(ipa.wordBreakdown || [])}`;
+  }
   switch(normalizedSection){
     case "ipa_intro":
       return `${header}
@@ -1122,6 +1307,8 @@ window._spellReviewName = function(input){
 
 function selectIpaComparisons(comparisons, section){
   const sectionSymbols = {
+    short_compare_e_ae: ["/e/", "/æ/"],
+    short_compare_caret_o: ["/ʌ/", "/ɒ/"],
     consonants2_pair_f_v: ["/f/", "/v/"],
     consonants2_pair_s_z: ["/s/", "/z/"],
     consonants2_pair_th: ["/θ/", "/ð/"],
@@ -1134,6 +1321,27 @@ function selectIpaComparisons(comparisons, section){
   return comparisons.filter((comparison) =>
     sectionSymbols.every((symbol) => comparison.items.some((item) => item.symbol === symbol))
   );
+}
+
+function renderShortLetterSound(rows){
+  return `<div class="responsive-table-wrap"><table class="grammar-table lesson-reference-table">
+    <thead><tr><th>Từ</th><th>Letters</th><th>Sounds</th><th>IPA</th></tr></thead>
+    <tbody>${rows.map(row=>`<tr><td>${escAttr(row.word)}</td><td>${escAttr(row.letters)}</td><td>${escAttr(row.sounds.join(" + "))}</td><td>${escAttr(row.ipa)}</td></tr>`).join("")}</tbody>
+  </table></div>
+  <div class="ipa-info-card"><h3>Ghi nhớ</h3><p>Letter là chữ em nhìn thấy. Sound là âm em nghe thấy. IPA ghi lại âm em nghe thấy.</p></div>`;
+}
+
+function renderShortWordBreakdown(words){
+  return `<div class="ipa-reading-list">${words.map((word, index)=>`
+    <div class="ipa-reading-card">
+      <b>${escAttr(word.word)}</b>
+      <span>${escAttr(word.ipa)} · ${escAttr(word.split.join(" + "))} · ${escAttr(word.meaning)} · ${escAttr(word.sentence)}</span>
+      <div class="ipa-card-actions">
+        <button onclick="speakById('${regTxt(word.word)}')">Nghe từ</button>
+        <button id="mic-shortWord${index}" onclick="recordById('shortWord${index}', '${regTxt(word.word)}')">Đọc thử</button>
+      </div>
+      <div id="speakRes-shortWord${index}" class="dlg-result" style="display:none"></div>
+    </div>`).join("")}</div>`;
 }
 
 function renderIpaComparisons(comparisons){
