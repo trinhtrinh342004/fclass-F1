@@ -2028,10 +2028,278 @@ function renderVowel2Section(lesson, section){
       return `${header}<div id="vowel2SentenceGameHost">${renderVowel2SentenceGame(data.advancedTrapSentences || [])}</div>`;
     case "vowel2_game_record_test":
       return `${header}${renderVowel2FinalTabs(lesson)}`;
+    case "vowel2_homework":
+      return `${header}${renderVowel2Homework(lesson)}`;
+    case "vowel2_summary":
+      return `${header}${renderVowel2Summary(lesson)}`;
     default:
       return renderMissingSection(section);
   }
 }
+
+function renderVowel2Homework(lesson) {
+  const isAssigned = window.vowel2HomeworkAssigned || false;
+  return `
+    <div class="vowel2-homework-slide">
+      <div class="vowel2-hw-skills-grid">
+        <!-- NGHE -->
+        <article class="vowel2-hw-card card-listen">
+          <div class="vowel2-hw-card-header">
+            <span class="vowel2-hw-icon">🎧</span>
+            <h3>1. Nghe</h3>
+          </div>
+          <div class="vowel2-hw-card-body">
+            <ul class="vowel2-hw-list">
+              <li>Nghe lại 6 âm hôm nay: <strong>/iː/ /ɪ/ /e/ /æ/ /ə/ /ʌ/</strong></li>
+              <li>Nghe lại các cặp dễ nhầm: <span class="badge-pair">ship – sheep</span>, <span class="badge-pair">sit – seat</span>, <span class="badge-pair">fit – feet</span>, <span class="badge-pair">bed – bad</span>, <span class="badge-pair">pen – pan</span>, <span class="badge-pair">cup – cap</span></li>
+              <li>Phụ huynh/giáo viên đọc 1 từ, học sinh chỉ ra âm đúng.</li>
+            </ul>
+            <div class="vowel2-hw-footer">
+              <span class="vowel2-hw-time">⏱️ 5–7 phút</span>
+              <span class="vowel2-hw-criteria">🎯 Đúng ít nhất 8/10 từ</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- NÓI -->
+        <article class="vowel2-hw-card card-speak">
+          <div class="vowel2-hw-card-header">
+            <span class="vowel2-hw-icon">🎙️</span>
+            <h3>2. Nói</h3>
+          </div>
+          <div class="vowel2-hw-card-body">
+            <ul class="vowel2-hw-list">
+              <li>Đọc to 12 từ: <em>sheep, ship, seat, sit, feet, fit, bed, bad, pen, pan, cup, cap</em></li>
+              <li>Đọc 5 câu:
+                <ol>
+                  <li>I see a sheep.</li>
+                  <li>Sit on the seat.</li>
+                  <li>My feet fit.</li>
+                  <li>The bed is bad.</li>
+                  <li>The cup is up.</li>
+                </ol>
+              </li>
+              <li>Ghi âm hoặc đọc cho giáo viên/phụ huynh nghe.</li>
+            </ul>
+            <div class="vowel2-hw-footer">
+              <span class="vowel2-hw-time">⏱️ 7–10 phút</span>
+              <span class="vowel2-hw-criteria">🎯 Rõ âm dài/ngắn, sai ≤ 3 từ</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- ĐỌC -->
+        <article class="vowel2-hw-card card-read">
+          <div class="vowel2-hw-card-header">
+            <span class="vowel2-hw-icon">📖</span>
+            <h3>3. Đọc</h3>
+          </div>
+          <div class="vowel2-hw-card-body">
+            <ul class="vowel2-hw-list">
+              <li>Nhìn từ và gạch chân phần chữ tạo âm: <em>sheep, seat, feet, ship, sit, fit, bed, bad, apple, cup, sofa, teacher</em></li>
+              <li>Đọc lại các từ sau khi gạch chân.</li>
+              <li>Chọn đúng nhóm âm cho từng từ.</li>
+            </ul>
+            <div class="vowel2-hw-footer">
+              <span class="vowel2-hw-time">⏱️ 5–7 phút</span>
+              <span class="vowel2-hw-criteria">🎯 Gạch đúng ít nhất 10/12 từ</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- VIẾT -->
+        <article class="vowel2-hw-card card-write">
+          <div class="vowel2-hw-card-header">
+            <span class="vowel2-hw-icon">✍️</span>
+            <h3>4. Viết</h3>
+          </div>
+          <div class="vowel2-hw-card-body">
+            <ul class="vowel2-hw-list">
+              <li>Viết mỗi cặp từ 2 lần: <em>ship–sheep, sit–seat, fit–feet, bed–bad, pen–pan, cup–cap</em></li>
+              <li>Viết 3 câu ngắn:
+                <ol>
+                  <li>I see a sheep.</li>
+                  <li>The pen is in the bag.</li>
+                  <li>The sun is up.</li>
+                </ol>
+              </li>
+              <li>Khoanh tròn từ có âm hôm nay trong mỗi câu.</li>
+            </ul>
+            <div class="vowel2-hw-footer">
+              <span class="vowel2-hw-time">⏱️ 8–10 phút</span>
+              <span class="vowel2-hw-criteria">🎯 Đủ 6 cặp & 3 câu, khoanh đúng</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Checklist nộp bài -->
+      <div class="vowel2-hw-checklist-card">
+        <h3>📋 Checklist nộp bài</h3>
+        <ul class="vowel2-hw-checklist-list">
+          <li><span>✅</span> 1 ảnh vở bài viết</li>
+          <li><span>✅</span> 1 file ghi âm hoặc đọc trực tiếp cho giáo viên</li>
+          <li><span>✅</span> Hoàn thành mini test trên web</li>
+          <li><span>✅</span> Tự luyện lại các âm còn sai</li>
+        </ul>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="vowel2-hw-actions">
+        <button id="vowel2BtnAssignHW" class="vowel2-hw-btn-assign ${isAssigned ? 'assigned' : ''}" onclick="window._vowel2MarkHomework(this)">
+          ${isAssigned ? '✓ Đã giao BTVN!' : 'Đánh dấu đã giao BTVN'}
+        </button>
+        <button class="vowel2-hw-btn-next" onclick="nextSection()">
+          Sang tổng kết →
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+window._vowel2MarkHomework = function(button) {
+  window.vowel2HomeworkAssigned = !window.vowel2HomeworkAssigned;
+  if (window.vowel2HomeworkAssigned) {
+    button.classList.add("assigned");
+    button.textContent = "✓ Đã giao BTVN!";
+    toast("Đã đánh dấu đã giao bài tập về nhà!", "success");
+  } else {
+    button.classList.remove("assigned");
+    button.textContent = "Đánh dấu đã giao BTVN";
+    toast("Đã bỏ đánh dấu giao bài tập.", "info");
+  }
+};
+
+function renderVowel2Summary(lesson) {
+  const selectedEval = window.vowel2SelfEval || "";
+  return `
+    <div class="vowel2-summary-slide">
+      <!-- Section A: Hôm nay em đã học -->
+      <div class="vowel2-summary-section">
+        <h3 class="vowel2-summary-subtitle">A. Hôm nay em đã học</h3>
+        <div class="vowel2-summary-sounds-grid">
+          <div class="vowel2-sum-sound-card" onclick="_vowel2SpeakSound('/iː/')">
+            <span class="vowel2-sum-sound-symbol">/iː/</span>
+            <span class="vowel2-sum-sound-desc">âm dài</span>
+          </div>
+          <div class="vowel2-sum-sound-card" onclick="_vowel2SpeakSound('/ɪ/')">
+            <span class="vowel2-sum-sound-symbol">/ɪ/</span>
+            <span class="vowel2-sum-sound-desc">âm ngắn</span>
+          </div>
+          <div class="vowel2-sum-sound-card" onclick="_vowel2SpeakSound('/e/')">
+            <span class="vowel2-sum-sound-symbol">/e/</span>
+            <span class="vowel2-sum-sound-desc">âm e ngắn</span>
+          </div>
+          <div class="vowel2-sum-sound-card" onclick="_vowel2SpeakSound('/æ/')">
+            <span class="vowel2-sum-sound-symbol">/æ/</span>
+            <span class="vowel2-sum-sound-desc">âm a bẹt</span>
+          </div>
+          <div class="vowel2-sum-sound-card" onclick="_vowel2SpeakSound('/ə/')">
+            <span class="vowel2-sum-sound-symbol">/ə/</span>
+            <span class="vowel2-sum-sound-desc">âm nhẹ, không nhấn</span>
+          </div>
+          <div class="vowel2-sum-sound-card" onclick="_vowel2SpeakSound('/ʌ/')">
+            <span class="vowel2-sum-sound-symbol">/ʌ/</span>
+            <span class="vowel2-sum-sound-desc">âm ă/â rõ hơn</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section B: Em cần nhớ 3 điều -->
+      <div class="vowel2-summary-section">
+        <h3 class="vowel2-summary-subtitle">B. Em cần nhớ 3 điều</h3>
+        <div class="vowel2-summary-takeaways">
+          <article class="vowel2-takeaway-card">
+            <div class="vowel2-takeaway-num">1</div>
+            <div class="vowel2-takeaway-content">
+              <h4>Âm dài và âm ngắn khác nhau</h4>
+              <p>Ví dụ: <strong>ship ≠ sheep</strong>, <strong>sit ≠ seat</strong></p>
+            </div>
+          </article>
+          <article class="vowel2-takeaway-card">
+            <div class="vowel2-takeaway-num">2</div>
+            <div class="vowel2-takeaway-content">
+              <h4>Miệng mở khác nhau thì âm khác nhau</h4>
+              <p>Ví dụ: <strong>bed ≠ bad</strong>, <strong>pen ≠ pan</strong></p>
+            </div>
+          </article>
+          <article class="vowel2-takeaway-card">
+            <div class="vowel2-takeaway-num">3</div>
+            <div class="vowel2-takeaway-content">
+              <h4>Âm nhẹ /ə/ không đọc mạnh</h4>
+              <p>Ví dụ: <strong>teacher</strong>, <strong>banana</strong>, <strong>sofa</strong></p>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- Section C: Từ khóa của buổi học -->
+      <div class="vowel2-summary-section">
+        <h3 class="vowel2-summary-subtitle">C. Từ khóa của buổi học</h3>
+        <div class="vowel2-summary-badges">
+          <span class="vowel2-badge-word" onclick="speakById('ship sheep')">ship – sheep 🔊</span>
+          <span class="vowel2-badge-word" onclick="speakById('sit seat')">sit – seat 🔊</span>
+          <span class="vowel2-badge-word" onclick="speakById('fit feet')">fit – feet 🔊</span>
+          <span class="vowel2-badge-word" onclick="speakById('bed bad')">bed – bad 🔊</span>
+          <span class="vowel2-badge-word" onclick="speakById('pen pan')">pen – pan 🔊</span>
+          <span class="vowel2-badge-word" onclick="speakById('cup cap')">cup – cap 🔊</span>
+        </div>
+      </div>
+
+      <!-- Section D: Tự đánh giá nhanh -->
+      <div class="vowel2-summary-section">
+        <h3 class="vowel2-summary-subtitle">D. Tự đánh giá nhanh</h3>
+        <div class="vowel2-summary-eval-buttons">
+          <button class="vowel2-eval-btn ${selectedEval === 'good' ? 'selected' : ''}" onclick="window._vowel2SelectSelfEval(this, 'good')">😊 Em đọc tốt</button>
+          <button class="vowel2-eval-btn ${selectedEval === 'confused' ? 'selected' : ''}" onclick="window._vowel2SelectSelfEval(this, 'confused')">😐 Em còn nhầm vài âm</button>
+          <button class="vowel2-eval-btn ${selectedEval === 'retry' ? 'selected' : ''}" onclick="window._vowel2SelectSelfEval(this, 'retry')">😣 Em cần luyện lại</button>
+        </div>
+        <div id="vowel2EvalFeedback" class="vowel2-eval-feedback">
+          ${selectedEval === 'good' ? 'Tuyệt vời! Hãy tiếp tục phát huy nhé! 🚀' : selectedEval === 'confused' ? 'Rất tốt! Luyện tập thêm chút nữa là chuẩn luôn em nhé! 💪' : selectedEval === 'retry' ? 'Không sao cả! Hãy ôn lại các âm dễ sai ở dưới để tự tin hơn nhé! ❤️' : 'Hãy chọn một trạng thái tự đánh giá nhé!'}
+        </div>
+      </div>
+
+      <!-- Section E: Lời kết -->
+      <div class="vowel2-summary-conclusion">
+        <p>🎉 Hoàn thành Buổi 2! Em đã biết cách phân biệt các nguyên âm đơn rất quan trọng trong tiếng Anh. Hãy luyện nghe và đọc lại mỗi ngày để miệng quen âm hơn.</p>
+      </div>
+
+      <!-- Section F: Nút cuối -->
+      <div class="vowel2-summary-footer-actions">
+        <button class="vowel2-footer-btn secondary" onclick="jumpTo(3)">Ôn lại âm dễ sai</button>
+        <button class="vowel2-footer-btn warning" onclick="window._vowel2JumpToMiniTest()">Làm lại mini test</button>
+        <button class="vowel2-footer-btn primary" onclick="nextSection()">Hoàn thành buổi học ✓</button>
+      </div>
+    </div>
+  `;
+}
+
+window._vowel2SelectSelfEval = function(button, rating) {
+  window.vowel2SelfEval = rating;
+  document.querySelectorAll(".vowel2-eval-btn").forEach(btn => btn.classList.remove("selected"));
+  button.classList.add("selected");
+  
+  const feedbackDiv = document.getElementById("vowel2EvalFeedback");
+  if (feedbackDiv) {
+    if (rating === "good") {
+      feedbackDiv.innerHTML = "Tuyệt vời! Hãy tiếp tục phát huy nhé! 🚀";
+      toast("Tuyệt vời! Chúc mừng em!", "success");
+    } else if (rating === "confused") {
+      feedbackDiv.innerHTML = "Rất tốt! Luyện tập thêm chút nữa là chuẩn luôn em nhé! 💪";
+      toast("Cố gắng thêm chút nữa nhé!", "info");
+    } else if (rating === "retry") {
+      feedbackDiv.innerHTML = "Không sao cả! Hãy ôn lại các âm dễ sai ở dưới để tự tin hơn nhé! ❤️";
+      toast("Chúng ta cùng ôn lại nhé!", "info");
+    }
+  }
+};
+
+window._vowel2JumpToMiniTest = function() {
+  jumpTo(12);
+  setTimeout(() => {
+    showVowel2Tab("test");
+  }, 100);
+};
 
 function renderVowel2Header(lesson, section){
   const title = (section === "vowel2_compare_i" || section === "vowel2_compare_e_ae" || section === "vowel2_compare_schwa_caret")
