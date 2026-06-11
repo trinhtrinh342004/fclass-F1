@@ -41,6 +41,25 @@ const alphabetSectionFlow = [
   "alphabet_chill",
 ];
 
+const createAlphabetLetterGroup = (groupTitle, completedMessage, start, end) => ({
+  groupTitle,
+  completedMessage,
+  letters: alphabetLetters.slice(start, end).map(({ letter, lower, word, icon, reading }) => ({
+    uppercase: letter,
+    lowercase: lower,
+    word,
+    icon,
+    chant: reading,
+  })),
+});
+
+const alphabetLetterGroups = {
+  alphabet_group_ag: createAlphabetLetterGroup("Nhóm chữ A–G", "Hoàn thành nhóm chữ A–G!", 0, 7),
+  alphabet_group_hn: createAlphabetLetterGroup("Nhóm chữ H–N", "Hoàn thành nhóm chữ H–N!", 7, 14),
+  alphabet_group_ou: createAlphabetLetterGroup("Nhóm chữ O–U", "Hoàn thành nhóm chữ O–U!", 14, 21),
+  alphabet_group_vz: createAlphabetLetterGroup("Nhóm chữ V–Z", "Hoàn thành nhóm chữ V–Z!", 21, 26),
+};
+
 export const lesson01 = {
   id: 1,
   title: "Buổi 1: Bảng chữ cái A–Z",
@@ -110,13 +129,8 @@ export const lesson01 = {
       alphabet_group_ou: "O P Q R S T U",
       alphabet_group_vz: "V W X Y Z",
     },
-    groupAG: alphabetLetters.slice(0, 7).map(({ letter, lower, word, icon, reading }) => ({
-      uppercase: letter,
-      lowercase: lower,
-      word,
-      icon,
-      chant: reading,
-    })),
+    letterGroups: alphabetLetterGroups,
+    groupAG: alphabetLetterGroups.alphabet_group_ag.letters,
     letters: alphabetLetters,
     vowels: alphabetLetters.filter(({ letter }) => "AEIOU".includes(letter)),
     listenChoose: [
