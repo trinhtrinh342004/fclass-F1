@@ -7,6 +7,7 @@
     "dev": "vite",
     "lint": "node --check src/main.js && node --check src/features/curriculum/tuwi27Lessons.js && node --check src/features/lessons/lesson-01-alphabet-and-nouns.js && node --check src/features/lessons/lessonArchitecture.js && node --check scripts/validate-34-lessons.js",
     "build": "vite build",
+    "test:alphabet-ag-audio": "node scripts/check-alphabet-ag-audio.mjs",
     "verify:production": "npm run validate:lessons && npm run build",
     "preview": "vite preview",
     "validate:env": "node scripts/validate-env.mjs",

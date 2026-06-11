@@ -3617,13 +3617,16 @@ body.admin-active > .topbar{
 .alphabet-ag-word{padding:0;color:var(--navy);font-family:var(--font-display);font-size:clamp(34px,5vw,58px);font-weight:900}
 .alphabet-ag-main-letter button:hover,.alphabet-ag-focus-icon:hover,.alphabet-ag-word:hover{filter:brightness(1.08);transform:scale(1.05)}
 .alphabet-ag-main-letter button:active,.alphabet-ag-focus-icon:active,.alphabet-ag-word:active{transform:scale(.96)}
+.alphabet-ag-main-letter button.playing,.alphabet-ag-focus-icon.playing,.alphabet-ag-word.playing{color:var(--blue);filter:brightness(1.08);animation:alphabetAgAudioPulse .8s ease-in-out infinite alternate}
 .alphabet-ag-main-letter button:focus-visible,.alphabet-ag-focus-icon:focus-visible,.alphabet-ag-word:focus-visible,.alphabet-ag-speaker:focus-visible{outline:4px solid var(--yellow);outline-offset:4px;border-radius:12px}
 .alphabet-ag-step>p{margin:0;color:var(--ink-mute);font-size:clamp(18px,2.4vw,25px);font-weight:850}
 .alphabet-ag-speaker{display:grid;width:50px;height:50px;flex:0 0 50px;place-items:center;border:0;border-radius:50%;background:var(--yellow);color:var(--navy);cursor:pointer;box-shadow:0 4px 0 #d3aa00;transition:transform .16s ease}
 .alphabet-ag-speaker:hover{transform:translateY(-2px)}.alphabet-ag-speaker:active{transform:translateY(2px);box-shadow:0 2px 0 #d3aa00}.alphabet-ag-speaker svg{width:27px;height:27px;fill:currentColor}.alphabet-ag-speaker svg path+path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.alphabet-ag-speaker.playing{background:var(--blue);color:#fff;animation:alphabetAgAudioPulse .8s ease-in-out infinite alternate}
 .alphabet-ag-praise{border-radius:999px;background:var(--yellow);padding:8px 20px;color:var(--navy);font-size:clamp(19px,2.5vw,27px);font-weight:950}
 .alphabet-ag-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}.alphabet-ag-actions:empty{display:none}.alphabet-ag-actions button{padding:11px 22px;font-size:17px}.alphabet-ag-speech-fallback{min-height:20px;color:var(--red);font-weight:800}
 .alphabet-ag-confetti{pointer-events:none;position:absolute;inset:0;overflow:hidden}.alphabet-ag-confetti i{position:absolute;top:-18px;left:var(--x);width:10px;height:18px;border-radius:3px;opacity:0;transform:rotate(0)}.alphabet-ag-confetti.active i{animation:alphabetAgConfetti 1.5s ease-out var(--delay) forwards}.alphabet-ag-confetti.large i{width:13px;height:22px}
+@keyframes alphabetAgAudioPulse{from{transform:scale(1)}to{transform:scale(1.08)}}
 @keyframes alphabetAgConfetti{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(540px) rotate(var(--spin))}}
 .alphabet-group-card{display:grid;gap:24px;justify-items:center;padding:36px 24px;background:linear-gradient(135deg,#fff,#fffbeb)}
 .alphabet-group-letters{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}

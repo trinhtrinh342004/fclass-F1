@@ -70,6 +70,10 @@ check(lesson01?.alphabetFoundation?.letters?.length === 26, "Lesson 1 must have 
 check(lesson01?.alphabetFoundation?.letters?.every((item) => item.pronunciation && item.reading), "Lesson 1 letter cards must include pronunciation and reading text.");
 check(lesson01?.alphabetFoundation?.groupAG?.length === 7, "Lesson 1 A-G group must have 7 interactive letter items.");
 check(
+  arrayEquals(lesson01?.alphabetFoundation?.groupAG?.map((item) => item.uppercase), ["A", "B", "C", "D", "E", "F", "G"]),
+  "Lesson 1 A-G group must preserve the exact A through G sequence."
+);
+check(
   lesson01?.alphabetFoundation?.groupAG?.every((item) => item.uppercase && item.lowercase && item.word && item.icon && item.chant),
   "Lesson 1 A-G interactive items must include uppercase, lowercase, word, icon, and chant."
 );
@@ -162,7 +166,6 @@ check([
 ].every((label) => alphabetRenderer.includes(label)), "Lesson 1 renderer must contain the requested Vietnamese controls.");
 check([
   "Bắt đầu học",
-  "Nghe lại",
   "Hiện chữ thường",
   "Hiện biểu tượng",
   "Từ tiếp theo",
@@ -170,14 +173,24 @@ check([
 ].every((label) => alphabetAgRenderer.includes(label)), "Lesson 1 A-G activity must contain all requested Vietnamese controls.");
 check(
   alphabetAgFlowRenderer.includes('class="alphabet-ag-speaker"')
-    && alphabetAgFlowRenderer.includes('aria-label="Nghe lại"')
+    && alphabetAgFlowRenderer.includes('aria-label="Nghe chữ ${escAttr(letter)}"')
     && !alphabetAgFlowRenderer.includes('>Nghe lại</button>'),
-  "Lesson 1 A-G replay control must use an accessible speaker icon without visible replay text."
+  "Lesson 1 A-G speaker must use a letter-specific accessible label without visible replay text."
 );
 check(
-  alphabetAgFlowRenderer.includes("_alphabetAgSpeakLetter")
+  alphabetAgFlowRenderer.includes('onclick="_alphabetAgSpeakLetter(this)"')
+    && alphabetAgFlowRenderer.includes('aria-label="Nghe chữ ${escAttr(item.uppercase)}"')
     && alphabetAgFlowRenderer.includes("_alphabetAgSpeakWord"),
-  "Lesson 1 A-G letters, words, and icons must be directly clickable for pronunciation."
+  "Lesson 1 A-G uppercase, lowercase, and speaker controls must share the letter pronunciation handler."
+);
+check(
+  alphabetAgFlowRenderer.includes('utterance.lang = "en-US"')
+    && alphabetAgFlowRenderer.includes("utterance.rate = 0.9")
+    && alphabetAgFlowRenderer.includes("utterance.pitch = 1")
+    && alphabetAgFlowRenderer.includes("stopCurrentSpeech()")
+    && alphabetAgFlowRenderer.includes("synthesis.speak(utterance)")
+    && !alphabetAgFlowRenderer.includes("await waitForVoices"),
+  "Lesson 1 A-G speech must cancel old audio and speak synchronously inside the user interaction."
 );
 check(
   !alphabetAgFlowRenderer.includes('alphabetAgSpeak("Good job!"'),
