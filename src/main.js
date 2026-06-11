@@ -1657,9 +1657,12 @@ function renderVowel2Section(lesson, section){
 }
 
 function renderVowel2Header(lesson, section){
+  const title = section === "vowel2_compare_i"
+    ? ""
+    : `<h2 class="stage-title">${escAttr(lesson.sectionLabels[section])}</h2>`;
   return `<div class="stage-h"><span class="stage-tag">Buổi 2 · Nguyên âm đơn</span>
     <span class="stage-num">Mục ${STATE.sectionIdx + 1}/${STATE.sections.length}</span></div>
-    <h2 class="stage-title">${escAttr(lesson.sectionLabels[section])}</h2>`;
+    ${title}`;
 }
 
 const VOWEL2_SOUND_SPEECH_TEXT = {
@@ -1797,7 +1800,7 @@ function renderVowel2FocusComparison(pairs){
   const pair = pairs[pairIndex];
   if (!pair) return renderMissingSection("vowel2_compare_i");
 
-  return `<section class="vowel2-focus-comparison">
+  return `<section class="vowel2-focus-comparison lesson2-card-compact">
     <div class="vowel2-focus-sounds">
       ${renderVowel2SoundButton("/ɪ/")}
       <i>≠</i>
