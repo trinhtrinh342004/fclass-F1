@@ -44,7 +44,7 @@ for (let id = 1; id <= expectedTotal; id += 1) {
 }
 
 const expectedTitles = new Map([
-  [2, "Spelling & Letter Sounds – Đánh vần và âm chữ cái"],
+  [2, "Buổi 2: Nguyên âm đơn 1"],
   [3, "IPA Foundation + Short Vowels – IPA và nguyên âm ngắn"],
   [4, "BUỔI 4: Long Vowels - Nguyên âm dài"],
   [5, "Fricatives – Âm gió / âm ma sát"],
@@ -145,15 +145,20 @@ check([
 ].every((label) => alphabetRenderer.includes(label)), "Lesson 1 renderer must contain the requested Vietnamese controls.");
 
 const lesson02 = lessonById(2);
-check(lesson02?.slug === "spelling-letter-sounds", "Lesson 2 must route to Spelling & Letter Sounds.");
-check(lesson02?.track === "spelling-letter-sounds", "Lesson 2 must use the dedicated spelling renderer.");
-check(lesson02?.sectionFlow?.length === 16, "Lesson 2 sidebar must have exactly 16 sections.");
-check(lesson02?.sectionFlow?.every((section) => section.startsWith("spelling_")), "Lesson 2 must use dedicated spelling sections.");
-check(lesson02?.spelling?.letterSounds?.length === 5, "Lesson 2 must compare 5 letter names and sounds.");
-check(lesson02?.spelling?.cvcWords?.length === 8, "Lesson 2 must include 8 CVC words.");
-check(lesson02?.spelling?.objects?.length === 6, "Lesson 2 must include 6 object spelling cards.");
-check(lesson02?.minitest?.length >= 10, "Lesson 2 must include the complete spelling mini test.");
-check(lesson02?.homeworkRich?.tasks?.length >= 4, "Lesson 2 must include the requested homework.");
+check(lesson02?.slug === "nguyen-am-don-1", "Lesson 2 must route to Monophthongs 1.");
+check(lesson02?.track === "single-vowels-1", "Lesson 2 must use the dedicated single-vowels renderer.");
+check(lesson02?.sectionFlow?.length === 12, "Lesson 2 sidebar must have exactly 12 grouped sections.");
+check(lesson02?.sectionFlow?.every((section) => section.startsWith("vowel2_")), "Lesson 2 must use dedicated vowel2 sections.");
+check(lesson02?.vowelLesson?.sounds?.length === 6, "Lesson 2 must include 6 monophthongs.");
+check(lesson02?.vowelLesson?.wordGroups?.length === 6, "Lesson 2 must include 6 vocabulary groups.");
+check(lesson02?.vowelLesson?.minimalPairs?.length === 6, "Lesson 2 must include 6 minimal pairs.");
+check(lesson02?.vowelLesson?.sentences?.length === 8, "Lesson 2 must include 8 reading sentences.");
+check(lesson02?.vowelLesson?.listenGame?.length === 10, "Lesson 2 listening game must include 10 rounds.");
+check(lesson02?.minitest?.length === 10, "Lesson 2 must include the complete 10-question mini test.");
+check(
+  mainSource.includes("function renderVowel2Section") && mainSource.includes("function renderVowel2MouthSvg"),
+  "Lesson 2 must include its grouped renderer and SVG mouth diagrams."
+);
 
 const lesson06 = lessonById(6);
 check(lesson06?.sectionFlow?.length === 16, "Lesson 6 sidebar must have the 16 requested sections.");
