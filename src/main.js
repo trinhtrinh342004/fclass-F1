@@ -2949,7 +2949,7 @@ function renderVowel2ListenGame(data){
               btnClass = "lesson2-btn-red";
               disabled = "disabled";
             }
-            return `<button class="lesson2-btn ${btnClass}" ${disabled} onclick="_vowel2ChooseSound(this, '${regTxt(sound)}')">
+            return `<button class="lesson2-btn ${btnClass}" ${disabled} onclick="_vowel2ChooseSound(this, '${escAttr(sound)}')">
               ${escAttr(sound)}
             </button>`;
           }).join("")}
@@ -3459,7 +3459,8 @@ window._vowel2ChooseSound = function(button, choice){
   const state = vowel2GameState;
   if(!state || state.answered) return;
   const round = state.items[state.index];
-  const correct = choice === round.answer;
+  const resolvedChoice = TXT_REG[choice] || choice;
+  const correct = resolvedChoice === round.answer;
   if(correct){
     const neededRetry = state.wrongChoices.size > 0;
     if(!neededRetry) state.score += 1;
@@ -3468,6 +3469,7 @@ window._vowel2ChooseSound = function(button, choice){
     state.feedback = `Đúng rồi! Đây là âm ${round.answer}.`;
   }else{
     state.wrongChoices.add(choice);
+    state.wrongChoices.add(resolvedChoice);
     state.statuses[state.index] = "retry";
     state.feedback = "Chưa đúng, nghe lại và chọn lại nhé.";
   }
