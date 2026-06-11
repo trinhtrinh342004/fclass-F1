@@ -844,6 +844,9 @@ function renderSection(){
   const lesson = LESSONS.find(l=>l.id===STATE.lessonId);
   const stage = document.getElementById("lessonStage");
   const section = STATE.sections[STATE.sectionIdx];
+  if(section !== "vowel2_game_record_test" && vowel2RecordingState){
+    disposeVowel2RecordingPractice();
+  }
 
   let html="";
   if(lesson?.track === "alphabet-foundation" && section.startsWith("alphabet_")){
@@ -1991,6 +1994,9 @@ function renderVowel2Section(lesson, section){
       vowel2SentenceGameSource = section === "vowel2_pairs_sentences" ? "advancedTrapSentences" : "confusingSentences";
       vowel2SentenceGameState = createVowel2SentenceGameState(data[vowel2SentenceGameSource] || []);
     }
+    if (section === "vowel2_game_record_test") {
+      initializeVowel2FinalActivities(lesson);
+    }
   }
 
   switch(section){
@@ -2525,56 +2531,320 @@ function _vowel2SentenceRestart(){
 
 function renderVowel2FinalTabs(lesson){
   const data = lesson.vowelLesson;
-  vowel2GameState = { index: 0, score: 0 };
   return `<div class="vowel2-tabs">
     <div class="vowel2-tab-buttons">
       <button data-vowel2-tab="game" onclick="showVowel2Tab('game')">1. Game</button>
       <button data-vowel2-tab="record" onclick="showVowel2Tab('record')">2. Ghi âm</button>
       <button data-vowel2-tab="test" onclick="showVowel2Tab('test')">3. Mini test</button>
     </div>
-    <section id="vowel2Tab-game" class="vowel2-tab-panel">${renderVowel2ListenGame(data)}</section>
-    <section id="vowel2Tab-record" class="vowel2-tab-panel">${renderVowel2Recording(data.recordingWords)}</section>
-    <section id="vowel2Tab-test" class="vowel2-tab-panel">${renderVowel2MiniTest(lesson.minitest)}</section>
+    <section id="vowel2Tab-game" class="vowel2-tab-panel"><div id="vowel2GameHost">${renderVowel2ListenGame(data)}</div></section>
+    <section id="vowel2Tab-record" class="vowel2-tab-panel"><div id="vowel2RecordingHost">${renderVowel2Recording(data.recordingWords)}</div></section>
+    <section id="vowel2Tab-test" class="vowel2-tab-panel"><div id="vowel2MiniTestHost">${renderVowel2MiniTest(lesson.minitest)}</div></section>
   </div>`;
 }
 
 function renderVowel2ListenGame(data){
-  const first = data.listenGame[0];
-  return `<div class="vowel2-game-card">
-    <div><span class="vowel2-game-score" id="vowel2GameScore">Điểm: 0</span><span id="vowel2GameCounter">Câu 1/${data.listenGame.length}</span></div>
-    <h3>Nghe và chọn âm</h3><p>Nghe từ mẫu, sau đó chọn âm đúng.</p>
-    <button class="vowel2-game-listen" id="vowel2GameListen" onclick="_vowel2PlayGameWord()">Nghe từ</button>
-    <div class="vowel2-game-sounds">${data.sounds.map(sound=>`<button onclick="_vowel2ChooseSound(this, '${regTxt(sound)}')">${escAttr(sound)}</button>`).join("")}</div>
-    <div id="vowel2GameFeedback" class="vowel2-game-feedback">Giáo viên có thể hiện từ sau khi học sinh trả lời.</div>
-    <button id="vowel2GameRestart" class="vowel2-secondary" onclick="_vowel2RestartGame()" hidden>Chơi lại</button>
-    <span hidden id="vowel2GameSeed">${escAttr(first.word)}</span>
-  </div>`;
+  const state = vowel2GameState;
+  if (!state) return "";
+  if (state.completed) return renderVowel2GameSummary();
+
+  const round = state.items[state.index];
+  const status = state.statuses[state.index];
+  const feedback = state.feedback
+    ? `<div class="vowel2-step-feedback ${state.answered ? "success" : "warning"}">${escAttr(state.feedback)}</div>`
+    : `<div class="vowel2-step-feedback neutral">Từ cần nghe đang được ẩn. Giáo viên có thể hiện từ sau khi học sinh trả lời đúng.</div>`;
+  const body = `
+    <p class="vowel2-step-instruction">Nghe từ mẫu, sau đó chọn âm đúng.</p>
+    <button class="vowel2-audio-orb" onclick="_vowel2PlayGameWord()" aria-label="Nghe từ">${SPEAKER_ICON_SVG}<span>Nghe từ</span></button>
+    ${state.answered ? `<div class="vowel2-revealed-word">Từ vừa nghe: <strong>${escAttr(round.word)}</strong></div>` : ""}
+    <div class="vowel2-answer-grid vowel2-sound-options">
+      ${data.sounds.map(sound => {
+        const isCorrect = state.answered && sound === round.answer;
+        const isWrong = state.wrongChoices.has(sound);
+        return `<button class="${isCorrect ? "correct" : isWrong ? "wrong" : ""}" onclick="_vowel2ChooseSound(this, '${escAttr(sound)}')" ${state.answered ? "disabled" : ""}>${escAttr(sound)}</button>`;
+      }).join("")}
+    </div>`;
+
+  return renderSingleStepQuizShell({
+    title: "Nghe và chọn âm",
+    currentIndex: state.index,
+    total: state.items.length,
+    scoreLabel: `Điểm: ${state.score}`,
+    statusList: state.statuses,
+    status,
+    body,
+    feedback,
+    nextLabel: state.index === state.items.length - 1 ? "Xem tổng kết" : "Câu tiếp theo",
+    nextDisabled: !state.answered,
+    onNext: "_vowel2NextGameQuestion()",
+  });
 }
 
 function renderVowel2Recording(words){
-  return `<div class="vowel2-recording"><h3>Ghi âm AI / Giáo viên chấm</h3>
-    <p>Nghe mẫu, bấm ghi âm và nghe lại. AI feedback sẽ được bật sau; hiện tại giáo viên có thể chấm trực tiếp.</p>
-    <div class="vowel2-record-grid">${words.map((word,index)=>`
-      <article><b>${escAttr(word)}</b><button class="vowel2-speaker-btn vowel2-speaker-btn-sm" onclick="speakById('${regTxt(word)}')" title="Nghe âm mẫu" aria-label="Nghe âm mẫu">${SPEAKER_ICON_SVG}</button>
-      <button id="mic-vowel2record${index}" onclick="recordById('vowel2record${index}', '${regTxt(word)}')">Bấm ghi âm</button>
-      <span>Giáo viên chấm</span><div id="speakRes-vowel2record${index}" class="dlg-result" style="display:none"></div></article>`).join("")}</div>
-  </div>`;
+  const state = vowel2RecordingState;
+  if (!state) return "";
+  if (state.completed) return renderVowel2RecordingSummary();
+
+  const item = state.items[state.index];
+  const teacherStatus = state.statuses[state.index];
+  const isRecording = state.recordingState === "recording";
+  const hasRecording = Boolean(state.recordings[state.index]);
+  const fallback = state.micMessage
+    ? `<div class="vowel2-mic-message">${escAttr(state.micMessage)}</div>`
+    : "";
+
+  return `<section class="vowel2-recording vowel2-step-shell">
+    <div class="vowel2-step-meta">
+      <strong>Từ ${state.index + 1}/${state.items.length}</strong>
+      <span>Giáo viên chấm trực tiếp</span>
+    </div>
+    ${renderVowel2StatusDots(state.statuses, state.index)}
+    <article class="vowel2-recording-card ${teacherStatus === "pass" ? "is-pass" : teacherStatus === "practice" ? "is-practice" : ""}">
+      <header>
+        <span>Ghi âm phát âm</span>
+        <h3>${escAttr(item.word)}</h3>
+        <b>${escAttr(item.ipa)}</b>
+      </header>
+      <div class="vowel2-word-details">
+        <span>Nghĩa: <strong>${escAttr(item.meaning)}</strong></span>
+        <span>Âm cần chú ý: <strong>${escAttr(item.focus)}</strong></span>
+      </div>
+      <button class="vowel2-listen-sample" onclick="_vowel2PlayRecordingWord()">${SPEAKER_ICON_SVG} Nghe mẫu</button>
+      <p class="vowel2-ai-note">AI feedback sẽ được bật sau; hiện tại giáo viên chấm trực tiếp.</p>
+      ${fallback}
+      <div class="vowel2-record-controls">
+        <button onclick="_vowel2StartRecording()" ${!state.canRecord || isRecording ? "disabled" : ""}>Bấm ghi âm</button>
+        <button class="danger" onclick="_vowel2StopRecording()" ${isRecording ? "" : "disabled"}>Dừng ghi âm</button>
+        <button class="secondary" onclick="_vowel2PlayRecording()" ${hasRecording && !isRecording ? "" : "disabled"}>Nghe lại</button>
+      </div>
+      <div class="vowel2-teacher-controls">
+        <span>Giáo viên chấm</span>
+        <button class="pass ${teacherStatus === "pass" ? "selected" : ""}" onclick="_vowel2MarkRecording('pass')" ${isRecording ? "disabled" : ""}>Đạt</button>
+        <button class="practice ${teacherStatus === "practice" ? "selected" : ""}" onclick="_vowel2MarkRecording('practice')" ${isRecording ? "disabled" : ""}>Cần luyện lại</button>
+      </div>
+      <button class="vowel2-step-next" onclick="_vowel2NextRecordingWord()" ${teacherStatus === "idle" || isRecording ? "disabled" : ""}>
+        ${state.index === state.items.length - 1 ? "Xem tổng kết" : "Từ tiếp theo"}
+      </button>
+    </article>
+  </section>`;
 }
 
 function renderVowel2MiniTest(questions){
-  return `<div class="vowel2-test"><h3>Mini test 10 câu</h3>
-    <div class="vowel2-test-list">${questions.map((question,index)=>`
-      <article data-vowel2-test="${index}" data-answer="${question.answer}">
-        <b>${index + 1}. ${escAttr(question.q)}</b>
-        ${question.audio ? `<button onclick="speakById('${regTxt(question.audio)}')">Nghe từ</button>` : ""}
-        <div>${question.options.map((option,choice)=>`<button data-choice="${choice}" onclick="_vowel2TestChoice(this)">${escAttr(option)}</button>`).join("")}</div>
-      </article>`).join("")}</div>
-    <button class="vowel2-submit-test" onclick="_vowel2SubmitTest()">Xem kết quả</button>
-    <div id="vowel2TestResult" class="vowel2-test-result"></div>
+  const state = vowel2MiniTestState;
+  if (!state) return "";
+  if (state.completed) return renderVowel2MiniTestSummary();
+
+  const question = state.questions[state.index];
+  const selected = state.selections[state.index];
+  const answered = selected !== null;
+  const isCorrect = answered && selected === question.answer;
+  const feedback = answered
+    ? `<div class="vowel2-step-feedback ${isCorrect ? "success" : "warning"}">
+        <strong>${isCorrect ? "Đúng rồi!" : `Chưa đúng. Đáp án đúng: ${escAttr(question.options[question.answer])}.`}</strong>
+        <span>${escAttr(question.explanation)}</span>
+      </div>`
+    : `<div class="vowel2-step-feedback neutral">Chọn một đáp án để xem giải thích.</div>`;
+  const body = `
+    <h4 class="vowel2-test-question">${escAttr(question.q)}</h4>
+    ${question.audio ? `<button class="vowel2-mini-audio" onclick="_vowel2PlayMiniTestAudio()">${SPEAKER_ICON_SVG} Nghe từ</button>` : ""}
+    <div class="vowel2-answer-grid">
+      ${question.options.map((option, choice) => {
+        const correctClass = answered && choice === question.answer ? "correct" : "";
+        const wrongClass = answered && choice === selected && !isCorrect ? "wrong" : "";
+        return `<button class="${correctClass || wrongClass}" onclick="_vowel2TestChoice(${choice})" ${answered ? "disabled" : ""}>${escAttr(option)}</button>`;
+      }).join("")}
+    </div>`;
+
+  return renderSingleStepQuizShell({
+    title: "Mini test",
+    currentIndex: state.index,
+    total: state.questions.length,
+    scoreLabel: `Điểm: ${state.score}/${state.questions.length}`,
+    statusList: state.statuses,
+    status: state.statuses[state.index],
+    body,
+    feedback,
+    nextLabel: state.index === state.questions.length - 1 ? "Xem tổng kết" : "Câu tiếp theo",
+    nextDisabled: !answered,
+    onNext: "_vowel2NextMiniTestQuestion()",
+  });
+}
+
+function renderSingleStepQuizShell({
+  title,
+  currentIndex,
+  total,
+  scoreLabel,
+  statusList,
+  status,
+  body,
+  feedback,
+  nextLabel,
+  nextDisabled,
+  onNext,
+}){
+  return `<section class="vowel2-step-shell ${status === "correct" || status === "retry" ? "is-correct" : status === "wrong" ? "is-wrong" : ""}">
+    <div class="vowel2-step-meta">
+      <strong>${escAttr(scoreLabel)}</strong>
+      <span>Câu ${currentIndex + 1}/${total}</span>
+    </div>
+    ${renderVowel2StatusDots(statusList, currentIndex)}
+    <article class="vowel2-step-card">
+      <h3>${escAttr(title)}</h3>
+      ${body}
+      ${feedback}
+      <button class="vowel2-step-next" onclick="${onNext}" ${nextDisabled ? "disabled" : ""}>${escAttr(nextLabel)}</button>
+    </article>
+  </section>`;
+}
+
+function renderVowel2StatusDots(statuses, activeIndex = -1){
+  return `<div class="vowel2-step-dots" aria-label="Trạng thái từng câu">
+    ${statuses.map((status, index) => `<span class="${escAttr(status)} ${index === activeIndex ? "active" : ""}" title="Mục ${index + 1}"></span>`).join("")}
   </div>`;
 }
 
-let vowel2GameState = { index: 0, score: 0 };
+function renderVowel2GameSummary(){
+  const state = vowel2GameState;
+  const weakSounds = [...new Set(state.items
+    .filter((_, index) => state.statuses[index] === "retry")
+    .map(item => item.answer))];
+  return `<section class="vowel2-summary-card">
+    <span class="vowel2-summary-icon">✓</span>
+    <h3>Hoàn thành game</h3>
+    <div class="vowel2-summary-counts">
+      <article><strong>${state.score}/${state.items.length}</strong><span>Điểm</span></article>
+      <article><strong>${state.score}</strong><span>Số câu đúng</span></article>
+    </div>
+    <p>${weakSounds.length ? `Âm cần luyện lại: <strong>${weakSounds.map(escAttr).join(", ")}</strong>` : "Không có âm cần luyện lại."}</p>
+    <button class="vowel2-primary-action" onclick="_vowel2RestartGame()">Chơi lại</button>
+  </section>`;
+}
+
+function renderVowel2RecordingSummary(){
+  const state = vowel2RecordingState;
+  const passed = state.statuses.filter(status => status === "pass").length;
+  const practice = state.statuses.filter(status => status === "practice").length;
+  return `<section class="vowel2-summary-card">
+    <span class="vowel2-summary-icon">✓</span>
+    <h3>Hoàn thành ghi âm phát âm</h3>
+    <div class="vowel2-summary-counts">
+      <article><strong>${passed}</strong><span>Số từ đạt</span></article>
+      <article><strong>${practice}</strong><span>Cần luyện lại</span></article>
+    </div>
+    <div class="vowel2-summary-actions">
+      <button class="vowel2-warning-action" onclick="_vowel2RetryRecordingWords()" ${practice ? "" : "disabled"}>Luyện lại từ cần sai</button>
+      <button class="vowel2-primary-action" onclick="_vowel2RestartRecording()">Làm lại từ đầu</button>
+    </div>
+  </section>`;
+}
+
+function renderVowel2MiniTestSummary(){
+  const state = vowel2MiniTestState;
+  const weakQuestions = state.questions.filter((_, index) => state.statuses[index] === "wrong");
+  const remark = state.score >= 8
+    ? "Rất tốt"
+    : state.score >= 5
+      ? "Cần luyện thêm vài âm"
+      : "Nên học lại phần so sánh âm";
+  return `<section class="vowel2-summary-card">
+    <span class="vowel2-summary-icon">✓</span>
+    <h3>Hoàn thành mini test</h3>
+    <div class="vowel2-summary-score">${state.score}/${state.questions.length}</div>
+    <p><strong>${escAttr(remark)}</strong></p>
+    <div class="vowel2-summary-actions">
+      <button class="vowel2-primary-action" onclick="_vowel2RestartMiniTest()">Làm lại mini test</button>
+      <button class="vowel2-warning-action" onclick="_vowel2RetryWeakMiniTest()" ${weakQuestions.length ? "" : "disabled"}>Luyện lại âm yếu</button>
+    </div>
+  </section>`;
+}
+
+function shuffleVowel2Items(items){
+  const shuffled = [...items];
+  for(let index = shuffled.length - 1; index > 0; index--){
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
+function createVowel2GameState(items){
+  const shuffled = shuffleVowel2Items(items.map(item => ({ ...item })));
+  return {
+    items: shuffled,
+    index: 0,
+    score: 0,
+    statuses: shuffled.map(() => "idle"),
+    wrongChoices: new Set(),
+    answered: false,
+    feedback: "",
+    completed: false,
+  };
+}
+
+function createVowel2RecordingState(items){
+  const canRecord = typeof MediaRecorder !== "undefined" && Boolean(navigator.mediaDevices?.getUserMedia);
+  return {
+    items: items.map(item => ({ ...item })),
+    index: 0,
+    statuses: items.map(() => "idle"),
+    recordings: items.map(() => null),
+    recordingState: "idle",
+    canRecord,
+    micMessage: canRecord ? "" : "Trình duyệt chưa bật quyền micro. Giáo viên có thể chấm trực tiếp.",
+    completed: false,
+  };
+}
+
+function createVowel2MiniTestState(questions){
+  return {
+    questions: questions.map(question => ({ ...question, options: [...question.options] })),
+    index: 0,
+    score: 0,
+    statuses: questions.map(() => "idle"),
+    selections: questions.map(() => null),
+    completed: false,
+  };
+}
+
+function initializeVowel2FinalActivities(lesson){
+  disposeVowel2RecordingPractice();
+  vowel2ActiveTab = "game";
+  vowel2GameState = createVowel2GameState(lesson.vowelLesson.listenGame);
+  vowel2RecordingState = createVowel2RecordingState(lesson.vowelLesson.recordingWords);
+  vowel2MiniTestState = createVowel2MiniTestState(lesson.minitest);
+}
+
+function renderVowel2GameHost(){
+  const host = document.getElementById("vowel2GameHost");
+  const lesson = LESSONS.find(item => item.id === STATE.lessonId);
+  if(host && lesson) host.innerHTML = renderVowel2ListenGame(lesson.vowelLesson);
+}
+
+function renderVowel2RecordingHost(){
+  const host = document.getElementById("vowel2RecordingHost");
+  const lesson = LESSONS.find(item => item.id === STATE.lessonId);
+  if(host && lesson) host.innerHTML = renderVowel2Recording(lesson.vowelLesson.recordingWords);
+}
+
+function renderVowel2MiniTestHost(){
+  const host = document.getElementById("vowel2MiniTestHost");
+  const lesson = LESSONS.find(item => item.id === STATE.lessonId);
+  if(host && lesson) host.innerHTML = renderVowel2MiniTest(lesson.minitest);
+}
+
+let vowel2ActiveTab = "game";
+let vowel2GameState = null;
+let vowel2RecordingState = null;
+let vowel2MiniTestState = null;
+const vowel2RecordingRuntime = {
+  mediaRecorder: null,
+  stream: null,
+  chunks: [],
+  recordingIndex: -1,
+  discard: false,
+  playback: null,
+};
 
 window.vowel2SingleSoundState = {};
 window.vowel2SingleSoundPhase = {};
@@ -2655,72 +2925,279 @@ window._vowel2BackToLastWord = function(stateKey, total) {
 };
 
 window.showVowel2Tab = function(tab){
+  if(!["game", "record", "test"].includes(tab)) return;
+  stopCurrentSpeech();
+  stopVowel2RecordedPlayback();
+  if(vowel2ActiveTab === "record" && tab !== "record"){
+    stopVowel2RecordingCapture(false);
+  }
+  vowel2ActiveTab = tab;
   document.querySelectorAll(".vowel2-tab-panel").forEach(panel => panel.classList.toggle("active", panel.id === `vowel2Tab-${tab}`));
   document.querySelectorAll("[data-vowel2-tab]").forEach(button => button.classList.toggle("active", button.dataset.vowel2Tab === tab));
 };
 
 window._vowel2PlayGameWord = function(){
-  const lesson = LESSONS.find(item => item.id === STATE.lessonId);
-  speakById(lesson.vowelLesson.listenGame[vowel2GameState.index].word);
+  const round = vowel2GameState?.items[vowel2GameState.index];
+  if(round) playEnglishAudio(round.word);
 };
 
 window._vowel2ChooseSound = function(button, choice){
-  const lesson = LESSONS.find(item => item.id === STATE.lessonId);
-  const rounds = lesson.vowelLesson.listenGame;
-  const round = rounds[vowel2GameState.index];
+  const state = vowel2GameState;
+  if(!state || state.answered) return;
+  const round = state.items[state.index];
   const correct = choice === round.answer;
-  if(correct) vowel2GameState.score++;
-  document.querySelectorAll(".vowel2-game-sounds button").forEach(item => {
-    item.disabled = true;
-    item.classList.toggle("correct", item.textContent === round.answer);
-    item.classList.toggle("wrong", item === button && !correct);
-  });
-  document.getElementById("vowel2GameScore").textContent = `Điểm: ${vowel2GameState.score}`;
-  document.getElementById("vowel2GameFeedback").textContent =
-    `${correct ? "Đúng" : "Chưa đúng"}: ${round.word} có âm ${round.answer}.`;
-  setTimeout(() => {
-    vowel2GameState.index++;
-    if(vowel2GameState.index >= rounds.length){
-      document.getElementById("vowel2GameFeedback").textContent = `Hoàn thành: ${vowel2GameState.score}/${rounds.length} câu đúng.`;
-      document.getElementById("vowel2GameRestart").hidden = false;
-      return;
-    }
-    document.getElementById("vowel2GameCounter").textContent = `Câu ${vowel2GameState.index + 1}/${rounds.length}`;
-    document.querySelectorAll(".vowel2-game-sounds button").forEach(item => {
-      item.disabled = false; item.classList.remove("correct", "wrong");
-    });
-    document.getElementById("vowel2GameFeedback").textContent = "Nghe từ tiếp theo và chọn âm đúng.";
-  }, 900);
+  if(correct){
+    const neededRetry = state.wrongChoices.size > 0;
+    if(!neededRetry) state.score += 1;
+    state.statuses[state.index] = neededRetry ? "retry" : "correct";
+    state.answered = true;
+    state.feedback = `Đúng rồi! Đây là âm ${round.answer}.`;
+  }else{
+    state.wrongChoices.add(choice);
+    state.statuses[state.index] = "retry";
+    state.feedback = "Chưa đúng, nghe lại và chọn lại nhé.";
+  }
+  renderVowel2GameHost();
+};
+
+window._vowel2NextGameQuestion = function(){
+  const state = vowel2GameState;
+  if(!state?.answered) return;
+  stopCurrentSpeech();
+  if(state.index >= state.items.length - 1){
+    state.completed = true;
+  }else{
+    state.index += 1;
+    state.wrongChoices = new Set();
+    state.answered = false;
+    state.feedback = "";
+  }
+  renderVowel2GameHost();
 };
 
 window._vowel2RestartGame = function(){
-  vowel2GameState = { index: 0, score: 0 };
-  document.getElementById("vowel2GameScore").textContent = "Điểm: 0";
-  document.getElementById("vowel2GameCounter").textContent = "Câu 1/10";
-  document.getElementById("vowel2GameFeedback").textContent = "Giáo viên có thể hiện từ sau khi học sinh trả lời.";
-  document.getElementById("vowel2GameRestart").hidden = true;
-  document.querySelectorAll(".vowel2-game-sounds button").forEach(item => {
-    item.disabled = false; item.classList.remove("correct", "wrong");
+  const lesson = LESSONS.find(item => item.id === STATE.lessonId);
+  if(!lesson) return;
+  stopCurrentSpeech();
+  vowel2GameState = createVowel2GameState(lesson.vowelLesson.listenGame);
+  renderVowel2GameHost();
+};
+
+window._vowel2PlayRecordingWord = function(){
+  const item = vowel2RecordingState?.items[vowel2RecordingState.index];
+  if(item) playEnglishAudio(item.word);
+};
+
+window._vowel2StartRecording = async function(){
+  const state = vowel2RecordingState;
+  if(!state || state.recordingState === "recording" || !state.canRecord) return;
+  stopCurrentSpeech();
+  stopVowel2RecordedPlayback();
+
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    if(vowel2RecordingState !== state){
+      stream.getTracks().forEach(track => track.stop());
+      return;
+    }
+    const recorder = new MediaRecorder(stream);
+    vowel2RecordingRuntime.mediaRecorder = recorder;
+    vowel2RecordingRuntime.stream = stream;
+    vowel2RecordingRuntime.chunks = [];
+    vowel2RecordingRuntime.recordingIndex = state.index;
+    vowel2RecordingRuntime.discard = false;
+    recorder.ondataavailable = event => {
+      if(event.data?.size) vowel2RecordingRuntime.chunks.push(event.data);
+    };
+    recorder.onstop = finishVowel2Recording;
+    recorder.onerror = () => {
+      state.recordingState = "idle";
+      state.micMessage = "Trình duyệt chưa bật quyền micro. Giáo viên có thể chấm trực tiếp.";
+      releaseVowel2RecordingStream();
+      renderVowel2RecordingHost();
+    };
+    recorder.start();
+    state.recordingState = "recording";
+    state.micMessage = "";
+    renderVowel2RecordingHost();
+  }catch(error){
+    state.recordingState = "idle";
+    state.micMessage = "Trình duyệt chưa bật quyền micro. Giáo viên có thể chấm trực tiếp.";
+    releaseVowel2RecordingStream();
+    renderVowel2RecordingHost();
+  }
+};
+
+window._vowel2StopRecording = function(){
+  stopVowel2RecordingCapture(false);
+};
+
+window._vowel2PlayRecording = function(){
+  const state = vowel2RecordingState;
+  const url = state?.recordings[state.index];
+  if(!url) return;
+  stopCurrentSpeech();
+  stopVowel2RecordedPlayback();
+  const audio = new Audio(url);
+  vowel2RecordingRuntime.playback = audio;
+  audio.onended = () => {
+    if(vowel2RecordingRuntime.playback === audio) vowel2RecordingRuntime.playback = null;
+  };
+  audio.onerror = () => {
+    if(vowel2RecordingRuntime.playback === audio) vowel2RecordingRuntime.playback = null;
+    state.micMessage = "Không thể phát bản ghi này. Giáo viên có thể chấm trực tiếp.";
+    renderVowel2RecordingHost();
+  };
+  audio.play().catch(() => {
+    if(vowel2RecordingRuntime.playback === audio) vowel2RecordingRuntime.playback = null;
+    state.micMessage = "Không thể phát bản ghi này. Giáo viên có thể chấm trực tiếp.";
+    renderVowel2RecordingHost();
   });
 };
 
-window._vowel2TestChoice = function(button){
-  const card = button.closest("[data-vowel2-test]");
-  card.querySelectorAll("button[data-choice]").forEach(item => item.classList.remove("selected"));
-  button.classList.add("selected");
-  card.dataset.selected = button.dataset.choice;
+window._vowel2MarkRecording = function(status){
+  const state = vowel2RecordingState;
+  if(!state || !["pass", "practice"].includes(status) || state.recordingState === "recording") return;
+  state.statuses[state.index] = status;
+  renderVowel2RecordingHost();
 };
 
-window._vowel2SubmitTest = function(){
-  const cards = [...document.querySelectorAll("[data-vowel2-test]")];
-  const score = cards.filter(card => card.dataset.selected === card.dataset.answer).length;
-  cards.forEach(card => {
-    card.classList.toggle("correct", card.dataset.selected === card.dataset.answer);
-    card.classList.toggle("wrong", Boolean(card.dataset.selected) && card.dataset.selected !== card.dataset.answer);
-  });
-  const result = document.getElementById("vowel2TestResult");
-  result.innerHTML = `<b>Kết quả: ${score}/${cards.length} câu đúng.</b><span>${score >= 8 ? "Em đã phân biệt âm tốt." : "Cần luyện lại minimal pairs và các âm dễ nhầm."}</span>`;
+window._vowel2NextRecordingWord = function(){
+  const state = vowel2RecordingState;
+  if(!state || state.statuses[state.index] === "idle" || state.recordingState === "recording") return;
+  stopCurrentSpeech();
+  stopVowel2RecordedPlayback();
+  if(state.index >= state.items.length - 1){
+    state.completed = true;
+  }else{
+    state.index += 1;
+    state.micMessage = state.canRecord ? "" : "Trình duyệt chưa bật quyền micro. Giáo viên có thể chấm trực tiếp.";
+  }
+  renderVowel2RecordingHost();
 };
+
+window._vowel2RetryRecordingWords = function(){
+  const state = vowel2RecordingState;
+  if(!state) return;
+  const retryItems = state.items.filter((_, index) => state.statuses[index] === "practice");
+  if(!retryItems.length) return;
+  disposeVowel2RecordingPractice();
+  vowel2RecordingState = createVowel2RecordingState(retryItems);
+  renderVowel2RecordingHost();
+};
+
+window._vowel2RestartRecording = function(){
+  const lesson = LESSONS.find(item => item.id === STATE.lessonId);
+  if(!lesson) return;
+  disposeVowel2RecordingPractice();
+  vowel2RecordingState = createVowel2RecordingState(lesson.vowelLesson.recordingWords);
+  renderVowel2RecordingHost();
+};
+
+window._vowel2TestChoice = function(choice){
+  const state = vowel2MiniTestState;
+  if(!state || state.selections[state.index] !== null) return;
+  const question = state.questions[state.index];
+  state.selections[state.index] = choice;
+  const correct = choice === question.answer;
+  state.statuses[state.index] = correct ? "correct" : "wrong";
+  if(correct) state.score += 1;
+  renderVowel2MiniTestHost();
+};
+
+window._vowel2PlayMiniTestAudio = function(){
+  const question = vowel2MiniTestState?.questions[vowel2MiniTestState.index];
+  if(question?.audio) playEnglishAudio(question.audio);
+};
+
+window._vowel2NextMiniTestQuestion = function(){
+  const state = vowel2MiniTestState;
+  if(!state || state.selections[state.index] === null) return;
+  stopCurrentSpeech();
+  if(state.index >= state.questions.length - 1){
+    state.completed = true;
+  }else{
+    state.index += 1;
+  }
+  renderVowel2MiniTestHost();
+};
+
+window._vowel2RestartMiniTest = function(){
+  const lesson = LESSONS.find(item => item.id === STATE.lessonId);
+  if(!lesson) return;
+  stopCurrentSpeech();
+  vowel2MiniTestState = createVowel2MiniTestState(lesson.minitest);
+  renderVowel2MiniTestHost();
+};
+
+window._vowel2RetryWeakMiniTest = function(){
+  const state = vowel2MiniTestState;
+  if(!state) return;
+  const weakQuestions = state.questions.filter((_, index) => state.statuses[index] === "wrong");
+  if(!weakQuestions.length) return;
+  stopCurrentSpeech();
+  vowel2MiniTestState = createVowel2MiniTestState(weakQuestions);
+  renderVowel2MiniTestHost();
+};
+
+function finishVowel2Recording(){
+  const state = vowel2RecordingState;
+  const index = vowel2RecordingRuntime.recordingIndex;
+  const chunks = [...vowel2RecordingRuntime.chunks];
+  const discard = vowel2RecordingRuntime.discard;
+  const recorder = vowel2RecordingRuntime.mediaRecorder;
+  releaseVowel2RecordingStream();
+  vowel2RecordingRuntime.mediaRecorder = null;
+  vowel2RecordingRuntime.chunks = [];
+  vowel2RecordingRuntime.recordingIndex = -1;
+  vowel2RecordingRuntime.discard = false;
+
+  if(state) state.recordingState = "idle";
+  if(!discard && state && index >= 0 && chunks.length){
+    if(state.recordings[index]) URL.revokeObjectURL(state.recordings[index]);
+    const mimeType = recorder?.mimeType || chunks[0]?.type || "audio/webm";
+    state.recordings[index] = URL.createObjectURL(new Blob(chunks, { type: mimeType }));
+  }
+  if(!discard) renderVowel2RecordingHost();
+}
+
+function stopVowel2RecordingCapture(discard = false){
+  const recorder = vowel2RecordingRuntime.mediaRecorder;
+  vowel2RecordingRuntime.discard = discard;
+  if(recorder && recorder.state !== "inactive"){
+    try{
+      recorder.stop();
+      return;
+    }catch(error){}
+  }
+  if(vowel2RecordingState) vowel2RecordingState.recordingState = "idle";
+  releaseVowel2RecordingStream();
+  if(!discard) renderVowel2RecordingHost();
+}
+
+function releaseVowel2RecordingStream(){
+  vowel2RecordingRuntime.stream?.getTracks().forEach(track => track.stop());
+  vowel2RecordingRuntime.stream = null;
+}
+
+function stopVowel2RecordedPlayback(){
+  const audio = vowel2RecordingRuntime.playback;
+  if(!audio) return;
+  try{
+    audio.pause();
+    audio.currentTime = 0;
+  }catch(error){}
+  vowel2RecordingRuntime.playback = null;
+}
+
+function disposeVowel2RecordingPractice(){
+  stopVowel2RecordedPlayback();
+  stopVowel2RecordingCapture(true);
+  vowel2RecordingState?.recordings?.forEach(url => {
+    if(url) URL.revokeObjectURL(url);
+  });
+  vowel2RecordingState = null;
+}
 
 function renderIpaSection(lesson, section){
   const ipa = lesson.ipa || {};
