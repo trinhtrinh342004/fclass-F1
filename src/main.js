@@ -1213,8 +1213,8 @@ function showAlphabetAgPhase(activity, state){
   launchAlphabetAgConfetti(activity, completedGroup);
 }
 
-function renderAlphabetAgSpeakerButton(){
-  return `<button class="alphabet-ag-speaker" type="button" onclick="_alphabetAgReplay(this)" aria-label="Nghe lại" title="Nghe lại">
+function renderAlphabetAgSpeakerButton(letter){
+  return `<button class="alphabet-ag-speaker" type="button" onclick="_alphabetAgSpeakLetter(this)" aria-label="Nghe chữ ${escAttr(letter)}" title="Nghe chữ ${escAttr(letter)}">
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M4 9v6h4l5 4V5L8 9H4Z"></path>
       <path d="M16 9.5c1.3 1.3 1.3 3.7 0 5M18.5 7c2.7 2.7 2.7 7.3 0 10"></path>
@@ -1230,14 +1230,13 @@ function renderAlphabetAgLearningCard(item, state, actions, completedGroup=false
       <div class="alphabet-ag-letter-row">
         <div class="alphabet-ag-main-letter">
           <button type="button" onclick="_alphabetAgSpeakLetter(this)" aria-label="Nghe chữ ${escAttr(item.uppercase)}">${escAttr(item.uppercase)}</button>
-          ${showLowercase ? `<button type="button" onclick="_alphabetAgSpeakLetter(this)" aria-label="Nghe chữ ${escAttr(item.lowercase)}">${escAttr(item.lowercase)}</button>` : ""}
+          ${showLowercase ? `<button type="button" onclick="_alphabetAgSpeakLetter(this)" aria-label="Nghe chữ ${escAttr(item.uppercase)}">${escAttr(item.lowercase)}</button>` : ""}
         </div>
-        ${showIcon ? "" : renderAlphabetAgSpeakerButton()}
+        ${renderAlphabetAgSpeakerButton(item.uppercase)}
       </div>
       ${showIcon ? `<button class="alphabet-ag-focus-icon" type="button" onclick="_alphabetAgSpeakWord(this)" aria-label="Nghe từ ${escAttr(item.word)}">${item.icon}</button>
         <div class="alphabet-ag-word-row">
           <button class="alphabet-ag-word" type="button" onclick="_alphabetAgSpeakWord(this)">${escAttr(item.word)}</button>
-          ${renderAlphabetAgSpeakerButton()}
         </div>
         <p>${escAttr(item.chant)}</p>
         <div class="alphabet-ag-praise">${completedGroup ? "Hoàn thành nhóm chữ A–G!" : "Giỏi lắm!"}</div>` : ""}
@@ -1256,29 +1255,16 @@ function _alphabetAgShowIcon(button){
   showAlphabetAgPhase(button.closest(".alphabet-ag-activity"), "icon");
 }
 
-function _alphabetAgReplay(button){
-  const activity = button.closest(".alphabet-ag-activity");
-  const item = getAlphabetAgItems()[Number(activity.dataset.index || 0)];
-  if(!item) return;
-  const state = activity.dataset.state;
-  const replayText = state === "icon"
-    ? item.word
-    : state === "completedLetter" || state === "completedGroup"
-      ? item.chant
-      : item.uppercase;
-  alphabetAgSpeak(replayText, activity);
-}
-
 function _alphabetAgSpeakLetter(button){
   const activity = button.closest(".alphabet-ag-activity");
   const item = getAlphabetAgItems()[Number(activity.dataset.index || 0)];
-  if(item) alphabetAgSpeak(item.uppercase, activity);
+  if(item) alphabetAgSpeak(item.uppercase, activity, button);
 }
 
 function _alphabetAgSpeakWord(button){
   const activity = button.closest(".alphabet-ag-activity");
   const item = getAlphabetAgItems()[Number(activity.dataset.index || 0)];
-  if(item) alphabetAgSpeak(item.word, activity);
+  if(item) alphabetAgSpeak(item.word, activity, button);
 }
 
 function _alphabetAgNext(button){
@@ -1294,14 +1280,51 @@ function _alphabetAgRestart(button){
   activity.outerHTML = renderAlphabetGroupAG(getAlphabetAgItems());
 }
 
-function alphabetAgSpeak(text, activity, showFallback=true){
+let alphabetAgSpeechRequestId = 0;
+
+function alphabetAgSpeak(text, activity, trigger=null){
   const fallback = activity.querySelector(".alphabet-ag-speech-fallback");
-  if(!("speechSynthesis" in window)){
-    if(showFallback && fallback) fallback.textContent = "Trình duyệt chưa hỗ trợ phát âm.";
+  const synthesis = window.speechSynthesis;
+  if(!synthesis || typeof SpeechSynthesisUtterance === "undefined"){
+    if(fallback) fallback.textContent = "Trình duyệt chưa hỗ trợ phát âm.";
     return;
   }
+
+  const requestId = ++alphabetAgSpeechRequestId;
+  stopCurrentSpeech();
   if(fallback) fallback.textContent = "";
-  speak(text, 0.82);
+
+  const utterance = new SpeechSynthesisUtterance(String(text || "").trim());
+  utterance.lang = "en-US";
+  utterance.rate = 0.9;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+  const voice = getBestEnglishVoice();
+  if(voice) utterance.voice = voice;
+
+  if(trigger){
+    activeSpeechButton = trigger;
+    trigger.classList.add("playing");
+  }
+
+  const cleanup = () => {
+    if(requestId !== alphabetAgSpeechRequestId) return;
+    trigger?.classList.remove("playing", "loading");
+    if(activeSpeechButton === trigger) activeSpeechButton = null;
+    if(activeUtterance === utterance) activeUtterance = null;
+  };
+
+  utterance.onend = cleanup;
+  utterance.onerror = (event) => {
+    cleanup();
+    if(requestId === alphabetAgSpeechRequestId && fallback && !["canceled", "interrupted"].includes(event.error)){
+      fallback.textContent = "Không thể phát âm. Vui lòng thử lại.";
+    }
+  };
+
+  activeUtterance = utterance;
+  if(synthesis.paused) synthesis.resume();
+  synthesis.speak(utterance);
 }
 
 function launchAlphabetAgConfetti(activity, large=false){
@@ -6906,7 +6929,7 @@ Object.assign(window, {
   getBestEnglishVoice, speakEnglish, normalizeSpeechText, stopCurrentSpeech,
   _checkIpaChoice,
   _alphabetSelect, _alphabetCheck, _alphabetInstantCheck, _alphabetNextRound,
-  _alphabetAgStart, _alphabetAgShowLowercase, _alphabetAgShowIcon, _alphabetAgReplay,
+  _alphabetAgStart, _alphabetAgShowLowercase, _alphabetAgShowIcon,
   _alphabetAgSpeakLetter, _alphabetAgSpeakWord,
   _alphabetAgNext, _alphabetAgRestart,
   _alphabetReadEach, _alphabetToggleGroup, _alphabetQuickNext, _alphabetSpeakQuick,
