@@ -4646,7 +4646,7 @@ function renderConsonants1Section(lesson, section){
 }
 
 function renderConsonants1Header(lesson, section){
-  return `<div class="stage-h"><span class="stage-tag">Consonants 1</span><span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span></div>
+  return `<div class="stage-h"><span class="stage-tag">${escAttr(lesson.title || "Phụ âm")}</span><span class="stage-num">${STATE.sectionIdx+1}/${STATE.sections.length}</span></div>
     <h2 class="stage-title">${escAttr(SECTION_LABELS[section] || lesson.title)}</h2><p class="stage-sub">${escAttr(lesson.subtitle || "")}</p>`;
 }
 

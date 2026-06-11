@@ -45,12 +45,12 @@ for (let id = 1; id <= expectedTotal; id += 1) {
 
 const expectedTitles = new Map([
   [2, "Buổi 2: Nguyên âm đơn 1"],
-  [3, "Buổi 3: Nguyên âm đơn 2"],
-  [4, "BUỔI 4: Long Vowels - Nguyên âm dài"],
-  [5, "Fricatives – Âm gió / âm ma sát"],
-  [6, "BUỔI 6: Consonants 1 – Phụ âm bật, âm mũi, âm cuối"],
-  [7, "BUỔI 7: Consonants 2 – Phụ âm gió & Âm khó"],
-  [8, "IPA Review + Word Stress – Tổng ôn IPA và trọng âm"],
+  [3, "Nguyên âm đơn 2"],
+  [4, "Nguyên âm đôi"],
+  [5, "Phụ âm bật + âm bật đôi"],
+  [6, "Âm gió"],
+  [7, "Âm mũi + L/R + W/Y"],
+  [8, "Tổng ôn toàn bộ IPA"],
 ]);
 
 for (const [id, title] of expectedTitles) {

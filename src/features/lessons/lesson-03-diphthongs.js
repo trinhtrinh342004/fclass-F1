@@ -2,16 +2,16 @@ export const lesson03Diphthongs = {
   id: 3,
   lessonNumber: 3,
   dayNumber: 3,
-  title: "Diphthongs – Nguyên âm đôi",
-  titleEn: "Diphthongs",
-  titleVi: "Nguyên âm đôi",
+  title: "Nguyên âm đơn 2",
+  titleEn: "Nguyên âm đơn 2",
+  titleVi: "Nguyên âm đơn 2",
   subtitle: "Học cách đọc âm trượt từ âm này sang âm khác",
   cefrLevel: "A0-A1",
   unit: "ABC & IPA Foundation",
   module: "ABC & IPA Foundation",
   track: "diphthongs",
   slug: "diphthongs",
-  mainTopic: "Diphthongs",
+  mainTopic: "Nguyên âm đơn 2",
   estimatedMinutes: 75,
   lessonType: "abc-ipa-foundation",
   status: "ready",
@@ -35,7 +35,7 @@ export const lesson03Diphthongs = {
   ],
   architecture: {
     preserveSectionFlow: true,
-    source: "Buổi 3 MD: Diphthongs",
+    source: "Buổi 3 MD: Nguyên âm đơn 2",
     sourceOfTruth: "Buổi 3 MD"
   },
   metadata: {
@@ -328,7 +328,7 @@ export const lesson03Diphthongs = {
   ],
   mindmap: {
     type: "structured",
-    center: "Diphthongs – Nguyên âm đôi",
+    center: "Nguyên âm đơn 2",
     branches: [
       { label: "Khái niệm", items: ["Âm trượt", "Mouth starts shape 1", "Mouth glides to shape 2", "Đọc liền mạch"] },
       { label: "Trượt về /ɪ/", items: ["/eɪ/ (say)", "/aɪ/ (time)", "/ɔɪ/ (boy)"] },
@@ -338,7 +338,7 @@ export const lesson03Diphthongs = {
     ]
   },
   homeworkRich: {
-    title: "Bài tập về nhà - Buổi 3: Nguyên âm đôi",
+    title: "Bài tập về nhà - Buổi 3: Nguyên âm đơn 2",
     submit: "Nộp file ghi âm qua nhóm lớp Zalo.",
     deadline: "Trước buổi học tiếp theo",
     tasks: [
@@ -395,6 +395,6 @@ export const lesson03Diphthongs = {
     "Ghi âm đọc 24 từ vựng mẫu.",
     "Ghi âm đọc 8 câu mẫu ngắn.",
     "Luyện nói phân biệt các cặp âm dễ nhầm.",
-    "Chuẩn bị trước Buổi 6 về Phụ âm bật, âm mũi và âm cuối."
+    "Chuẩn bị trước Buổi 6: Âm gió."
   ]
 };
