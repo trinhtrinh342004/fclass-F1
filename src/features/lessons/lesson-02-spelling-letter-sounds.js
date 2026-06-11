@@ -236,6 +236,33 @@ const CONFUSING_SENTENCES = [
   trap: trap.map(([word, ipa, confusion]) => ({ word, ipa, confusion })),
 }));
 
+const ADVANCED_TRAP_SENTENCES = [
+  ["Please sit in the green seat.", ["sit", "green", "seat"], [["sit", "/sɪt/"], ["green", "/griːn/"], ["seat", "/siːt/"]]],
+  ["Six little fish swim in the deep sea.", ["Six", "fish", "deep", "sea"], [["six", "/sɪks/"], ["fish", "/fɪʃ/"], ["deep", "/diːp/"], ["sea", "/siː/"]]],
+  ["This sheep is very thin.", ["sheep", "thin"], [["sheep", "/ʃiːp/"], ["thin", "/θɪn/"]]],
+  ["Tim needs a ticket.", ["Tim", "needs", "ticket"], [["Tim", "/tɪm/"], ["needs", "/niːdz/"], ["ticket", "/ˈtɪkɪt/"]]],
+  ["The little ship is near the sea.", ["little", "ship", "sea"], [["little", "/ˈlɪtəl/"], ["ship", "/ʃɪp/"], ["sea", "/siː/"]]],
+  ["Three green leaves are in the bin.", ["Three", "green", "leaves", "bin"], [["three", "/θriː/"], ["green", "/griːn/"], ["leaves", "/liːvz/"], ["bin", "/bɪn/"]]],
+  ["The black cat sat on Ben’s bed.", ["black", "cat", "sat", "Ben’s", "bed"], [["black", "/blæk/"], ["cat", "/kæt/"], ["sat", "/sæt/"], ["Ben", "/ben/"], ["bed", "/bed/"]]],
+  ["Dad has a red pen in his bag.", ["Dad", "has", "red", "pen", "bag"], [["Dad", "/dæd/"], ["has", "/hæz/"], ["red", "/red/"], ["pen", "/pen/"], ["bag", "/bæg/"]]],
+  ["The man with the cap is at the desk.", ["man", "cap", "at", "desk"], [["man", "/mæn/"], ["cap", "/kæp/"], ["at", "/æt/"], ["desk", "/desk/"]]],
+  ["Ten apples are in the bag.", ["Ten", "apples", "bag"], [["ten", "/ten/"], ["apples", "/ˈæpəlz/"], ["bag", "/bæg/"]]],
+  ["The egg is in the black pan.", ["egg", "black", "pan"], [["egg", "/eg/"], ["black", "/blæk/"], ["pan", "/pæn/"]]],
+  ["Meg has a map and a red bag.", ["Meg", "map", "red", "bag"], [["Meg", "/meg/"], ["red", "/red/"], ["map", "/mæp/"], ["bag", "/bæg/"]]],
+  ["My mother is on the bus at sunset.", ["mother", "bus", "sunset"], [["mother", "/ˈmʌðər/"], ["bus", "/bʌs/"], ["sunset", "/ˈsʌnset/"]]],
+  ["The teacher is about to sit on the sofa.", ["teacher", "about", "sofa"], [["teacher", "/ˈtiːtʃər/"], ["about", "/əˈbaʊt/"], ["sofa", "/ˈsoʊfə/"]]],
+  ["A cup is under the yellow umbrella.", ["cup", "under", "umbrella"], [["cup", "/kʌp/"], ["under", "/ˈʌndər/"], ["umbrella", "/ʌmˈbrelə/"]]],
+  ["We had lunch under the umbrella.", ["lunch", "under", "umbrella"], [["lunch", "/lʌntʃ/"], ["under", "/ˈʌndər/"], ["umbrella", "/ʌmˈbrelə/"]]],
+  ["A banana and a cup are on the sofa.", ["banana", "cup", "sofa"], [["banana", "/bəˈnænə/"], ["cup", "/kʌp/"], ["sofa", "/ˈsoʊfə/"]]],
+  ["The puppy runs under the bed.", ["puppy", "runs", "under", "bed"], [["puppy", "/ˈpʌpi/"], ["runs", "/rʌnz/"], ["under", "/ˈʌndər/"], ["bed", "/bed/"]]],
+].map(([sentence, highlightWords, trap], id) => ({
+  id,
+  sentence,
+  highlightWords,
+  audioText: sentence,
+  trap: trap.map(([word, ipa]) => ({ word, ipa, confusion: "Âm cần chú ý" })),
+}));
+
 const LISTEN_GAME = [
   ["sheep", "/iː/"], ["ship", "/ɪ/"], ["bed", "/e/"], ["bad", "/æ/"], ["sofa", "/ə/"],
   ["cup", "/ʌ/"], ["seat", "/iː/"], ["sit", "/ɪ/"], ["pen", "/e/"], ["pan", "/æ/"],
@@ -271,7 +298,7 @@ export const lesson02SpellingLetterSounds = {
     vowel2_sound_uh: "Âm /ʌ/",
     vowel2_compare_schwa_caret: "So sánh /ə/ và /ʌ/",
     vowel2_word_practice: "Câu dễ đọc sai",
-    vowel2_pairs_sentences: "Minimal pairs + Đọc câu",
+    vowel2_pairs_sentences: "Câu bẫy nâng cao",
     vowel2_game_record_test: "Game + Ghi âm AI + Mini test",
   },
   objectives: [
@@ -287,6 +314,7 @@ export const lesson02SpellingLetterSounds = {
     comparisonPairsE: COMPARISON_PAIRS_E,
     comparisonPairsSchwa: COMPARISON_PAIRS_SCHWA,
     confusingSentences: CONFUSING_SENTENCES,
+    advancedTrapSentences: ADVANCED_TRAP_SENTENCES,
     sentences: SENTENCES,
     listenGame: LISTEN_GAME,
     recordingWords: ["sheep", "ship", "seat", "sit", "feet", "fit", "bed", "bad", "pen", "pan", "cup", "cap"],
