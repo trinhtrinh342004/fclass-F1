@@ -45,8 +45,8 @@ for (let id = 1; id <= expectedTotal; id += 1) {
 
 const expectedTitles = new Map([
   [1, "IPA Foundation – Cách đọc một từ tiếng Anh"],
-  [2, "Short vs Long Vowels – Nguyên âm ngắn và dài"],
-  [3, "Diphthongs – Nguyên âm đôi"],
+  [2, "Spelling & Letter Sounds – Đánh vần và âm chữ cái"],
+  [3, "IPA Foundation + Short Vowels – IPA và nguyên âm ngắn"],
   [4, "BUỔI 4: Long Vowels - Nguyên âm dài"],
   [5, "Fricatives – Âm gió / âm ma sát"],
   [6, "BUỔI 6: Consonants 1 – Phụ âm bật, âm mũi, âm cuối"],
@@ -69,6 +69,17 @@ check(lesson01?.ipa?.imageSlots?.length === 6, "Lesson 1 must have 6 vocabulary 
 check(lesson01?.ipa?.blendGame?.length >= 4, "Lesson 1 must have blend game data.");
 check(lesson01?.ipa?.listenChooseGame?.length >= 4, "Lesson 1 must have listen-and-choose game data.");
 
+const lesson02 = lessonById(2);
+check(lesson02?.slug === "spelling-letter-sounds", "Lesson 2 must route to Spelling & Letter Sounds.");
+check(lesson02?.track === "spelling-letter-sounds", "Lesson 2 must use the dedicated spelling renderer.");
+check(lesson02?.sectionFlow?.length === 16, "Lesson 2 sidebar must have exactly 16 sections.");
+check(lesson02?.sectionFlow?.every((section) => section.startsWith("spelling_")), "Lesson 2 must use dedicated spelling sections.");
+check(lesson02?.spelling?.letterSounds?.length === 5, "Lesson 2 must compare 5 letter names and sounds.");
+check(lesson02?.spelling?.cvcWords?.length === 8, "Lesson 2 must include 8 CVC words.");
+check(lesson02?.spelling?.objects?.length === 6, "Lesson 2 must include 6 object spelling cards.");
+check(lesson02?.minitest?.length >= 10, "Lesson 2 must include the complete spelling mini test.");
+check(lesson02?.homeworkRich?.tasks?.length >= 4, "Lesson 2 must include the requested homework.");
+
 const lesson06 = lessonById(6);
 check(lesson06?.sectionFlow?.length === 16, "Lesson 6 sidebar must have the 16 requested sections.");
 check(lesson06?.consonants?.sounds?.length === 9, "Lesson 6 must have 9 consonant sound cards.");
@@ -79,13 +90,14 @@ check(
 check(lesson06?.consonants?.sounds?.find((sound) => sound.symbol === "/ŋ/")?.fixTip?.includes("Không thêm /g/"), "Lesson 6 /ŋ/ card must warn learners not to add /g/.");
 
 const lesson03 = lessonById(3);
-check(lesson03?.sectionFlow?.length === 16, "Lesson 3 Diphthongs sidebar must have exactly 16 sections.");
-check(lesson03?.ipa?.sounds?.length === 8, "Lesson 3 Diphthongs must have 8 sound cards.");
-check(lesson03?.ipa?.videoSlots?.length === 4, "Lesson 3 Diphthongs must have 4 safe video placeholders.");
-check(lesson03?.ipa?.imageSlots?.length === 8, "Lesson 3 Diphthongs must have 8 safe image placeholders.");
-check(lesson03?.ipa?.blendGame?.length === 8, "Lesson 3 Diphthongs must have 8 blend-game words.");
-check(lesson03?.ipa?.listenChooseGame?.length === 8, "Lesson 3 Diphthongs must have 8 listen-and-choose rounds.");
-check(lesson03?.ipa?.isGlideLesson === true, "Lesson 3 Diphthongs must enable the glide animation.");
+check(lesson03?.sectionFlow?.length === 18, "Lesson 3 Short Vowels sidebar must have exactly 18 sections.");
+check(lesson03?.ipa?.sounds?.length === 6, "Lesson 3 Short Vowels must have 6 sound cards.");
+check(lesson03?.ipa?.sounds?.every((sound) => ["lips", "tongue", "teeth", "air", "voice"].every((key) => Boolean(sound.mouth?.[key]))), "Lesson 3 sound cards must include mouth guidance.");
+check(lesson03?.ipa?.videoSlots?.length === 4, "Lesson 3 Short Vowels must have 4 safe video placeholders.");
+check(lesson03?.ipa?.imageSlots?.length === 6, "Lesson 3 Short Vowels must have 6 safe image placeholders.");
+check(lesson03?.ipa?.blendGame?.length >= 4, "Lesson 3 Short Vowels must have blend-game words.");
+check(lesson03?.ipa?.listenChooseGame?.length >= 4, "Lesson 3 Short Vowels must have listen-and-choose rounds.");
+check(lesson03?.ipa?.comparisons?.length === 2, "Lesson 3 Short Vowels must compare /e/ vs /æ/ and /ʌ/ vs /ɒ/.");
 
 const lesson08 = lessonById(8);
 check(lesson08?.sectionFlow?.length === 18, "Lesson 8 IPA review sidebar must have exactly 18 sections.");
