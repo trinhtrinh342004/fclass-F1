@@ -64,8 +64,13 @@ const lesson01 = lessonById(1);
 check(lesson01?.title === "Buổi 1: Bảng chữ cái A–Z", "Lesson 1 must use the Vietnamese Alphabet A–Z title.");
 check(lesson01?.track === "alphabet-foundation", "Lesson 1 must use the dedicated Alphabet Foundation renderer.");
 check(lesson01?.metadata?.localContentAuthoritative === true, "Lesson 1 local Alphabet content must override stale Supabase content.");
-check(lesson01?.sectionFlow?.length === 21, "Lesson 1 Alphabet sidebar must have exactly 21 sections.");
+check(lesson01?.sectionFlow?.length === 17, "Lesson 1 Alphabet sidebar must have exactly 17 sections after removing four games.");
 check(lesson01?.sectionFlow?.every((section) => section.startsWith("alphabet_")), "Lesson 1 must use dedicated alphabet sections.");
+check(
+  ["alphabet_case_match", "alphabet_icon_match", "alphabet_spell_words", "alphabet_build_word"]
+    .every((section) => !lesson01?.sectionFlow?.includes(section)),
+  "Lesson 1 flow must not contain the four removed games."
+);
 check(lesson01?.alphabetFoundation?.letters?.length === 26, "Lesson 1 must have 26 alphabet letter cards.");
 check(
   lesson01?.alphabetFoundation?.letters?.every((item) => item.pronunciation && item.reading && item.meaning && item.group),
@@ -106,7 +111,8 @@ for (const [key, groupTitle, completedMessage, length, first, last] of expectedA
   );
 }
 check(lesson01?.alphabetFoundation?.vowels?.length === 5, "Lesson 1 must have 5 vowel cards.");
-check(lesson01?.alphabetFoundation?.simpleWords?.length === 10, "Lesson 1 must have 10 simple spelling words.");
+check(lesson01?.alphabetFoundation?.listenChoose?.length === 26, "Lesson 1 listen-and-choose game must cover A-Z.");
+check(lesson01?.alphabetFoundation?.practiceWords?.length === 9, "Lesson 1 single-question word games must have 9 practice words.");
 check(arrayEquals(Object.values(lesson01?.sectionLabels || {}), [
   "Video bài hát bảng chữ cái",
   "Nhóm chữ A–G",
@@ -116,15 +122,11 @@ check(arrayEquals(Object.values(lesson01?.sectionLabels || {}), [
   "Thẻ học chữ cái",
   "Nguyên âm A E I O U",
   "Nghe và chọn chữ",
-  "Ghép chữ hoa - chữ thường",
-  "Ghép chữ với biểu tượng",
   "Nhìn hình đoán chữ",
   "Điền chữ còn thiếu",
   "Đọc nhanh chữ cái",
   "Đánh vần tên của em",
-  "Đánh vần từ đơn giản",
   "Tách chữ trong từ",
-  "Ghép chữ thành từ",
   "Nhìn biểu tượng đọc từ",
   "Thử thách đọc theo giáo viên",
   "Chơi game bảng chữ cái",
@@ -176,13 +178,11 @@ check([
   "Nghe lại",
   "Kiểm tra",
   "Câu tiếp theo",
+  "Em đã đọc",
+  "Hiện đáp án",
+  "Chơi lại",
+  "Chọn lại nhé",
   "Tạo chữ cái",
-  "Nghe từng chữ",
-  "Làm lại",
-  "Đọc từng chữ",
-  "Ẩn chữ",
-  "Hiện chữ",
-  "Chữ tiếp theo",
   "Từ tiếp theo",
   "Hiện icon",
   "Ẩn icon",
@@ -191,7 +191,7 @@ check([
 ].every((label) => alphabetRenderer.includes(label)), "Lesson 1 renderer must contain the requested Vietnamese controls.");
 const alphabetFlashcardRenderer = mainSource.slice(
   mainSource.indexOf("function renderAlphabetFlashcardSection"),
-  mainSource.indexOf("function renderAlphabetWordGame")
+  mainSource.indexOf("function shuffleAlphabetItems")
 );
 check([
   "Chọn nhóm chữ, bấm vào thẻ để xem từ vựng.",
@@ -243,6 +243,12 @@ check(
 check(
   !alphabetAgFlowRenderer.includes('alphabetAgSpeak("Good job!"'),
   "Lesson 1 Alphabet group completion must not speak the English praise phrase."
+);
+check(
+  alphabetRenderer.includes("function renderAlphabetSingleGameShell")
+    && alphabetRenderer.includes("function playEnglishAudio")
+    && alphabetRenderer.includes("stopCurrentSpeech()"),
+  "Lesson 1 games must use the shared single-question shell and cancel old audio before playback."
 );
 check([
   "\"idle\"",
