@@ -34,6 +34,7 @@ const alphabetFlashcardState = {
   group: "A-G",
   openLetters: new Set(),
 };
+let vowel2SentenceGameState = null;
 const alphabetSingleGameStates = new Map();
 
 const STORAGE_KEY = "gateway_a1_progress_v2";
@@ -1925,6 +1926,9 @@ function renderVowel2Section(lesson, section){
     window.vowel2SingleSoundPhase = {};
     window.vowel2ComparisonPairIndex = 0;
     clearVowel2PairSequence();
+    if (section === "vowel2_word_practice") {
+      vowel2SentenceGameState = createVowel2SentenceGameState(data.confusingSentences || []);
+    }
   }
 
   switch(section){
@@ -1957,10 +1961,7 @@ function renderVowel2Section(lesson, section){
     case "vowel2_compare_schwa_caret":
       return `${header}${renderVowel2FocusComparison(data.comparisonPairsSchwa || [], "/ə/", "/ʌ/")}`;
     case "vowel2_word_practice":
-      return `${header}<div class="vowel2-practice-groups">${data.wordGroups.map((group, groupIndex)=>`
-        <article><header><b>${escAttr(group.symbol)}</b><span>${escAttr(group.label)}</span>
-        <button onclick="speakById('${regTxt(group.words.map(item=>item.word).join(". "))}')">Đọc từng nhóm</button></header>
-        <div class="vowel2-compact-words">${group.words.map((word,index)=>renderVowel2WordCard(word, 2600 + groupIndex * 10 + index)).join("")}</div></article>`).join("")}</div>`;
+      return `${header}<div id="vowel2SentenceGameHost">${renderVowel2SentenceGame(data.confusingSentences || [])}</div>`;
     case "vowel2_pairs_sentences":
       return `${header}
         <h3 class="vowel2-subtitle">Minimal pairs</h3>
@@ -2329,6 +2330,144 @@ function highlightSentence(text, focusWords){
     const plain = token.replace(/[.,!?]/g, "").toLowerCase();
     return focus.has(plain) ? `<mark>${escAttr(token)}</mark>` : escAttr(token);
   }).join("");
+}
+
+function createVowel2SentenceGameState(sentences){
+  const items = shuffle(sentences || []);
+  return {
+    items,
+    statuses: Array(items.length).fill("idle"),
+    index: 0,
+    revealedTrap: false,
+    hasRead: false,
+    completed: false,
+  };
+}
+
+function renderVowel2SentenceGame(sentences){
+  if (!vowel2SentenceGameState) {
+    vowel2SentenceGameState = createVowel2SentenceGameState(sentences);
+  }
+  const state = vowel2SentenceGameState;
+  if (!state.items.length) return `<div class="vowel2-sentence-game"><p>Chưa có dữ liệu câu luyện đọc.</p></div>`;
+  if (state.completed) return renderVowel2SentenceSummary(state);
+
+  const item = state.items[state.index];
+  const status = state.statuses[state.index];
+  const canContinue = status !== "idle";
+  return `<section class="vowel2-sentence-game ${status === "good" ? "is-good" : status === "practice" ? "is-practice" : ""}">
+    <div class="vowel2-sentence-meta">
+      <strong>Câu ${state.index + 1}/${state.items.length}</strong>
+      <span>${state.hasRead ? "Học sinh đã đọc" : "Nghe mẫu rồi đọc to"}</span>
+    </div>
+    <div class="vowel2-sentence-dots" aria-label="Trạng thái các câu">
+      ${state.statuses.map((dotStatus, index)=>`<span class="${dotStatus}" title="Câu ${index + 1}: ${dotStatus === "good" ? "Đọc tốt" : dotStatus === "practice" ? "Cần luyện lại" : "Chưa làm"}"></span>`).join("")}
+    </div>
+    <article class="vowel2-sentence-card">
+      <p class="vowel2-sentence-text">${highlightSentence(item.sentence, item.highlightWords)}</p>
+      <div class="vowel2-sentence-actions">
+        <button class="vowel2-sentence-listen" onclick="_vowel2SentencePlay()">${SPEAKER_ICON_SVG} Nghe mẫu</button>
+        <button class="vowel2-sentence-read ${state.hasRead ? "active" : ""}" onclick="_vowel2SentenceRead()">Em đã đọc</button>
+        <button class="vowel2-sentence-trap-toggle" onclick="_vowel2SentenceReveal()">${state.revealedTrap ? "Ẩn bẫy dễ nhầm" : "Hiện bẫy dễ nhầm"}</button>
+      </div>
+      ${state.revealedTrap ? renderVowel2SentenceTraps(item.trap) : ""}
+      <div class="vowel2-sentence-marking" aria-label="Giáo viên chấm nhanh">
+        <span>Giáo viên chấm:</span>
+        <button class="good ${status === "good" ? "selected" : ""}" onclick="_vowel2SentenceMark('good')">Đọc tốt</button>
+        <button class="practice ${status === "practice" ? "selected" : ""}" onclick="_vowel2SentenceMark('practice')">Cần luyện lại</button>
+      </div>
+      <button class="vowel2-sentence-next" onclick="_vowel2SentenceNext()" ${canContinue ? "" : "disabled"}>
+        ${state.index === state.items.length - 1 ? "Xem tổng kết" : "Câu tiếp theo"}
+      </button>
+    </article>
+  </section>`;
+}
+
+function renderVowel2SentenceTraps(traps){
+  return `<div class="vowel2-sentence-traps">
+    ${traps.map(trap=>`<article>
+      <strong>${escAttr(trap.word)}</strong>
+      <span>${escAttr(trap.ipa)}</span>
+      <small>${escAttr(trap.confusion)}</small>
+    </article>`).join("")}
+  </div>`;
+}
+
+function renderVowel2SentenceSummary(state){
+  const goodCount = state.statuses.filter(status=>status === "good").length;
+  const practiceCount = state.statuses.filter(status=>status === "practice").length;
+  return `<section class="vowel2-sentence-summary">
+    <span class="vowel2-sentence-summary-icon">✓</span>
+    <h3>Hoàn thành ${state.items.length} câu</h3>
+    <div class="vowel2-sentence-summary-counts">
+      <article><strong>${goodCount}</strong><span>Đọc tốt</span></article>
+      <article><strong>${practiceCount}</strong><span>Cần luyện lại</span></article>
+    </div>
+    <div class="vowel2-sentence-summary-actions">
+      <button class="practice" onclick="_vowel2SentenceRetry()" ${practiceCount ? "" : "disabled"}>Luyện lại câu cần sai</button>
+      <button class="restart" onclick="_vowel2SentenceRestart()">Chơi lại</button>
+    </div>
+  </section>`;
+}
+
+function renderVowel2SentenceGameHost(){
+  const host = document.getElementById("vowel2SentenceGameHost");
+  const lesson = LESSONS.find(item=>item.id === STATE.lessonId);
+  if (host) host.innerHTML = renderVowel2SentenceGame(lesson?.vowelLesson?.confusingSentences || []);
+}
+
+function _vowel2SentencePlay(){
+  const item = vowel2SentenceGameState?.items[vowel2SentenceGameState.index];
+  if (item) speakEnglish(item.audioText, { lang: "en-US", rate: 0.9, pitch: 1 });
+}
+
+function _vowel2SentenceRead(){
+  if (!vowel2SentenceGameState) return;
+  vowel2SentenceGameState.hasRead = true;
+  renderVowel2SentenceGameHost();
+}
+
+function _vowel2SentenceReveal(){
+  if (!vowel2SentenceGameState) return;
+  vowel2SentenceGameState.revealedTrap = !vowel2SentenceGameState.revealedTrap;
+  renderVowel2SentenceGameHost();
+}
+
+function _vowel2SentenceMark(status){
+  if (!vowel2SentenceGameState || !["good", "practice"].includes(status)) return;
+  vowel2SentenceGameState.statuses[vowel2SentenceGameState.index] = status;
+  renderVowel2SentenceGameHost();
+}
+
+function _vowel2SentenceNext(){
+  const state = vowel2SentenceGameState;
+  if (!state || state.statuses[state.index] === "idle") return;
+  stopCurrentSpeech();
+  if (state.index >= state.items.length - 1) {
+    state.completed = true;
+  } else {
+    state.index += 1;
+    state.revealedTrap = false;
+    state.hasRead = false;
+  }
+  renderVowel2SentenceGameHost();
+}
+
+function _vowel2SentenceRetry(){
+  const state = vowel2SentenceGameState;
+  if (!state) return;
+  const practiceItems = state.items.filter((_, index)=>state.statuses[index] === "practice");
+  if (!practiceItems.length) return;
+  stopCurrentSpeech();
+  vowel2SentenceGameState = createVowel2SentenceGameState(practiceItems);
+  renderVowel2SentenceGameHost();
+}
+
+function _vowel2SentenceRestart(){
+  const lesson = LESSONS.find(item=>item.id === STATE.lessonId);
+  stopCurrentSpeech();
+  vowel2SentenceGameState = createVowel2SentenceGameState(lesson?.vowelLesson?.confusingSentences || []);
+  renderVowel2SentenceGameHost();
 }
 
 function renderVowel2FinalTabs(lesson){
@@ -7427,6 +7566,8 @@ Object.assign(window, {
   _alphabetToggleSplit, _alphabetChallengeNext, _alphabetToggleChallengeIcon, _alphabetCompleteChallenge,
   _alphabetAddWordLetter, _alphabetRemoveWordLetter, _alphabetCheckWord, _alphabetResetWord,
   _alphabetBuildName, _alphabetSpeakName, _alphabetResetName, _alphabetVideoError,
+  _vowel2SentencePlay, _vowel2SentenceRead, _vowel2SentenceReveal, _vowel2SentenceMark,
+  _vowel2SentenceNext, _vowel2SentenceRetry, _vowel2SentenceRestart,
   playEnglishAudio, _alphabetSingleSpeak, _alphabetSingleChoose, _alphabetSingleMarkRead,
   _alphabetSingleShowWord, _alphabetSingleAddLetter, _alphabetSingleRemoveLetter,
   _alphabetSingleCheckSplit, _alphabetSingleReveal, _alphabetSingleNext, _alphabetSingleRestart,
