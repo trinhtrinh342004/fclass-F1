@@ -38,8 +38,6 @@ const alphabetSectionFlow = [
   "alphabet_spell_name",
   "alphabet_split_word",
   "alphabet_icon_read",
-  "alphabet_teacher_challenge",
-  "alphabet_starfall",
   "alphabet_chill",
 ];
 
@@ -88,8 +86,6 @@ export const lesson01 = {
     alphabet_spell_name: "Đánh vần tên của em",
     alphabet_split_word: "Tách chữ trong từ",
     alphabet_icon_read: "Nhìn biểu tượng đọc từ",
-    alphabet_teacher_challenge: "Thử thách đọc theo giáo viên",
-    alphabet_starfall: "Chơi game bảng chữ cái",
     alphabet_chill: "Video thư giãn cuối buổi",
   },
   metadata: {

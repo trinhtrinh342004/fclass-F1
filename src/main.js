@@ -719,8 +719,6 @@ Object.assign(SECTION_LABELS, {
   alphabet_spell_name: "Đánh vần tên của em",
   alphabet_split_word: "Tách chữ trong từ",
   alphabet_icon_read: "Nhìn biểu tượng đọc từ",
-  alphabet_teacher_challenge: "Thử thách đọc theo giáo viên",
-  alphabet_starfall: "Chơi game bảng chữ cái",
   alphabet_chill: "Video thư giãn cuối buổi",
 });
 
@@ -972,16 +970,7 @@ function renderAlphabetSection(lesson, section){
       return `${header}${renderAlphabetSingleGame(section, alphabet)}`;
     case "alphabet_icon_read":
       return `${header}${renderAlphabetSingleGame(section, alphabet)}`;
-    case "alphabet_teacher_challenge":
-      return `${header}<p class="alphabet-instruction">Đọc theo giáo viên từng từ.</p>
-        ${renderAlphabetTeacherChallenge(alphabet.teacherChallenge || [], alphabet.letters || [])}`;
-    case "alphabet_starfall":
-      return `${header}<p class="alphabet-instruction">Bấm để chơi game luyện bảng chữ cái.</p>
-        <div class="alphabet-starfall-card">
-          <iframe src="${escAttr(alphabet.starfallUrl || "")}" title="Game luyện bảng chữ cái"></iframe>
-          <div><strong>Không thể hiển thị game trực tiếp.</strong><p>Hãy bấm nút bên dưới để mở game.</p>
-          <a href="${escAttr(alphabet.starfallUrl || "")}" target="_blank" rel="noopener noreferrer">Mở game bảng chữ cái</a></div>
-        </div>`;
+
     case "alphabet_chill":
       return `${header}<p class="alphabet-instruction">Nghe lại bảng chữ cái và hát theo.</p>
         <div class="alphabet-video-card">

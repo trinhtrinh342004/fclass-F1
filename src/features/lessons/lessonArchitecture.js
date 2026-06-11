@@ -40,8 +40,6 @@ export const lessonSectionFlowOverrides = {
       "alphabet_spell_name",
       "alphabet_split_word",
       "alphabet_icon_read",
-      "alphabet_teacher_challenge",
-      "alphabet_starfall",
       "alphabet_chill"
     ]
   },
