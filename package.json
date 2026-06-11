@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "verify:production": "npm run validate:lessons && npm run build",
     "preview": "vite preview",
     "validate:env": "node scripts/validate-env.mjs",
     "seed:lessons": "node scripts/seed-34-lessons.mjs",
