@@ -175,12 +175,12 @@ export const IPA_BOOTCAMP_CURRICULUM_MAP = [
   },
   {
     lessonId: 3,
-    topicEnglish: "IPA Foundation + Short Vowels",
-    topicVietnamese: "IPA và nguyên âm ngắn",
-    slug: "short-vowels",
+    topicEnglish: "Monophthongs 2 - Long, short and confusing vowels",
+    topicVietnamese: "Nguyên âm đơn 2 - Phân biệt âm dài, âm ngắn",
+    slug: "nguyen-am-don-2",
     sourceLessons: [],
     status: "ready",
-    notes: "Buổi 3 có structure riêng 18 mục theo tài liệu IPA Foundation + Short Vowels.",
+    notes: "Buổi 3 có 15 mục theo tài liệu Nguyên âm đơn 2, dùng UI vowelLesson giống Buổi 2.",
   },
   {
     lessonId: 4,

@@ -45,7 +45,7 @@ for (let id = 1; id <= expectedTotal; id += 1) {
 
 const expectedTitles = new Map([
   [2, "Buổi 2: Nguyên âm đơn 1"],
-  [3, "IPA Foundation + Short Vowels – IPA và nguyên âm ngắn"],
+  [3, "Buổi 3: Nguyên âm đơn 2"],
   [4, "BUỔI 4: Long Vowels - Nguyên âm dài"],
   [5, "Fricatives – Âm gió / âm ma sát"],
   [6, "BUỔI 6: Consonants 1 – Phụ âm bật, âm mũi, âm cuối"],
@@ -362,14 +362,20 @@ check(
 check(lesson06?.consonants?.sounds?.find((sound) => sound.symbol === "/ŋ/")?.fixTip?.includes("Không thêm /g/"), "Lesson 6 /ŋ/ card must warn learners not to add /g/.");
 
 const lesson03 = lessonById(3);
-check(lesson03?.sectionFlow?.length === 18, "Lesson 3 Short Vowels sidebar must have exactly 18 sections.");
-check(lesson03?.ipa?.sounds?.length === 6, "Lesson 3 Short Vowels must have 6 sound cards.");
+const lesson03RequiredPairs = ["hot - horse", "cot - caught", "full - fool", "pull - pool", "good - food", "bed - bird", "cup - car"];
+check(lesson03?.track === "single-vowels-2", "Lesson 3 must use the Monophthongs 2 track.");
+check(lesson03?.sectionFlow?.length === 15, "Lesson 3 Monophthongs 2 sidebar must have exactly 15 sections.");
+check(lesson03?.sectionLabels && lesson03.sectionFlow.every((section) => Boolean(lesson03.sectionLabels[section])), "Lesson 3 must label all 15 sidebar sections.");
+check(lesson03?.ipa?.sounds?.length === 6, "Lesson 3 Monophthongs 2 must have 6 sound cards.");
 check(lesson03?.ipa?.sounds?.every((sound) => ["lips", "tongue", "teeth", "air", "voice"].every((key) => Boolean(sound.mouth?.[key]))), "Lesson 3 sound cards must include mouth guidance.");
-check(lesson03?.ipa?.videoSlots?.length === 4, "Lesson 3 Short Vowels must have 4 safe video placeholders.");
-check(lesson03?.ipa?.imageSlots?.length === 6, "Lesson 3 Short Vowels must have 6 safe image placeholders.");
-check(lesson03?.ipa?.blendGame?.length >= 4, "Lesson 3 Short Vowels must have blend-game words.");
-check(lesson03?.ipa?.listenChooseGame?.length >= 4, "Lesson 3 Short Vowels must have listen-and-choose rounds.");
-check(lesson03?.ipa?.comparisons?.length === 2, "Lesson 3 Short Vowels must compare /e/ vs /æ/ and /ʌ/ vs /ɒ/.");
+check(JSON.stringify(lesson03?.vowelLesson?.sounds) === JSON.stringify(["/ɑː/", "/ɒ/", "/ɔː/", "/ʊ/", "/uː/", "/ɜː/"]), "Lesson 3 must teach /ɑː/ /ɒ/ /ɔː/ /ʊ/ /uː/ /ɜː/.");
+check(lesson03?.vowelLesson?.wordGroups?.length === 6, "Lesson 3 must have 6 vowel word groups.");
+check(lesson03?.vowelLesson?.wordGroups?.find((group) => group.symbol === "/ɜː/")?.words?.every((word) => word.word !== "teacher"), "Lesson 3 must not use teacher as a main /ɜː/ example.");
+check(lesson03?.vowelLesson?.listenGame?.length === 7, "Lesson 3 listening game must include the 7 required minimal-pair rounds.");
+check(lesson03?.vowelLesson?.recordingWords?.length >= 10, "Lesson 3 recording practice must include at least 10 words.");
+check(lesson03?.minitest?.length === 10, "Lesson 3 must include the complete 10-question mini test.");
+check(lesson03RequiredPairs.every((pair) => lesson03?.vowelLesson?.homeworkRich?.requiredPairs?.includes(pair)), "Lesson 3 homework must include all 7 required confusing pairs.");
+check(lesson03?.homework?.length >= 5, "Lesson 3 homework must cover listening, speaking, reading, and writing tasks.");
 
 const lesson08 = lessonById(8);
 check(lesson08?.sectionFlow?.length === 18, "Lesson 8 IPA review sidebar must have exactly 18 sections.");
