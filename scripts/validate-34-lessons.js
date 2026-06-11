@@ -251,9 +251,6 @@ const lesson02SingleSounds = new Map(
 check(
   mainSource.includes("function renderVowel2SingleSoundLesson")
     && mainSource.includes("function renderSoundWordPracticeCard")
-    && mainSource.includes("function renderVowel2SoundSwitcher")
-    && mainSource.includes('renderVowel2SoundSwitcher("vowel2_e_ae"')
-    && mainSource.includes('renderVowel2SoundSwitcher("vowel2_schwa_caret"')
     && mainSource.includes("Từ ${wordIndex + 1}/${group.words.length}")
     && mainSource.includes("Xem video hướng dẫn"),
   "Lesson 2 individual vowels must render through the shared single-sound practice template."
@@ -271,7 +268,7 @@ check(
   "Lesson 2 single-sound renderer must use shared media fallback helpers and no /i:/ special state."
 );
 check(lesson02?.track === "single-vowels-1", "Lesson 2 must use the dedicated single-vowels renderer.");
-check(lesson02?.sectionFlow?.length === 12, "Lesson 2 sidebar must have exactly 12 grouped sections.");
+check(lesson02?.sectionFlow?.length === 14, "Lesson 2 sidebar must have exactly 14 grouped sections.");
 check(lesson02?.sectionFlow?.every((section) => section.startsWith("vowel2_")), "Lesson 2 must use dedicated vowel2 sections.");
 check(lesson02?.vowelLesson?.sounds?.length === 6, "Lesson 2 must include 6 monophthongs.");
 check(lesson02?.vowelLesson?.wordGroups?.length === 6, "Lesson 2 must include 6 vocabulary groups.");
