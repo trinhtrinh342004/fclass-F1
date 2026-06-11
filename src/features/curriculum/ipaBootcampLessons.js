@@ -166,12 +166,12 @@ export const IPA_BOOTCAMP_CURRICULUM_MAP = [
   },
   {
     lessonId: 2,
-    topicEnglish: "Spelling & Letter Sounds – Đánh vần và âm chữ cái",
-    topicVietnamese: "Hiểu tên chữ cái khác với âm trong từ",
-    slug: "spelling-letter-sounds",
+    topicEnglish: "Monophthongs 1 – Nguyên âm đơn 1",
+    topicVietnamese: "Phân biệt 6 nguyên âm đơn thường gặp",
+    slug: "nguyen-am-don-1",
     sourceLessons: [],
     status: "ready",
-    notes: "Buổi 2 có structure riêng 16 mục theo MD Spelling & Letter Sounds.",
+    notes: "Buổi 2 có sidebar rút gọn 12 nhóm nội dung cho giáo viên.",
   },
   {
     lessonId: 3,
