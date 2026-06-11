@@ -26,6 +26,34 @@ const LOCAL_LESSON_CONTENT_BY_OLD_ID = {
 const EMPTY_SECTION_FLOW = ["intro", "homework"];
 
 export const TUWI_34_LESSONS = TUWI_34_CURRICULUM_MAP.map((entry) => {
+  if(entry.lessonId === 1) {
+    const rawDraft = remapLocalLessonContent(lesson01, entry);
+    const alphabetLesson = normalizeLessonToBuoi9Architecture({
+      ...rawDraft,
+      id: entry.lessonId,
+      lessonNumber: entry.lessonId,
+      dayNumber: entry.lessonId,
+      slug: rawDraft.slug,
+      status: "ready",
+      metadata: {
+        ...(rawDraft.metadata || {}),
+        curriculum: entry,
+        status: {
+          content: "ready",
+          code: "alphabet-foundation",
+          import: "manual"
+        }
+      }
+    });
+    return {
+      ...alphabetLesson,
+      title: lesson01.title,
+      titleVi: lesson01.titleVi,
+      topicEnglish: "Alphabet A–Z",
+      topicVietnamese: "Bảng chữ cái A–Z",
+    };
+  }
+
   const ipaLesson = IPA_BOOTCAMP_LESSONS.find((lesson) => lesson.id === entry.lessonId);
   if(ipaLesson) return structuredClone(ipaLesson);
 

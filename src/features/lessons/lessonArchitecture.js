@@ -23,6 +23,26 @@ export const canonicalLessonSections = [
 ];
 
 export const lessonSectionFlowOverrides = {
+  1: {
+    source: "Buổi 1 Alphabet Foundation",
+    sectionFlow: [
+      "alphabet_song",
+      "alphabet_group_ag",
+      "alphabet_group_hn",
+      "alphabet_group_ou",
+      "alphabet_group_vz",
+      "alphabet_cards",
+      "alphabet_vowels",
+      "alphabet_listen_choose",
+      "alphabet_case_match",
+      "alphabet_icon_match",
+      "alphabet_missing",
+      "alphabet_spell_name",
+      "alphabet_spell_words",
+      "alphabet_starfall",
+      "alphabet_chill"
+    ]
+  },
   31: {
     source: "Buổi 31 MD",
     sectionFlow: [
@@ -818,8 +838,7 @@ function applyLessonSectionFlowOverride(lesson){
   const override = lessonSectionFlowOverrides[lesson.id];
   if(!override) return;
 
-  const canonical = new Set(canonicalLessonSections);
-  const sectionFlow = (override.sectionFlow || []).filter(section => canonical.has(section));
+  const sectionFlow = (override.sectionFlow || []).filter(Boolean);
   if(sectionFlow.length){
     lesson.sectionFlow = sectionFlow;
   }
