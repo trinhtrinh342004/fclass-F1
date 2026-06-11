@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { LESSONS } from "../src/features/lessons/lessonRegistry.js";
 import { COURSE_TOTAL_LESSONS, TUWI_34_CURRICULUM_MAP } from "../src/features/curriculum/curriculumMap.js";
 
@@ -207,26 +207,6 @@ check([
 
 const lesson02 = lessonById(2);
 check(lesson02?.slug === "nguyen-am-don-1", "Lesson 2 must route to Monophthongs 1.");
-const longIMouthImage = new URL(
-  "../public/pronunciation/lesson-2/i-long/mouth-position.png",
-  import.meta.url
-);
-const longIGuideVideo = new URL(
-  "../public/pronunciation/lesson-2/i-long/guide-video.mp4",
-  import.meta.url
-);
-const hasLongIMouthImage = existsSync(longIMouthImage);
-const hasLongIGuideVideo = existsSync(longIGuideVideo);
-check(hasLongIMouthImage, "Lesson 2 long /i:/ mouth image must exist in the configured public folder.");
-check(hasLongIGuideVideo, "Lesson 2 long /i:/ guide video must exist in the configured public folder.");
-check(
-  !hasLongIMouthImage || statSync(longIMouthImage).size > 100_000,
-  "Lesson 2 long /i:/ mouth image must contain the imported PNG asset."
-);
-check(
-  !hasLongIGuideVideo || statSync(longIGuideVideo).size > 1_000_000,
-  "Lesson 2 long /i:/ guide video must contain the imported MP4 asset."
-);
 check(
   pronunciationMediaSource.includes('["i-long", "/iː/"]')
     && pronunciationMediaSource.includes("mouth-position.png")
@@ -234,19 +214,42 @@ check(
     && !pronunciationMediaSource.includes("/words/"),
   "Lesson 2 pronunciation media must configure mouth and guide files without per-word images."
 );
+const lesson02SingleSounds = new Map(
+  (lesson02?.vowelLesson?.wordGroups || []).map((group) => [group.symbol, group])
+);
+[
+  ["/iː/", "i-long", "long_i", "Âm dài /iː/"],
+  ["/ɪ/", "i-short", "short_i", "Âm ngắn /ɪ/"],
+  ["/e/", "e", "e", "Âm /e/"],
+  ["/æ/", "ae", "ae", "Âm /æ/"],
+  ["/ə/", "schwa", "schwa", "Âm /ə/"],
+  ["/ʌ/", "uh", "uh", "Âm /ʌ/"],
+].forEach(([symbol, sectionKey, practiceKey, title]) => {
+  const group = lesson02SingleSounds.get(symbol);
+  check(group?.sectionKey === sectionKey, `Lesson 2 ${symbol} must configure its pronunciation media key.`);
+  check(group?.practiceKey === practiceKey, `Lesson 2 ${symbol} must configure a stable practice key.`);
+  check(group?.title === title, `Lesson 2 ${symbol} must expose the single-sound section title.`);
+  check(group?.words?.length === 5, `Lesson 2 ${symbol} must include exactly 5 practice words.`);
+});
 check(
-  mainSource.includes("renderPronunciationMouthMedia(media)")
-    && mainSource.includes("renderPronunciationMouthMedia(media, true)")
-    && mainSource.includes("renderPronunciationGuideVideo(media)")
-    && mainSource.includes("renderVowel2MouthPositionSvg()")
-    && mainSource.includes("Video hướng dẫn sẽ được cập nhật"),
-  "Lesson 2 long /i:/ must render static media with mouth and video fallbacks."
+  mainSource.includes("function renderVowel2SingleSoundLesson")
+    && mainSource.includes("function renderSoundWordPracticeCard")
+    && mainSource.includes("function renderVowel2SoundSwitcher")
+    && mainSource.includes('renderVowel2SoundSwitcher("vowel2_e_ae"')
+    && mainSource.includes('renderVowel2SoundSwitcher("vowel2_schwa_caret"')
+    && mainSource.includes("TỪ ${wordIndex + 1}/${group.words.length}"),
+  "Lesson 2 individual vowels must render through the shared single-sound practice template."
 );
 check(
   mainSource.includes('<span>${escAttr(word.icon)}</span>')
-    && mainSource.includes('regTxt("ee")')
     && mainSource.includes("regTxt(word.word)"),
-  "Lesson 2 long /i:/ must keep default word icons and separate sound/word audio controls."
+  "Lesson 2 individual vowels must keep word icons and sound/word audio controls."
+);
+check(
+  mainSource.includes("pronunciation-mouth-placeholder")
+    && mainSource.includes("Chưa có hình khẩu hình")
+    && !mainSource.includes("vowel2LongIState"),
+  "Lesson 2 single-sound renderer must use compact mouth placeholders and no /i:/ special state."
 );
 check(lesson02?.track === "single-vowels-1", "Lesson 2 must use the dedicated single-vowels renderer.");
 check(lesson02?.sectionFlow?.length === 12, "Lesson 2 sidebar must have exactly 12 grouped sections.");
