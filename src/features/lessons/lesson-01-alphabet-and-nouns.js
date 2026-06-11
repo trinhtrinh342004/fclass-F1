@@ -128,9 +128,7 @@ export const lesson01 = {
     letters: alphabetLetters,
     vowels: alphabetLetters.filter(({ letter }) => "AEIOU".includes(letter)),
     listenChoose: alphabetLetters.map(({ letter }) => ({ audio: letter, answer: letter })),
-    practiceWords: alphabetLetters.filter(({ word }) => [
-      "apple", "ball", "cat", "dog", "egg", "fish", "ink", "orange", "umbrella",
-    ].includes(word)),
+    practiceWords: alphabetLetters,
     quickReadLetters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
     teacherChallenge: ["cat", "dog", "pen", "sun", "box"],
     starfallUrl: "https://www.starfall.com/h/abcs/?mg=k",
