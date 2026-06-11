@@ -46,7 +46,7 @@ for (let id = 1; id <= expectedTotal; id += 1) {
 const expectedTitles = new Map([
   [1, "IPA Foundation – Cách đọc một từ tiếng Anh"],
   [2, "Spelling & Letter Sounds – Đánh vần và âm chữ cái"],
-  [3, "Diphthongs – Nguyên âm đôi"],
+  [3, "IPA Foundation + Short Vowels – IPA và nguyên âm ngắn"],
   [4, "BUỔI 4: Long Vowels - Nguyên âm dài"],
   [5, "Fricatives – Âm gió / âm ma sát"],
   [6, "BUỔI 6: Consonants 1 – Phụ âm bật, âm mũi, âm cuối"],
@@ -90,13 +90,14 @@ check(
 check(lesson06?.consonants?.sounds?.find((sound) => sound.symbol === "/ŋ/")?.fixTip?.includes("Không thêm /g/"), "Lesson 6 /ŋ/ card must warn learners not to add /g/.");
 
 const lesson03 = lessonById(3);
-check(lesson03?.sectionFlow?.length === 16, "Lesson 3 Diphthongs sidebar must have exactly 16 sections.");
-check(lesson03?.ipa?.sounds?.length === 8, "Lesson 3 Diphthongs must have 8 sound cards.");
-check(lesson03?.ipa?.videoSlots?.length === 4, "Lesson 3 Diphthongs must have 4 safe video placeholders.");
-check(lesson03?.ipa?.imageSlots?.length === 8, "Lesson 3 Diphthongs must have 8 safe image placeholders.");
-check(lesson03?.ipa?.blendGame?.length === 8, "Lesson 3 Diphthongs must have 8 blend-game words.");
-check(lesson03?.ipa?.listenChooseGame?.length === 8, "Lesson 3 Diphthongs must have 8 listen-and-choose rounds.");
-check(lesson03?.ipa?.isGlideLesson === true, "Lesson 3 Diphthongs must enable the glide animation.");
+check(lesson03?.sectionFlow?.length === 18, "Lesson 3 Short Vowels sidebar must have exactly 18 sections.");
+check(lesson03?.ipa?.sounds?.length === 6, "Lesson 3 Short Vowels must have 6 sound cards.");
+check(lesson03?.ipa?.sounds?.every((sound) => ["lips", "tongue", "teeth", "air", "voice"].every((key) => Boolean(sound.mouth?.[key]))), "Lesson 3 sound cards must include mouth guidance.");
+check(lesson03?.ipa?.videoSlots?.length === 4, "Lesson 3 Short Vowels must have 4 safe video placeholders.");
+check(lesson03?.ipa?.imageSlots?.length === 6, "Lesson 3 Short Vowels must have 6 safe image placeholders.");
+check(lesson03?.ipa?.blendGame?.length >= 4, "Lesson 3 Short Vowels must have blend-game words.");
+check(lesson03?.ipa?.listenChooseGame?.length >= 4, "Lesson 3 Short Vowels must have listen-and-choose rounds.");
+check(lesson03?.ipa?.comparisons?.length === 2, "Lesson 3 Short Vowels must compare /e/ vs /æ/ and /ʌ/ vs /ɒ/.");
 
 const lesson08 = lessonById(8);
 check(lesson08?.sectionFlow?.length === 18, "Lesson 8 IPA review sidebar must have exactly 18 sections.");

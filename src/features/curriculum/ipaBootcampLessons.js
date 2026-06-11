@@ -1,6 +1,6 @@
 import { lesson04LongVowels } from "../lessons/lesson-04-long-vowels.js";
 import { lesson06Consonants1 } from "../lessons/lesson-06-consonants-1.js";
-import { lesson03Diphthongs } from "../lessons/lesson-03-diphthongs.js";
+import { lesson03ShortVowels } from "../lessons/lesson-03-short-vowels.js";
 import { lesson08IpaReview } from "../lessons/lesson-08-ipa-review.js";
 import { lesson07Consonants2 } from "../lessons/lesson-07-consonants-2.js";
 import { lesson02SpellingLetterSounds } from "../lessons/lesson-02-spelling-letter-sounds.js";
@@ -175,12 +175,12 @@ export const IPA_BOOTCAMP_CURRICULUM_MAP = [
   },
   {
     lessonId: 3,
-    topicEnglish: "Diphthongs – Nguyên âm đôi",
-    topicVietnamese: "Học cách đọc âm trượt từ âm này sang âm khác",
-    slug: "diphthongs-nguyen-am-doi",
+    topicEnglish: "IPA Foundation + Short Vowels",
+    topicVietnamese: "IPA và nguyên âm ngắn",
+    slug: "short-vowels",
     sourceLessons: [],
     status: "ready",
-    notes: "Buổi 3 có structure riêng theo tài liệu Diphthongs.",
+    notes: "Buổi 3 có structure riêng 18 mục theo tài liệu IPA Foundation + Short Vowels.",
   },
   {
     lessonId: 4,
@@ -252,7 +252,7 @@ export const IPA_BOOTCAMP_LESSONS = [
     ],
   }),
   lesson02SpellingLetterSounds,
-  createDiphthongLesson(lesson03Diphthongs),
+  lesson03ShortVowels,
   {
     ...lesson04LongVowels,
     id: 4,
