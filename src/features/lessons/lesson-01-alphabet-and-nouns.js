@@ -165,7 +165,7 @@ export const lesson01 = {
     ],
     teacherChallenge: ["cat", "dog", "pen", "sun", "box"],
     starfallUrl: "https://www.starfall.com/h/abcs/?mg=k",
-    chillVideo: "/videos/alphabet.mp4",
+    chillVideo: "/alphabet/alphabet.mp4",
   },
   review: {
     title: "Ôn đầu vào / Khởi động",

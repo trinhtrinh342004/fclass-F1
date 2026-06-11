@@ -1027,7 +1027,7 @@ function renderAlphabetSection(lesson, section){
       return `${header}<p class="alphabet-instruction">Nghe lại bảng chữ cái và hát theo.</p>
         <div class="alphabet-video-card">
           <video controls preload="metadata" onerror="_alphabetVideoError(this)"><source src="${escAttr(alphabet.chillVideo || "")}" type="video/mp4"></video>
-          <div class="alphabet-video-placeholder">Hãy thêm file alphabet.mp4 vào thư mục public/videos/alphabet.mp4</div>
+          <div class="alphabet-video-placeholder">Không thể tải video bảng chữ cái.</div>
         </div>`;
     default:
       return renderMissingSection(section);
