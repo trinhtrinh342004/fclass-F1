@@ -132,45 +132,45 @@ const MINIMAL_PAIRS = [
   left, leftIpa, leftMeaning, leftFocus, right, rightIpa, rightMeaning, rightFocus,
 }));
 
-const COMPARISON_PAIRS = [
-  ["ship", "/ʃɪp/", "tàu thủy", "/ɪ/", "i", "🚢", "sheep", "/ʃiːp/", "con cừu", "/iː/", "ee", "🐑"],
-  ["sit", "/sɪt/", "ngồi", "/ɪ/", "i", "🪑", "seat", "/siːt/", "ghế", "/iː/", "ea", "🪑"],
-  ["fit", "/fɪt/", "phù hợp", "/ɪ/", "i", "✅", "feet", "/fiːt/", "bàn chân", "/iː/", "ee", "🦶"],
-].map(([leftWord, leftIpa, leftMeaning, leftSound, leftHighlight, leftIcon,
-  rightWord, rightIpa, rightMeaning, rightSound, rightHighlight, rightIcon]) => ({
-  left: {
-    word: leftWord, ipa: leftIpa, meaning: leftMeaning, sound: leftSound, highlight: leftHighlight, icon: leftIcon,
-  },
-  right: {
-    word: rightWord, ipa: rightIpa, meaning: rightMeaning, sound: rightSound, highlight: rightHighlight, icon: rightIcon,
-  },
-}));
+function createComparisonSlide(leftSound, rightSound, rows) {
+  return {
+    leftSound,
+    rightSound,
+    pairs: rows.map(([leftWord, leftIpa, leftMeaning, leftHighlight, leftIcon,
+      rightWord, rightIpa, rightMeaning, rightHighlight, rightIcon]) => ({
+      left: {
+        word: leftWord, ipa: leftIpa, meaning: leftMeaning, highlight: leftHighlight, sound: leftSound, icon: leftIcon,
+      },
+      right: {
+        word: rightWord, ipa: rightIpa, meaning: rightMeaning, highlight: rightHighlight, sound: rightSound, icon: rightIcon,
+      },
+    })),
+  };
+}
 
-const COMPARISON_PAIRS_E = [
-  ["bed", "/bed/", "cái giường", "/e/", "e", "🛏️", "bad", "/bæd/", "xấu/tệ", "/æ/", "a", "👎"],
-  ["pen", "/pen/", "cây bút", "/e/", "e", "🖊️", "pan", "/pæn/", "cái chảo", "/æ/", "a", "🍳"],
-].map(([leftWord, leftIpa, leftMeaning, leftSound, leftHighlight, leftIcon,
-  rightWord, rightIpa, rightMeaning, rightSound, rightHighlight, rightIcon]) => ({
-  left: {
-    word: leftWord, ipa: leftIpa, meaning: leftMeaning, sound: leftSound, highlight: leftHighlight, icon: leftIcon,
-  },
-  right: {
-    word: rightWord, ipa: rightIpa, meaning: rightMeaning, sound: rightSound, highlight: rightHighlight, icon: rightIcon,
-  },
-}));
-
-const COMPARISON_PAIRS_SCHWA = [
-  ["about", "/əˈbaʊt/", "về", "/ə/", "a", "💬", "cup", "/kʌp/", "cái cốc", "/ʌ/", "u", "🥤"],
-  ["sofa", "/ˈsoʊfə/", "ghế sofa", "/ə/", "a", "🛋️", "sun", "/sʌn/", "mặt trời", "/ʌ/", "u", "☀️"],
-].map(([leftWord, leftIpa, leftMeaning, leftSound, leftHighlight, leftIcon,
-  rightWord, rightIpa, rightMeaning, rightSound, rightHighlight, rightIcon]) => ({
-  left: {
-    word: leftWord, ipa: leftIpa, meaning: leftMeaning, sound: leftSound, highlight: leftHighlight, icon: leftIcon,
-  },
-  right: {
-    word: rightWord, ipa: rightIpa, meaning: rightMeaning, sound: rightSound, highlight: rightHighlight, icon: rightIcon,
-  },
-}));
+const COMPARISON_SLIDES = {
+  vowel2_compare_i: createComparisonSlide("/ɪ/", "/iː/", [
+    ["ship", "/ʃɪp/", "tàu thủy", "i", "🚢", "sheep", "/ʃiːp/", "con cừu", "ee", "🐑"],
+    ["sit", "/sɪt/", "ngồi", "i", "🪑", "seat", "/siːt/", "ghế", "ea", "💺"],
+    ["fit", "/fɪt/", "phù hợp", "i", "✅", "feet", "/fiːt/", "bàn chân", "ee", "🦶"],
+    ["bit", "/bɪt/", "một chút", "i", "🤏", "beat", "/biːt/", "đánh/nhịp", "ea", "🥁"],
+    ["live", "/lɪv/", "sống", "i", "🏠", "leave", "/liːv/", "rời đi", "ea", "🚪"],
+  ]),
+  vowel2_compare_e_ae: createComparisonSlide("/e/", "/æ/", [
+    ["bed", "/bed/", "cái giường", "e", "🛏️", "bad", "/bæd/", "xấu/tệ", "a", "👎"],
+    ["pen", "/pen/", "cây bút", "e", "🖊️", "pan", "/pæn/", "cái chảo", "a", "🍳"],
+    ["men", "/men/", "những người đàn ông", "e", "👨‍👨‍👦", "man", "/mæn/", "người đàn ông", "a", "👨"],
+    ["ten", "/ten/", "số 10", "e", "🔟", "tan", "/tæn/", "màu rám nắng", "a", "🌞"],
+    ["pet", "/pet/", "thú cưng", "e", "🐶", "pat", "/pæt/", "vỗ nhẹ", "a", "👋"],
+  ]),
+  vowel2_compare_schwa_caret: createComparisonSlide("/ə/", "/ʌ/", [
+    ["about", "/əˈbaʊt/", "về", "a", "💬", "cup", "/kʌp/", "cái cốc", "u", "🥤"],
+    ["sofa", "/ˈsoʊfə/", "ghế sofa", "a", "🛋️", "sun", "/sʌn/", "mặt trời", "u", "☀️"],
+    ["banana", "/bəˈnænə/", "quả chuối", "a", "🍌", "bus", "/bʌs/", "xe buýt", "u", "🚌"],
+    ["teacher", "/ˈtiːtʃər/", "giáo viên", "er", "👩‍🏫", "mother", "/ˈmʌðər/", "mẹ", "o", "👩"],
+    ["away", "/əˈweɪ/", "đi xa", "a", "➡️", "up", "/ʌp/", "lên", "u", "⬆️"],
+  ]),
+};
 
 const SENTENCES = [
   ["I see a sheep.", ["see", "sheep"]],
@@ -310,9 +310,7 @@ export const lesson02SpellingLetterSounds = {
     sounds: ["/iː/", "/ɪ/", "/e/", "/æ/", "/ə/", "/ʌ/"],
     wordGroups: WORD_GROUPS,
     minimalPairs: MINIMAL_PAIRS,
-    comparisonPairs: COMPARISON_PAIRS,
-    comparisonPairsE: COMPARISON_PAIRS_E,
-    comparisonPairsSchwa: COMPARISON_PAIRS_SCHWA,
+    comparisons: COMPARISON_SLIDES,
     confusingSentences: CONFUSING_SENTENCES,
     advancedTrapSentences: ADVANCED_TRAP_SENTENCES,
     sentences: SENTENCES,

@@ -319,6 +319,31 @@ check(lesson02?.sectionFlow?.every((section) => section.startsWith("vowel2_")), 
 check(lesson02?.vowelLesson?.sounds?.length === 6, "Lesson 2 must include 6 monophthongs.");
 check(lesson02?.vowelLesson?.wordGroups?.length === 6, "Lesson 2 must include 6 vocabulary groups.");
 check(lesson02?.vowelLesson?.minimalPairs?.length === 6, "Lesson 2 must include 6 minimal pairs.");
+const lesson02Comparisons = lesson02?.vowelLesson?.comparisons || {};
+[
+  ["vowel2_compare_i", "/ɪ/", "/iː/", ["ship/sheep", "sit/seat", "fit/feet", "bit/beat", "live/leave"]],
+  ["vowel2_compare_e_ae", "/e/", "/æ/", ["bed/bad", "pen/pan", "men/man", "ten/tan", "pet/pat"]],
+  ["vowel2_compare_schwa_caret", "/ə/", "/ʌ/", ["about/cup", "sofa/sun", "banana/bus", "teacher/mother", "away/up"]],
+].forEach(([section, leftSound, rightSound, expectedPairs]) => {
+  const comparison = lesson02Comparisons[section];
+  check(comparison?.leftSound === leftSound, `Lesson 2 ${section} must configure leftSound ${leftSound}.`);
+  check(comparison?.rightSound === rightSound, `Lesson 2 ${section} must configure rightSound ${rightSound}.`);
+  check(comparison?.pairs?.length === 5, `Lesson 2 ${section} must include exactly 5 comparison pairs.`);
+  check(
+    arrayEquals(comparison?.pairs?.map((pair) => `${pair.left.word}/${pair.right.word}`), expectedPairs),
+    `Lesson 2 ${section} must preserve the requested comparison pair order.`
+  );
+  check(
+    comparison?.pairs?.every((pair) => [pair.left, pair.right].every((item) => (
+      item?.word && item?.ipa && item?.meaning && item?.highlight && item?.sound && item?.icon
+    ))),
+    `Lesson 2 ${section} comparison pairs must include all word fields.`
+  );
+  check(
+    comparison?.pairs?.every((pair) => pair.left.sound === leftSound && pair.right.sound === rightSound),
+    `Lesson 2 ${section} pair sounds must match the slide sounds.`
+  );
+});
 check(lesson02?.vowelLesson?.sentences?.length === 8, "Lesson 2 must include 8 reading sentences.");
 check(lesson02?.vowelLesson?.listenGame?.length === 10, "Lesson 2 listening game must include 10 rounds.");
 check(lesson02?.minitest?.length === 10, "Lesson 2 must include the complete 10-question mini test.");
