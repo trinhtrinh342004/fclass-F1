@@ -853,7 +853,7 @@ function renderSection(){
     html = renderAlphabetSection(lesson, section);
   }else if(lesson?.module === "ipa-bootcamp" && section.startsWith("review8_")){
     html = renderReview8Section(lesson, section);
-  }else if(lesson?.track === "single-vowels-1" && section.startsWith("vowel2_")){
+  }else if(lesson?.vowelLesson && section.startsWith("vowel2_")){
     html = renderVowel2Section(lesson, section);
   }else if(lesson?.track === "spelling-letter-sounds" && section.startsWith("spelling_")){
     html = renderSpellingSection(lesson, section);
@@ -1370,7 +1370,7 @@ function _alphabetSingleScheduleAudio(section){
 
 function playEnglishAudio(text, options={}){
   stopCurrentSpeech();
-  speakEnglish(text, { lang: "en-US", rate: options.rate ?? 0.9, pitch: 1, isWord: true, ...options });
+  speakEnglish(text, { lang: "en-GB", rate: options.rate ?? 0.9, pitch: 1, isWord: true, ...options });
 }
 
 function _alphabetSingleSpeak(section){
@@ -1979,6 +1979,27 @@ const SPEAKER_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="22" hei
   <path d="M19.07 4.93a10 10 0 0 1 0 14.14" class="sound-wave sound-wave-2"></path>
 </svg>`;
 
+const DEFAULT_VOWEL2_SECTION_SOUND_MAP = {
+  vowel2_long_i: "/iː/",
+  vowel2_short_i: "/ɪ/",
+  vowel2_sound_e: "/e/",
+  vowel2_sound_ae: "/æ/",
+  vowel2_sound_schwa: "/ə/",
+  vowel2_sound_uh: "/ʌ/",
+};
+
+function getVowel2SectionSoundMap(lesson){
+  return {
+    ...DEFAULT_VOWEL2_SECTION_SOUND_MAP,
+    ...(lesson?.vowelLesson?.sectionSoundMap || {}),
+  };
+}
+
+function getVowel2GroupForSection(lesson, section){
+  const symbol = getVowel2SectionSoundMap(lesson)[section];
+  return lesson?.vowelLesson?.wordGroups?.find(group => group.symbol === symbol);
+}
+
 function renderVowel2Section(lesson, section){
   const data = lesson.vowelLesson;
   const header = renderVowel2Header(lesson, section);
@@ -2011,21 +2032,21 @@ function renderVowel2Section(lesson, section){
           </div>
         </div>`;
     case "vowel2_long_i":
-      return `${header}${renderVowel2SingleSoundLesson(groups["/iː/"], 2000)}`;
+      return `${header}${renderVowel2SingleSoundLesson(getVowel2GroupForSection(lesson, section) || groups["/iː/"], 2000)}`;
     case "vowel2_short_i":
-      return `${header}${renderVowel2SingleSoundLesson(groups["/ɪ/"], 2100)}`;
+      return `${header}${renderVowel2SingleSoundLesson(getVowel2GroupForSection(lesson, section) || groups["/ɪ/"], 2100)}`;
     case "vowel2_compare_i":
       return `${header}${renderVowel2FocusComparison(data.comparisons?.[section])}`;
     case "vowel2_sound_e":
-      return `${header}${renderVowel2SingleSoundLesson(groups["/e/"], 2200)}`;
+      return `${header}${renderVowel2SingleSoundLesson(getVowel2GroupForSection(lesson, section) || groups["/e/"], 2200)}`;
     case "vowel2_sound_ae":
-      return `${header}${renderVowel2SingleSoundLesson(groups["/æ/"], 2300)}`;
+      return `${header}${renderVowel2SingleSoundLesson(getVowel2GroupForSection(lesson, section) || groups["/æ/"], 2300)}`;
     case "vowel2_compare_e_ae":
       return `${header}${renderVowel2FocusComparison(data.comparisons?.[section])}`;
     case "vowel2_sound_schwa":
-      return `${header}${renderVowel2SingleSoundLesson(groups["/ə/"], 2400)}`;
+      return `${header}${renderVowel2SingleSoundLesson(getVowel2GroupForSection(lesson, section) || groups["/ə/"], 2400)}`;
     case "vowel2_sound_uh":
-      return `${header}${renderVowel2SingleSoundLesson(groups["/ʌ/"], 2500)}`;
+      return `${header}${renderVowel2SingleSoundLesson(getVowel2GroupForSection(lesson, section) || groups["/ʌ/"], 2500)}`;
     case "vowel2_compare_schwa_caret":
       return `${header}${renderVowel2FocusComparison(data.comparisons?.[section])}`;
     case "vowel2_word_practice":
@@ -2044,6 +2065,61 @@ function renderVowel2Section(lesson, section){
 }
 
 function renderVowel2Homework(lesson) {
+  const rich = lesson.vowelLesson?.homeworkRich;
+  if (rich) {
+    const isAssigned = window.vowel2HomeworkAssigned || false;
+    return `
+      <div class="vowel2-homework-slide">
+        <div class="vowel2-hw-skills-grid">
+          <article class="vowel2-hw-card card-listen">
+            <div class="vowel2-hw-card-header"><span class="vowel2-hw-icon">🎧</span><h3>1. Nghe</h3></div>
+            <div class="vowel2-hw-card-body">
+              <ul class="vowel2-hw-list">
+                <li>Nghe lại 6 âm hôm nay: <strong>${escAttr(lesson.vowelLesson.sounds.join(" "))}</strong></li>
+                <li>Làm bài nghe chọn từ với ${rich.listeningPairs.length} cặp: ${rich.listeningPairs.map(pair => `<span class="badge-pair">${escAttr(pair)}</span>`).join(" ")}</li>
+              </ul>
+              <div class="vowel2-hw-footer"><span class="vowel2-hw-time">5-7 phút</span><span class="vowel2-hw-criteria">Đúng ít nhất 8/10 cặp</span></div>
+            </div>
+          </article>
+          <article class="vowel2-hw-card card-speak">
+            <div class="vowel2-hw-card-header"><span class="vowel2-hw-icon">🎤</span><h3>2. Nói</h3></div>
+            <div class="vowel2-hw-card-body">
+              <ul class="vowel2-hw-list">
+                <li>Ghi âm 10 từ: ${rich.speakingWords.map(word => `<span class="badge-pair">${escAttr(word)}</span>`).join(" ")}</li>
+                <li>Ghi âm 5 câu: ${rich.speakingSentences.map(sentence => `<span class="badge-pair">${escAttr(sentence)}</span>`).join(" ")}</li>
+              </ul>
+              <div class="vowel2-hw-footer"><span class="vowel2-hw-time">7-10 phút</span><span class="vowel2-hw-criteria">Âm dài/ngắn rõ</span></div>
+            </div>
+          </article>
+          <article class="vowel2-hw-card card-read">
+            <div class="vowel2-hw-card-header"><span class="vowel2-hw-icon">📖</span><h3>3. Đọc</h3></div>
+            <div class="vowel2-hw-card-body">
+              <ul class="vowel2-hw-list">
+                ${rich.readingGroups.map(group => `<li><strong>${escAttr(group.sound)}</strong>: ${group.words.map(escAttr).join(", ")}</li>`).join("")}
+              </ul>
+              <div class="vowel2-hw-footer"><span class="vowel2-hw-time">8-10 phút</span><span class="vowel2-hw-criteria">Mỗi nhóm đọc 2 lần</span></div>
+            </div>
+          </article>
+          <article class="vowel2-hw-card card-write">
+            <div class="vowel2-hw-card-header"><span class="vowel2-hw-icon">✍️</span><h3>4. Viết</h3></div>
+            <div class="vowel2-hw-card-body">
+              <ul class="vowel2-hw-list">
+                <li>Viết 6 câu, mỗi câu dùng ít nhất 1 từ Buổi ${lesson.id}: ${rich.writingSentences.map(sentence => `<span class="badge-pair">${escAttr(sentence)}</span>`).join(" ")}</li>
+                <li>Viết lại 7 cặp bắt buộc: ${rich.requiredPairs.map(pair => `<span class="badge-pair">${escAttr(pair)}</span>`).join(" ")}</li>
+              </ul>
+              <div class="vowel2-hw-footer"><span class="vowel2-hw-time">8-10 phút</span><span class="vowel2-hw-criteria">Đủ câu và cặp âm</span></div>
+            </div>
+          </article>
+        </div>
+        <div class="vowel2-hw-actions">
+          <button id="vowel2BtnAssignHW" class="vowel2-hw-btn-assign ${isAssigned ? 'assigned' : ''}" onclick="window._vowel2MarkHomework(this)">
+            ${isAssigned ? '✓ Đã giao BTVN!' : 'Đánh dấu đã giao BTVN'}
+          </button>
+          <button class="vowel2-hw-btn-next" onclick="nextSection()">Sang tổng kết →</button>
+        </div>
+      </div>
+    `;
+  }
   const isAssigned = window.vowel2HomeworkAssigned || false;
   return `
     <div class="vowel2-homework-slide">
@@ -2177,6 +2253,72 @@ window._vowel2MarkHomework = function(button) {
 };
 
 function renderVowel2Summary(lesson) {
+  const rich = lesson.vowelLesson?.homeworkRich;
+  if (rich) {
+    const selectedEval = window.vowel2SelfEval || "";
+    const longSounds = lesson.vowelLesson.wordGroups
+      .filter(group => group.label?.toLowerCase().includes("dài"))
+      .map(group => group.symbol);
+    const shortSounds = lesson.vowelLesson.wordGroups
+      .filter(group => group.label?.toLowerCase().includes("ngắn"))
+      .map(group => group.symbol);
+    return `
+      <div class="vowel2-summary-slide">
+        <div class="vowel2-summary-section">
+          <h3 class="vowel2-summary-subtitle">A. Hôm nay em đã học</h3>
+          <div class="vowel2-summary-sounds-grid">
+            ${lesson.vowelLesson.wordGroups.map(group => `
+              <div class="vowel2-sum-sound-card" onclick="_vowel2SpeakSound('${escAttr(group.symbol)}')">
+                <span class="vowel2-sum-sound-symbol">${escAttr(group.symbol)}</span>
+                <span class="vowel2-sum-sound-desc">${escAttr(group.label)}</span>
+              </div>
+            `).join("")}
+          </div>
+          <div class="vowel2-note-box">
+            <strong>Âm dài:</strong> ${escAttr(longSounds.join(" ")) || "không có"}<br>
+            <strong>Âm ngắn:</strong> ${escAttr(shortSounds.join(" ")) || "không có"}
+          </div>
+        </div>
+
+        <div class="vowel2-summary-section">
+          <h3 class="vowel2-summary-subtitle">B. Cặp dễ sai nhất</h3>
+          <div class="vowel2-required-pairs">
+            ${rich.requiredPairs.map(pair => `<button class="badge-pair" onclick="speakById('${regTxt(pair.replace(" - ", ". "))}')">${escAttr(pair)}</button>`).join("")}
+          </div>
+        </div>
+
+        <div class="vowel2-summary-section">
+          <h3 class="vowel2-summary-subtitle">C. Checklist sau buổi học</h3>
+          <div class="vowel2-checklist">
+            ${[
+              "Em đọc được /ɑː/ trong car.",
+              "Em đọc được /ɒ/ trong hot.",
+              "Em đọc được /ɔː/ trong horse.",
+              "Em phân biệt được good và food.",
+              "Em phân biệt được pull và pool.",
+              "Em phân biệt được bed và bird.",
+              "Em phân biệt được cup và car.",
+              "Em đọc được ít nhất 5 câu có âm mục tiêu.",
+            ].map(item => `<label><input type="checkbox"> ${escAttr(item)}</label>`).join("")}
+          </div>
+        </div>
+
+        <div class="vowel2-summary-section">
+          <h3 class="vowel2-summary-subtitle">D. Tự đánh giá</h3>
+          <div class="vowel2-eval-buttons">
+            <button class="vowel2-eval-btn ${selectedEval === "good" ? "selected" : ""}" onclick="_vowel2SelectSelfEval(this, 'good')">Em làm tốt</button>
+            <button class="vowel2-eval-btn ${selectedEval === "confused" ? "selected" : ""}" onclick="_vowel2SelectSelfEval(this, 'confused')">Cần luyện thêm</button>
+            <button class="vowel2-eval-btn ${selectedEval === "retry" ? "selected" : ""}" onclick="_vowel2SelectSelfEval(this, 'retry')">Muốn học lại</button>
+          </div>
+          <div id="vowel2EvalFeedback" class="vowel2-eval-feedback"></div>
+        </div>
+
+        <div class="vowel2-note-box">
+          Sau Buổi ${lesson.id}, em cần nghe rõ sự khác nhau giữa âm ngắn và âm dài, đặc biệt là ${rich.requiredPairs.map(escAttr).join(", ")}.
+        </div>
+      </div>
+    `;
+  }
   const selectedEval = window.vowel2SelfEval || "";
   return `
     <div class="vowel2-summary-slide">
@@ -2311,7 +2453,7 @@ function renderVowel2Header(lesson, section){
   const title = (section === "vowel2_compare_i" || section === "vowel2_compare_e_ae" || section === "vowel2_compare_schwa_caret")
     ? ""
     : `<h2 class="stage-title">${escAttr(lesson.sectionLabels[section])}</h2>`;
-  return `<div class="stage-h"><span class="stage-tag">Buổi 2 · Nguyên âm đơn</span>
+  return `<div class="stage-h"><span class="stage-tag">Buổi ${lesson.id} · ${escAttr(lesson.titleVi || "Nguyên âm đơn")}</span>
     <span class="stage-num">Mục ${STATE.sectionIdx + 1}/${STATE.sections.length}</span></div>
     ${title}`;
 }
@@ -2323,6 +2465,12 @@ const VOWEL2_SOUND_SPEECH_TEXT = {
   "/æ/": "aa",
   "/ə/": "uh",
   "/ʌ/": "uh",
+  "/ɑː/": "ah",
+  "/ɒ/": "o",
+  "/ɔː/": "aw",
+  "/ʊ/": "uu",
+  "/uː/": "oo",
+  "/ɜː/": "er",
 };
 
 function renderVowel2SoundSwitcher(section, groups, offset){
@@ -2337,6 +2485,7 @@ function renderVowel2SoundSwitcher(section, groups, offset){
 }
 
 function renderVowel2SingleSoundLesson(group, offset){
+  if (!group) return renderMissingSection(STATE.sections[STATE.sectionIdx]);
   const stateKey = group.practiceKey || group.symbol;
   window.vowel2SingleSoundState = window.vowel2SingleSoundState || {};
   window.vowel2SingleSoundPhase = window.vowel2SingleSoundPhase || {};
@@ -2344,7 +2493,8 @@ function renderVowel2SingleSoundLesson(group, offset){
   const wordIndex = Math.min(window.vowel2SingleSoundState[stateKey] || 0, group.words.length - 1);
   window.vowel2SingleSoundState[stateKey] = wordIndex;
   const word = group.words[wordIndex];
-  const media = getPronunciationMedia(2, group.sectionKey);
+  const lesson = LESSONS.find(item => item.id === STATE.lessonId);
+  const media = getPronunciationMedia(lesson?.lessonNumber || lesson?.id || 2, group.sectionKey);
   if (phase === "intro") {
     return `<section class="vowel2-sound-intro-card">
       <div class="vowel2-sound-intro-copy">
@@ -2501,7 +2651,7 @@ function highlightInteractiveComparisonWord(word, focus, sound){
 }
 
 function renderVowel2MouthSvg(shape){
-  const openings = { smile: 20, "relaxed-small": 25, medium: 34, wide: 52, neutral: 29, natural: 40 };
+  const openings = { smile: 20, "relaxed-small": 25, medium: 34, wide: 52, neutral: 29, natural: 40, "round-open": 46, rounded: 38, "rounded-small": 24 };
   const opening = openings[shape] || 34;
   const tongueY = shape === "smile" ? 91 : shape === "wide" ? 110 : 100;
   return `<svg class="vowel2-mouth-svg" viewBox="0 0 220 150" role="img" aria-label="Minh họa khẩu hình">
@@ -2858,6 +3008,25 @@ const SOUND_TO_SECTION_INDEX = {
   "/ʌ/": 8
 };
 
+function getVowel2SoundSectionIndex(symbol){
+  const lesson = LESSONS.find(item => item.id === STATE.lessonId);
+  const map = getVowel2SectionSoundMap(lesson);
+  const section = Object.entries(map).find(([, sound]) => sound === symbol)?.[0];
+  if (!section) return SOUND_TO_SECTION_INDEX[symbol] || 0;
+  const idx = STATE.sections.indexOf(section);
+  return idx >= 0 ? idx : SOUND_TO_SECTION_INDEX[symbol] || 0;
+}
+
+function getVowel2SoundForWord(word){
+  const needle = String(word || "").toLowerCase();
+  if (!needle) return "";
+  const lesson = LESSONS.find(item => item.id === STATE.lessonId);
+  const group = lesson?.vowelLesson?.wordGroups?.find(item =>
+    item.words?.some(entry => String(entry.word || "").toLowerCase() === needle)
+  );
+  return group?.symbol || "";
+}
+
 function renderVowel2FinalTabs(lesson){
   const data = lesson.vowelLesson;
   return `<div class="vowel2-tabs">
@@ -2878,7 +3047,7 @@ function renderVowel2ListenGame(data){
   const total = state.items.length;
 
   if (state.completed || state.index >= total) {
-    const wrongSounds = Array.from(state.wrongChoices);
+    const wrongSounds = Array.from(state.weakSounds || state.wrongChoices);
     return `
       <div class="vowel2-game-summary lesson2-compact-card" style="max-width: 500px; margin: 0 auto; padding: 32px 20px; text-align: center;">
         <div style="font-size: 52px; margin-bottom: 12px;">🎉</div>
@@ -2892,7 +3061,7 @@ function renderVowel2ListenGame(data){
             <b style="color: #c2410c; display: block; margin-bottom: 8px;">Âm cần luyện lại:</b>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
               ${wrongSounds.map(sound => `
-                <button class="lesson2-btn lesson2-btn-gray" style="padding: 6px 12px; font-size: 14px;" onclick="jumpTo(${SOUND_TO_SECTION_INDEX[sound] || 0})">
+                <button class="lesson2-btn lesson2-btn-gray" style="padding: 6px 12px; font-size: 14px;" onclick="jumpTo(${getVowel2SoundSectionIndex(sound)})">
                   ${escAttr(sound)} ↗
                 </button>
               `).join("")}
@@ -3229,7 +3398,12 @@ function renderVowel2MiniTestSummary(){
     if (status === "wrong") {
       const q = state.questions[idx];
       const match = q.q.match(/\/[^\s\/]+\//);
-      if (match) {
+      const soundFromWord = getVowel2SoundForWord(q.audio || q.options?.[q.answer]);
+      if (q.focusSound) {
+        wrongSounds.add(q.focusSound);
+      } else if (soundFromWord) {
+        wrongSounds.add(soundFromWord);
+      } else if (match) {
         wrongSounds.add(match[0]);
       } else {
         if (idx === 0 || idx === 5) wrongSounds.add("/iː/");
@@ -3258,7 +3432,7 @@ function renderVowel2MiniTestSummary(){
           <b style="color: #c2410c; display: block; margin-bottom: 8px;">Luyện lại âm yếu:</b>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             ${wrongSoundsList.map(sound => `
-              <button class="lesson2-btn lesson2-btn-gray" style="padding: 6px 12px; font-size: 14px;" onclick="jumpTo(${SOUND_TO_SECTION_INDEX[sound] || 0})">
+              <button class="lesson2-btn lesson2-btn-gray" style="padding: 6px 12px; font-size: 14px;" onclick="jumpTo(${getVowel2SoundSectionIndex(sound)})">
                 ${escAttr(sound)} ↗
               </button>
             `).join("")}
@@ -3292,6 +3466,7 @@ function createVowel2GameState(items){
     score: 0,
     statuses: shuffled.map(() => "idle"),
     wrongChoices: new Set(),
+    weakSounds: new Set(),
     answered: false,
     completed: false,
   };
@@ -3380,7 +3555,7 @@ function clearVowel2PairSequence(){
 window._vowel2SpeakSound = function(symbol) {
   clearVowel2PairSequence();
   const speechText = VOWEL2_SOUND_SPEECH_TEXT[symbol] || symbol;
-  speak(speechText, 0.68, null, "en-US");
+  speak(speechText, 0.68, null, "en-GB");
 };
 window._vowel2SpeakComparisonText = function(id) {
   clearVowel2PairSequence();
@@ -3479,6 +3654,7 @@ window._vowel2ChooseSound = function(button, choice){
   }else{
     state.wrongChoices.add(choice);
     state.wrongChoices.add(resolvedChoice);
+    state.weakSounds.add(round.correctSound);
     state.statuses[state.index] = "retry";
     state.feedback = "Chưa đúng. Nghe lại và chọn lại nhé.";
   }
