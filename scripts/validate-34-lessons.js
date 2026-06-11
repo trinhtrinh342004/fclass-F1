@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { LESSONS } from "../src/features/lessons/lessonRegistry.js";
 import { COURSE_TOTAL_LESSONS, TUWI_34_CURRICULUM_MAP } from "../src/features/curriculum/curriculumMap.js";
-import { IPA_BOOTCAMP_SECTION_FLOW } from "../src/features/curriculum/ipaBootcampLessons.js";
 
 let failed = false;
 
@@ -44,7 +43,6 @@ for (let id = 1; id <= expectedTotal; id += 1) {
 }
 
 const expectedTitles = new Map([
-  [1, "IPA Foundation – Cách đọc một từ tiếng Anh"],
   [2, "Spelling & Letter Sounds – Đánh vần và âm chữ cái"],
   [3, "IPA Foundation + Short Vowels – IPA và nguyên âm ngắn"],
   [4, "BUỔI 4: Long Vowels - Nguyên âm dài"],
@@ -62,12 +60,30 @@ for (const [id, title] of expectedTitles) {
 }
 
 const lesson01 = lessonById(1);
-check(arrayEquals(lesson01?.sectionFlow || [], IPA_BOOTCAMP_SECTION_FLOW), "Lesson 1 IPA sidebar must have the 20 requested sections in order.");
-check(lesson01?.ipa?.sounds?.length === 6, "Lesson 1 must have 6 short vowel sound cards.");
-check(lesson01?.ipa?.videoSlots?.length === 7, "Lesson 1 must have 7 video slots.");
-check(lesson01?.ipa?.imageSlots?.length === 6, "Lesson 1 must have 6 vocabulary image slots.");
-check(lesson01?.ipa?.blendGame?.length >= 4, "Lesson 1 must have blend game data.");
-check(lesson01?.ipa?.listenChooseGame?.length >= 4, "Lesson 1 must have listen-and-choose game data.");
+check(lesson01?.title === "Buổi 1: Bảng chữ cái A–Z", "Lesson 1 must use the Vietnamese Alphabet A–Z title.");
+check(lesson01?.track === "alphabet-foundation", "Lesson 1 must use the dedicated Alphabet Foundation renderer.");
+check(lesson01?.sectionFlow?.length === 15, "Lesson 1 Alphabet sidebar must have exactly 15 sections.");
+check(lesson01?.sectionFlow?.every((section) => section.startsWith("alphabet_")), "Lesson 1 must use dedicated alphabet sections.");
+check(lesson01?.alphabetFoundation?.letters?.length === 26, "Lesson 1 must have 26 alphabet letter cards.");
+check(lesson01?.alphabetFoundation?.vowels?.length === 5, "Lesson 1 must have 5 vowel cards.");
+check(lesson01?.alphabetFoundation?.simpleWords?.length === 10, "Lesson 1 must have 10 simple spelling words.");
+check(arrayEquals(Object.values(lesson01?.sectionLabels || {}), [
+  "Video bài hát bảng chữ cái",
+  "Nhóm chữ A–G",
+  "Nhóm chữ H–N",
+  "Nhóm chữ O–U",
+  "Nhóm chữ V–Z",
+  "Thẻ học chữ cái",
+  "Nguyên âm A E I O U",
+  "Nghe và chọn chữ",
+  "Ghép chữ hoa - chữ thường",
+  "Ghép chữ với biểu tượng",
+  "Điền chữ còn thiếu",
+  "Đánh vần tên của em",
+  "Đánh vần từ đơn giản",
+  "Chơi game bảng chữ cái",
+  "Video thư giãn cuối buổi",
+]), "Lesson 1 sidebar labels must match the requested Vietnamese labels.");
 
 const lesson02 = lessonById(2);
 check(lesson02?.slug === "spelling-letter-sounds", "Lesson 2 must route to Spelling & Letter Sounds.");
@@ -129,7 +145,7 @@ check(lesson07?.sectionFlow?.length === 18, "Lesson 7 must preserve the 18 reque
 check(lesson07?.ipa?.sounds?.length === 15, "Lesson 7 must expose all 15 difficult consonant sounds.");
 check(lesson07?.ipa?.comparisons?.length === 7, "Lesson 7 must expose all 7 requested consonant comparisons.");
 
-check(!LESSONS.some((lesson) => lesson.slug === "alphabet-and-nouns"), "Old lesson 1 Alphabet and Nouns must not remain in the main route.");
+check(lesson01?.slug === "alphabet-and-nouns", "Lesson 1 must route to the Alphabet A–Z lesson.");
 check(lessonById(9)?.slug === "singular-plural-nouns", "Lesson 9 must be old Lesson 2 Singular & Plural Nouns.");
 check(lessonById(9)?.title.includes("SINGULAR & PLURAL NOUNS"), "Lesson 9 title must be Singular & Plural Nouns.");
 check(lessonById(10)?.slug === "countable-uncountable-nouns", "Lesson 10 must be old Lesson 3 Countable/Uncountable Nouns.");
@@ -146,7 +162,7 @@ if (failed) {
   process.exit(1);
 }
 
-console.log("Validation PASSED. 34 lessons and IPA Bootcamp mapping are correct.");
+console.log("Validation PASSED. 34 lessons, Alphabet Foundation, and IPA Bootcamp mapping are correct.");
 
 function lessonById(id){
   return LESSONS.find((lesson) => lesson.id === id);
